@@ -1,8 +1,8 @@
 {
-  "name": "calc-slang",
+  "name": "sml-slang",
   "version": "1.0.10",
   "license": "Apache-2.0",
-  "description": "Calc language as a start point for CS4215's project",
+  "description": "JavaScript-based implementation of a sublanguage of SML, written in TypeScript",
   "keywords": [
     "JavaScript",
     "interpreter",
@@ -26,7 +26,7 @@
     "eslint-plugin-simple-import-sort": "^7.0.0",
     "gpu.js": "^2.10.4",
     "lodash": "^4.17.20",
-    "node-getopt": "^0.3.2",
+    "node-getopt": "git://github.com/tuxpoldo/node-getopt.git#05e498731c14b648fa332ca78d3a301c5e4be440",
     "source-map": "0.7.3",
     "xmlhttprequest-ts": "^1.0.1"
   },
@@ -36,10 +36,10 @@
     "dist"
   ],
   "bin": {
-    "calc-slang": "dist/repl/repl.js"
+    "sml-slang": "dist/repl/repl.js"
   },
   "scripts": {
-    "antlr4ts": "antlr4ts -visitor ./src/lang/Calc.g4",
+    "antlr4ts": "antlr4ts -visitor ./src/lang/Sml.g4",
     "autocomplete": "node ./scripts/updateAutocompleteDocs.js",
     "benchmark": "jest --runInBand --testPathPattern='.*benchmark.*' --testPathIgnorePatterns='/dist/'",
     "build": "yarn docs && yarn tsc --build --force",
@@ -59,12 +59,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yangdinglou/calc-slang.git"
+    "url": "git+https://github.com/CS4215-Project-SML/sml-slang.git"
   },
   "bugs": {
-    "url": "https://github.com/yangdinglou/calc-slang/issues"
+    "url": "https://github.com/CS4215-Project-SML/sml-slang/issues"
   },
-  "homepage": "https://github.com/yangdinglou/calc-slang",
+  "homepage": "https://github.com/CS4215-Project-SML/sml-slang",
   "devDependencies": {
     "@types/jest": "^29.0.0",
     "@types/lodash.assignin": "^4.2.6",

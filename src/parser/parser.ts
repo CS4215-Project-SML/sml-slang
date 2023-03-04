@@ -6,10 +6,10 @@ import { RuleNode } from 'antlr4ts/tree/RuleNode'
 import { TerminalNode } from 'antlr4ts/tree/TerminalNode'
 import * as es from 'estree'
 
-import { CalcLexer } from '../lang/CalcLexer'
+import { SmlLexer } from '../lang/SmlLexer'
 import {
   AdditionContext,
-  CalcParser,
+  SmlParser,
   DivisionContext,
   ExpressionContext,
   MultiplicationContext,
@@ -18,8 +18,8 @@ import {
   PowerContext,
   StartContext,
   SubtractionContext
-} from '../lang/CalcParser'
-import { CalcVisitor } from '../lang/CalcVisitor'
+} from '../lang/SmlParser'
+import { SmlVisitor } from '../lang/SmlVisitor'
 import { Context, ErrorSeverity, ErrorType, SourceError } from '../types'
 import { stripIndent } from '../utils/formatters'
 
@@ -120,7 +120,8 @@ function contextToLocation(ctx: ExpressionContext): es.SourceLocation {
     }
   }
 }
-class ExpressionGenerator implements CalcVisitor<es.Expression> {
+
+class ExpressionGenerator implements SmlVisitor<es.Expression> {
   visitNumber(ctx: NumberContext): es.Expression {
     return {
       type: 'Literal',
@@ -238,11 +239,11 @@ function convertSource(expression: ExpressionContext): es.Program {
 export function parse(source: string, context: Context) {
   let program: es.Program | undefined
 
-  if (context.variant === 'calc') {
+  if (context.variant === 'sml') {
     const inputStream = CharStreams.fromString(source)
-    const lexer = new CalcLexer(inputStream)
+    const lexer = new SmlLexer(inputStream)
     const tokenStream = new CommonTokenStream(lexer)
-    const parser = new CalcParser(tokenStream)
+    const parser = new SmlParser(tokenStream)
     parser.buildParseTree = true
     try {
       const tree = parser.expression()
