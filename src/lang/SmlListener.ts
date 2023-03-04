@@ -3,15 +3,26 @@
 
 import { ParseTreeListener } from "antlr4ts/tree/ParseTreeListener";
 
+import { TypeVarContext } from "./SmlParser";
+import { TypeParContext } from "./SmlParser";
+import { TypeFunContext } from "./SmlParser";
+import { ExpConstContext } from "./SmlParser";
+import { ExpParContext } from "./SmlParser";
+import { ExpAppPrefixContext } from "./SmlParser";
+import { ExpAppInfixContext } from "./SmlParser";
 import { NumberContext } from "./SmlParser";
-import { ParenthesesContext } from "./SmlParser";
-import { PowerContext } from "./SmlParser";
-import { MultiplicationContext } from "./SmlParser";
-import { DivisionContext } from "./SmlParser";
-import { AdditionContext } from "./SmlParser";
-import { SubtractionContext } from "./SmlParser";
-import { StartContext } from "./SmlParser";
-import { ExpressionContext } from "./SmlParser";
+import { ConstantContext } from "./SmlParser";
+import { IntContext } from "./SmlParser";
+import { RealContext } from "./SmlParser";
+import { BoolContext } from "./SmlParser";
+import { CharContext } from "./SmlParser";
+import { StringContext } from "./SmlParser";
+import { IdContext } from "./SmlParser";
+import { VariableContext } from "./SmlParser";
+import { LabelContext } from "./SmlParser";
+import { TypeContext } from "./SmlParser";
+import { ExpContext } from "./SmlParser";
+import { ProgContext } from "./SmlParser";
 
 
 /**
@@ -20,116 +31,237 @@ import { ExpressionContext } from "./SmlParser";
  */
 export interface SmlListener extends ParseTreeListener {
 	/**
-	 * Enter a parse tree produced by the `Number`
-	 * labeled alternative in `SmlParser.expression`.
+	 * Enter a parse tree produced by the `typeVar`
+	 * labeled alternative in `SmlParser.type`.
+	 * @param ctx the parse tree
+	 */
+	enterTypeVar?: (ctx: TypeVarContext) => void;
+	/**
+	 * Exit a parse tree produced by the `typeVar`
+	 * labeled alternative in `SmlParser.type`.
+	 * @param ctx the parse tree
+	 */
+	exitTypeVar?: (ctx: TypeVarContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `typePar`
+	 * labeled alternative in `SmlParser.type`.
+	 * @param ctx the parse tree
+	 */
+	enterTypePar?: (ctx: TypeParContext) => void;
+	/**
+	 * Exit a parse tree produced by the `typePar`
+	 * labeled alternative in `SmlParser.type`.
+	 * @param ctx the parse tree
+	 */
+	exitTypePar?: (ctx: TypeParContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `typeFun`
+	 * labeled alternative in `SmlParser.type`.
+	 * @param ctx the parse tree
+	 */
+	enterTypeFun?: (ctx: TypeFunContext) => void;
+	/**
+	 * Exit a parse tree produced by the `typeFun`
+	 * labeled alternative in `SmlParser.type`.
+	 * @param ctx the parse tree
+	 */
+	exitTypeFun?: (ctx: TypeFunContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `expConst`
+	 * labeled alternative in `SmlParser.exp`.
+	 * @param ctx the parse tree
+	 */
+	enterExpConst?: (ctx: ExpConstContext) => void;
+	/**
+	 * Exit a parse tree produced by the `expConst`
+	 * labeled alternative in `SmlParser.exp`.
+	 * @param ctx the parse tree
+	 */
+	exitExpConst?: (ctx: ExpConstContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `expPar`
+	 * labeled alternative in `SmlParser.exp`.
+	 * @param ctx the parse tree
+	 */
+	enterExpPar?: (ctx: ExpParContext) => void;
+	/**
+	 * Exit a parse tree produced by the `expPar`
+	 * labeled alternative in `SmlParser.exp`.
+	 * @param ctx the parse tree
+	 */
+	exitExpPar?: (ctx: ExpParContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `expAppPrefix`
+	 * labeled alternative in `SmlParser.exp`.
+	 * @param ctx the parse tree
+	 */
+	enterExpAppPrefix?: (ctx: ExpAppPrefixContext) => void;
+	/**
+	 * Exit a parse tree produced by the `expAppPrefix`
+	 * labeled alternative in `SmlParser.exp`.
+	 * @param ctx the parse tree
+	 */
+	exitExpAppPrefix?: (ctx: ExpAppPrefixContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `expAppInfix`
+	 * labeled alternative in `SmlParser.exp`.
+	 * @param ctx the parse tree
+	 */
+	enterExpAppInfix?: (ctx: ExpAppInfixContext) => void;
+	/**
+	 * Exit a parse tree produced by the `expAppInfix`
+	 * labeled alternative in `SmlParser.exp`.
+	 * @param ctx the parse tree
+	 */
+	exitExpAppInfix?: (ctx: ExpAppInfixContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `SmlParser.number`.
 	 * @param ctx the parse tree
 	 */
 	enterNumber?: (ctx: NumberContext) => void;
 	/**
-	 * Exit a parse tree produced by the `Number`
-	 * labeled alternative in `SmlParser.expression`.
+	 * Exit a parse tree produced by `SmlParser.number`.
 	 * @param ctx the parse tree
 	 */
 	exitNumber?: (ctx: NumberContext) => void;
 
 	/**
-	 * Enter a parse tree produced by the `Parentheses`
-	 * labeled alternative in `SmlParser.expression`.
+	 * Enter a parse tree produced by `SmlParser.constant`.
 	 * @param ctx the parse tree
 	 */
-	enterParentheses?: (ctx: ParenthesesContext) => void;
+	enterConstant?: (ctx: ConstantContext) => void;
 	/**
-	 * Exit a parse tree produced by the `Parentheses`
-	 * labeled alternative in `SmlParser.expression`.
+	 * Exit a parse tree produced by `SmlParser.constant`.
 	 * @param ctx the parse tree
 	 */
-	exitParentheses?: (ctx: ParenthesesContext) => void;
+	exitConstant?: (ctx: ConstantContext) => void;
 
 	/**
-	 * Enter a parse tree produced by the `Power`
-	 * labeled alternative in `SmlParser.expression`.
+	 * Enter a parse tree produced by `SmlParser.int`.
 	 * @param ctx the parse tree
 	 */
-	enterPower?: (ctx: PowerContext) => void;
+	enterInt?: (ctx: IntContext) => void;
 	/**
-	 * Exit a parse tree produced by the `Power`
-	 * labeled alternative in `SmlParser.expression`.
+	 * Exit a parse tree produced by `SmlParser.int`.
 	 * @param ctx the parse tree
 	 */
-	exitPower?: (ctx: PowerContext) => void;
+	exitInt?: (ctx: IntContext) => void;
 
 	/**
-	 * Enter a parse tree produced by the `Multiplication`
-	 * labeled alternative in `SmlParser.expression`.
+	 * Enter a parse tree produced by `SmlParser.real`.
 	 * @param ctx the parse tree
 	 */
-	enterMultiplication?: (ctx: MultiplicationContext) => void;
+	enterReal?: (ctx: RealContext) => void;
 	/**
-	 * Exit a parse tree produced by the `Multiplication`
-	 * labeled alternative in `SmlParser.expression`.
+	 * Exit a parse tree produced by `SmlParser.real`.
 	 * @param ctx the parse tree
 	 */
-	exitMultiplication?: (ctx: MultiplicationContext) => void;
+	exitReal?: (ctx: RealContext) => void;
 
 	/**
-	 * Enter a parse tree produced by the `Division`
-	 * labeled alternative in `SmlParser.expression`.
+	 * Enter a parse tree produced by `SmlParser.bool`.
 	 * @param ctx the parse tree
 	 */
-	enterDivision?: (ctx: DivisionContext) => void;
+	enterBool?: (ctx: BoolContext) => void;
 	/**
-	 * Exit a parse tree produced by the `Division`
-	 * labeled alternative in `SmlParser.expression`.
+	 * Exit a parse tree produced by `SmlParser.bool`.
 	 * @param ctx the parse tree
 	 */
-	exitDivision?: (ctx: DivisionContext) => void;
+	exitBool?: (ctx: BoolContext) => void;
 
 	/**
-	 * Enter a parse tree produced by the `Addition`
-	 * labeled alternative in `SmlParser.expression`.
+	 * Enter a parse tree produced by `SmlParser.char`.
 	 * @param ctx the parse tree
 	 */
-	enterAddition?: (ctx: AdditionContext) => void;
+	enterChar?: (ctx: CharContext) => void;
 	/**
-	 * Exit a parse tree produced by the `Addition`
-	 * labeled alternative in `SmlParser.expression`.
+	 * Exit a parse tree produced by `SmlParser.char`.
 	 * @param ctx the parse tree
 	 */
-	exitAddition?: (ctx: AdditionContext) => void;
+	exitChar?: (ctx: CharContext) => void;
 
 	/**
-	 * Enter a parse tree produced by the `Subtraction`
-	 * labeled alternative in `SmlParser.expression`.
+	 * Enter a parse tree produced by `SmlParser.string`.
 	 * @param ctx the parse tree
 	 */
-	enterSubtraction?: (ctx: SubtractionContext) => void;
+	enterString?: (ctx: StringContext) => void;
 	/**
-	 * Exit a parse tree produced by the `Subtraction`
-	 * labeled alternative in `SmlParser.expression`.
+	 * Exit a parse tree produced by `SmlParser.string`.
 	 * @param ctx the parse tree
 	 */
-	exitSubtraction?: (ctx: SubtractionContext) => void;
+	exitString?: (ctx: StringContext) => void;
 
 	/**
-	 * Enter a parse tree produced by `SmlParser.start`.
+	 * Enter a parse tree produced by `SmlParser.id`.
 	 * @param ctx the parse tree
 	 */
-	enterStart?: (ctx: StartContext) => void;
+	enterId?: (ctx: IdContext) => void;
 	/**
-	 * Exit a parse tree produced by `SmlParser.start`.
+	 * Exit a parse tree produced by `SmlParser.id`.
 	 * @param ctx the parse tree
 	 */
-	exitStart?: (ctx: StartContext) => void;
+	exitId?: (ctx: IdContext) => void;
 
 	/**
-	 * Enter a parse tree produced by `SmlParser.expression`.
+	 * Enter a parse tree produced by `SmlParser.variable`.
 	 * @param ctx the parse tree
 	 */
-	enterExpression?: (ctx: ExpressionContext) => void;
+	enterVariable?: (ctx: VariableContext) => void;
 	/**
-	 * Exit a parse tree produced by `SmlParser.expression`.
+	 * Exit a parse tree produced by `SmlParser.variable`.
 	 * @param ctx the parse tree
 	 */
-	exitExpression?: (ctx: ExpressionContext) => void;
+	exitVariable?: (ctx: VariableContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `SmlParser.label`.
+	 * @param ctx the parse tree
+	 */
+	enterLabel?: (ctx: LabelContext) => void;
+	/**
+	 * Exit a parse tree produced by `SmlParser.label`.
+	 * @param ctx the parse tree
+	 */
+	exitLabel?: (ctx: LabelContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `SmlParser.type`.
+	 * @param ctx the parse tree
+	 */
+	enterType?: (ctx: TypeContext) => void;
+	/**
+	 * Exit a parse tree produced by `SmlParser.type`.
+	 * @param ctx the parse tree
+	 */
+	exitType?: (ctx: TypeContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `SmlParser.exp`.
+	 * @param ctx the parse tree
+	 */
+	enterExp?: (ctx: ExpContext) => void;
+	/**
+	 * Exit a parse tree produced by `SmlParser.exp`.
+	 * @param ctx the parse tree
+	 */
+	exitExp?: (ctx: ExpContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `SmlParser.prog`.
+	 * @param ctx the parse tree
+	 */
+	enterProg?: (ctx: ProgContext) => void;
+	/**
+	 * Exit a parse tree produced by `SmlParser.prog`.
+	 * @param ctx the parse tree
+	 */
+	exitProg?: (ctx: ProgContext) => void;
 }
 

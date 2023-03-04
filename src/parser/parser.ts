@@ -8,19 +8,31 @@ import * as es from 'estree'
 
 import { SmlLexer } from '../lang/SmlLexer'
 import {
-  AdditionContext,
   SmlParser,
-  DivisionContext,
-  ExpressionContext,
-  MultiplicationContext,
   NumberContext,
-  ParenthesesContext,
-  PowerContext,
-  StartContext,
-  SubtractionContext
+  ConstantContext,
+  IntContext,
+  RealContext,
+  BoolContext,
+  CharContext,
+  StringContext,
+  IdContext,
+  VariableContext,
+  LabelContext,
+  TypeContext,
+  TypeVarContext,
+  TypeParContext,
+  TypeFunContext,
+  ExpContext,
+  ExpConstContext,
+  ExpParContext,
+  ExpAppPrefixContext,
+  ExpAppInfixContext,
+  ProgContext
 } from '../lang/SmlParser'
 import { SmlVisitor } from '../lang/SmlVisitor'
-import { Context, ErrorSeverity, ErrorType, SourceError } from '../types'
+import { Context, ErrorSeverity, ErrorType, SourceError, Variable } from '../types'
+import { expressionStatement } from '../utils/astCreator'
 import { stripIndent } from '../utils/formatters'
 
 export class DisallowedConstructError implements SourceError {
@@ -108,7 +120,135 @@ export class TrailingCommaError implements SourceError {
   }
 }
 
-function contextToLocation(ctx: ExpressionContext): es.SourceLocation {
+// function contextToLocation(ctx: ExpressionContext): es.SourceLocation {
+//   return {
+//     start: {
+//       line: ctx.start.line,
+//       column: ctx.start.charPositionInLine
+//     },
+//     end: {
+//       line: ctx.stop ? ctx.stop.line : ctx.start.line,
+//       column: ctx.stop ? ctx.stop.charPositionInLine : ctx.start.charPositionInLine
+//     }
+//   }
+// }
+
+// class ExpressionGenerator implements SmlVisitor<es.Expression> {
+//   visitNumber(ctx: NumberContext): es.Expression {
+//     return {
+//       type: 'Literal',
+//       value: parseInt(ctx.text),
+//       raw: ctx.text,
+//       loc: contextToLocation(ctx)
+//     }
+//   }
+//   visitParentheses(ctx: ParenthesesContext): es.Expression {
+//     return this.visit(ctx.expression())
+//   }
+//   visitPower(ctx: PowerContext): es.Expression {
+//     return {
+//       type: 'BinaryExpression',
+//       operator: '^',
+//       left: this.visit(ctx._left),
+//       right: this.visit(ctx._right),
+//       loc: contextToLocation(ctx)
+//     }
+//   }
+
+//   visitMultiplication(ctx: MultiplicationContext): es.Expression {
+//     return {
+//       type: 'BinaryExpression',
+//       operator: '*',
+//       left: this.visit(ctx._left),
+//       right: this.visit(ctx._right),
+//       loc: contextToLocation(ctx)
+//     }
+//   }
+//   visitDivision(ctx: DivisionContext): es.Expression {
+//     return {
+//       type: 'BinaryExpression',
+//       operator: '/',
+//       left: this.visit(ctx._left),
+//       right: this.visit(ctx._right),
+//       loc: contextToLocation(ctx)
+//     }
+//   }
+//   visitAddition(ctx: AdditionContext): es.Expression {
+//     return {
+//       type: 'BinaryExpression',
+//       operator: '+',
+//       left: this.visit(ctx._left),
+//       right: this.visit(ctx._right),
+//       loc: contextToLocation(ctx)
+//     }
+//   }
+
+//   visitSubtraction(ctx: SubtractionContext): es.Expression {
+//     return {
+//       type: 'BinaryExpression',
+//       operator: '-',
+//       left: this.visit(ctx._left),
+//       right: this.visit(ctx._right),
+//       loc: contextToLocation(ctx)
+//     }
+//   }
+
+//   visitExpression?: ((ctx: ExpressionContext) => es.Expression) | undefined
+//   visitStart?: ((ctx: StartContext) => es.Expression) | undefined
+
+//   visit(tree: ParseTree): es.Expression {
+//     return tree.accept(this)
+//   }
+//   visitChildren(node: RuleNode): es.Expression {
+//     const expressions: es.Expression[] = []
+//     for (let i = 0; i < node.childCount; i++) {
+//       expressions.push(node.getChild(i).accept(this))
+//     }
+//     return {
+//       type: 'SequenceExpression',
+//       expressions
+//     }
+//   }
+//   visitTerminal(node: TerminalNode): es.Expression {
+//     return node.accept(this)
+//   }
+
+//   visitErrorNode(node: ErrorNode): es.Expression {
+//     throw new FatalSyntaxError(
+//       {
+//         start: {
+//           line: node.symbol.line,
+//           column: node.symbol.charPositionInLine
+//         },
+//         end: {
+//           line: node.symbol.line,
+//           column: node.symbol.charPositionInLine + 1
+//         }
+//       },
+//       `invalid syntax ${node.text}`
+//     )
+//   }
+// }
+
+// function convertExpression(expression: ExpressionContext): es.Expression {
+//   const generator = new ExpressionGenerator()
+//   return expression.accept(generator)
+// }
+
+// function convertSource(expression: ExpressionContext): es.Program {
+//   return {
+//     type: 'Program',
+//     sourceType: 'script',
+//     body: [
+//       {
+//         type: 'ExpressionStatement',
+//         expression: convertExpression(expression)
+//       }
+//     ]
+//   }
+// }
+
+function contextToLocation(ctx: ExpContext): es.SourceLocation {
   return {
     start: {
       line: ctx.start.line,
@@ -121,7 +261,7 @@ function contextToLocation(ctx: ExpressionContext): es.SourceLocation {
   }
 }
 
-class ExpressionGenerator implements SmlVisitor<es.Expression> {
+class ProgramGenerator implements SmlVisitor<es.Expression> {
   visitNumber(ctx: NumberContext): es.Expression {
     return {
       type: 'Literal',
@@ -130,64 +270,186 @@ class ExpressionGenerator implements SmlVisitor<es.Expression> {
       loc: contextToLocation(ctx)
     }
   }
-  visitParentheses(ctx: ParenthesesContext): es.Expression {
-    return this.visit(ctx.expression())
-  }
-  visitPower(ctx: PowerContext): es.Expression {
+
+  visitConstant(ctx: ConstantContext): es.Expression {
     return {
-      type: 'BinaryExpression',
-      operator: '^',
-      left: this.visit(ctx._left),
-      right: this.visit(ctx._right),
+      type: 'Literal',
+      value: parseInt(ctx.text),
+      raw: ctx.text,
       loc: contextToLocation(ctx)
     }
   }
 
-  visitMultiplication(ctx: MultiplicationContext): es.Expression {
+  visitInt(ctx: IntContext): es.Expression {
     return {
-      type: 'BinaryExpression',
-      operator: '*',
-      left: this.visit(ctx._left),
-      right: this.visit(ctx._right),
-      loc: contextToLocation(ctx)
-    }
-  }
-  visitDivision(ctx: DivisionContext): es.Expression {
-    return {
-      type: 'BinaryExpression',
-      operator: '/',
-      left: this.visit(ctx._left),
-      right: this.visit(ctx._right),
-      loc: contextToLocation(ctx)
-    }
-  }
-  visitAddition(ctx: AdditionContext): es.Expression {
-    return {
-      type: 'BinaryExpression',
-      operator: '+',
-      left: this.visit(ctx._left),
-      right: this.visit(ctx._right),
+      type: 'Literal',
+      value: parseInt(ctx.text),
+      raw: ctx.text,
       loc: contextToLocation(ctx)
     }
   }
 
-  visitSubtraction(ctx: SubtractionContext): es.Expression {
+  visitReal(ctx: RealContext): es.Expression {
     return {
-      type: 'BinaryExpression',
-      operator: '-',
-      left: this.visit(ctx._left),
-      right: this.visit(ctx._right),
+      type: 'Literal',
+      value: parseInt(ctx.text),
+      raw: ctx.text,
       loc: contextToLocation(ctx)
     }
   }
 
-  visitExpression?: ((ctx: ExpressionContext) => es.Expression) | undefined
-  visitStart?: ((ctx: StartContext) => es.Expression) | undefined
+  visitBool(ctx: BoolContext): es.Expression {
+    return {
+      type: 'Literal',
+      value: parseInt(ctx.text),
+      raw: ctx.text,
+      loc: contextToLocation(ctx)
+    }
+  }
+
+  visitChar(ctx: CharContext): es.Expression {
+    return {
+      type: 'Literal',
+      value: parseInt(ctx.text),
+      raw: ctx.text,
+      loc: contextToLocation(ctx)
+    }
+  }
+
+  visitString(ctx: StringContext): es.Expression {
+    return {
+      type: 'Literal',
+      value: parseInt(ctx.text),
+      raw: ctx.text,
+      loc: contextToLocation(ctx)
+    }
+  }
+
+  visitId(ctx: IdContext): es.Expression {
+    return {
+      type: 'Literal',
+      value: parseInt(ctx.text),
+      raw: ctx.text,
+      loc: contextToLocation(ctx)
+    }
+  }
+
+  visitVariable(ctx: VariableContext): es.Expression {
+    return {
+      type: 'Literal',
+      value: parseInt(ctx.text),
+      raw: ctx.text,
+      loc: contextToLocation(ctx)
+    }
+  }
+
+  visitLabel(ctx: LabelContext): es.Expression {
+    return {
+      type: 'Literal',
+      value: parseInt(ctx.text),
+      raw: ctx.text,
+      loc: contextToLocation(ctx)
+    }
+  }
+
+  visitType(ctx: TypeContext): es.Expression {
+    return {
+      type: 'Literal',
+      value: parseInt(ctx.text),
+      raw: ctx.text,
+      loc: contextToLocation(ctx)
+    }
+  }
+
+  visitTypeVar(ctx: TypeVarContext): es.Expression {
+    return {
+      type: 'Literal',
+      value: parseInt(ctx.text),
+      raw: ctx.text,
+      loc: contextToLocation(ctx)
+    }
+  }
+
+  visitTypePar(ctx: TypeParContext): es.Expression {
+    return {
+      type: 'Literal',
+      value: parseInt(ctx.text),
+      raw: ctx.text,
+      loc: contextToLocation(ctx)
+    }
+  }
+
+  visitTypeFun(ctx: TypeFunContext): es.Expression {
+    return {
+      type: 'Literal',
+      value: parseInt(ctx.text),
+      raw: ctx.text,
+      loc: contextToLocation(ctx)
+    }
+  }
+
+  visitExp(ctx: ExpContext): es.Expression {
+    return {
+      type: 'Literal',
+      value: parseInt(ctx.text),
+      raw: ctx.text,
+      loc: contextToLocation(ctx)
+    }
+  }
+
+  visitExpConst(ctx: ExpConstContext): es.Expression {
+    return {
+      type: 'Literal',
+      value: parseInt(ctx.text),
+      raw: ctx.text,
+      loc: contextToLocation(ctx)
+    }
+  }
+
+  visitExpPar(ctx: ExpParContext): es.Expression {
+    return {
+      type: 'Literal',
+      value: parseInt(ctx.text),
+      raw: ctx.text,
+      loc: contextToLocation(ctx)
+    }
+  }
+
+  visitExpAppPrefix(ctx: ExpAppPrefixContext): es.Expression {
+    return {
+      type: 'Literal',
+      value: parseInt(ctx.text),
+      raw: ctx.text,
+      loc: contextToLocation(ctx)
+    }
+  }
+
+  visitExpAppInfix(ctx: ExpAppInfixContext): es.Expression {
+    return {
+      type: 'Literal',
+      value: parseInt(ctx.text),
+      raw: ctx.text,
+      loc: contextToLocation(ctx)
+    }
+  }
+
+  visitProg(ctx: ProgContext): es.Expression {
+    console.log('prog')
+    return {
+      type: 'Literal',
+      value: parseInt(ctx.text),
+      raw: ctx.text,
+      loc: contextToLocation(ctx)
+    }
+  }
 
   visit(tree: ParseTree): es.Expression {
+    console.log('visit')
     return tree.accept(this)
   }
+
   visitChildren(node: RuleNode): es.Expression {
+    console.log('children')
     const expressions: es.Expression[] = []
     for (let i = 0; i < node.childCount; i++) {
       expressions.push(node.getChild(i).accept(this))
@@ -197,6 +459,7 @@ class ExpressionGenerator implements SmlVisitor<es.Expression> {
       expressions
     }
   }
+
   visitTerminal(node: TerminalNode): es.Expression {
     return node.accept(this)
   }
@@ -218,22 +481,10 @@ class ExpressionGenerator implements SmlVisitor<es.Expression> {
   }
 }
 
-function convertExpression(expression: ExpressionContext): es.Expression {
-  const generator = new ExpressionGenerator()
-  return expression.accept(generator)
-}
-
-function convertSource(expression: ExpressionContext): es.Program {
-  return {
-    type: 'Program',
-    sourceType: 'script',
-    body: [
-      {
-        type: 'ExpressionStatement',
-        expression: convertExpression(expression)
-      }
-    ]
-  }
+function convertSml(program: ProgContext): es.Program | undefined {
+  const generator = new ProgramGenerator()
+  console.log(program.accept(generator))
+  return undefined
 }
 
 export function parse(source: string, context: Context) {
@@ -246,8 +497,9 @@ export function parse(source: string, context: Context) {
     const parser = new SmlParser(tokenStream)
     parser.buildParseTree = true
     try {
-      const tree = parser.expression()
-      program = convertSource(tree)
+      const tree = parser.prog()
+      program = convertSml(tree)
+      console.log(program)
     } catch (error) {
       if (error instanceof FatalSyntaxError) {
         context.errors.push(error)

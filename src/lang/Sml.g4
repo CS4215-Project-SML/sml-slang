@@ -3,25 +3,68 @@ grammar Sml;
 /*
  * Tokens (terminal)
  */
-POW: '^';
-MUL: '*';
-DIV: '/';
-ADD: '+';
-SUB: '-';
-NUMBER: [0-9]+;
+DIGIT:      [0-9];
+TRUE:       'true';
+FALSE:      'false';
+LETTER:     [A-Za-z];
+ASCII:      [A-Za-z0-9];
 WHITESPACE: [ \r\n\t]+ -> skip;
+NEWLINE: '\r'? '\n';
 
 /*
- * Productions
+ * Tokens (non-terminal)
  */
-start : expression;
+number: DIGIT+;
 
-expression
-   : NUMBER                                         # Number
-   | '(' inner=expression ')'                       # Parentheses
-   | left=expression operator=POW right=expression  # Power
-   | left=expression operator=MUL right=expression  # Multiplication
-   | left=expression operator=DIV right=expression  # Division
-   | left=expression operator=ADD right=expression  # Addition
-   | left=expression operator=SUB right=expression  # Subtraction
-   ;
+/*
+ * Constants
+ */
+constant
+    : int
+    | real
+    | bool
+    | char
+    | string;
+
+int:    number;
+real:   number '.' number;
+bool:   TRUE | FALSE;
+char:   '#"' ASCII '"';
+string: '"' ASCII* '"';
+
+/*
+ * Identifiers
+ */
+id: LETTER (LETTER | DIGIT | '\'' | '_')*;
+
+variable: '\'' (LETTER | DIGIT | '\'' | '_' )*;
+
+label: id | number;
+
+/*
+ * Types
+ */
+type
+    : variable          # typeVar
+    | '(' exp ')'       # typePar
+    | type '->' type    # typeFun;
+
+/*
+ * Expressions
+ */
+exp
+    : constant      # expConst
+    | '(' exp ')'   # expPar
+    | exp exp       # expAppPrefix
+    | exp id exp    # expAppInfix;
+
+/*
+ * Declarations
+ */
+
+
+/*
+ * Programs
+ */
+prog
+    : exp (';' exp)*;
