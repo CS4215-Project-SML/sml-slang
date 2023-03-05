@@ -1,15 +1,15 @@
-grammar Sml;
+grammar sml;
 
 /*
  * Tokens (terminal)
  */
-DIGIT:      [0-9];
-TRUE:       'true';
-FALSE:      'false';
-LETTER:     [A-Za-z];
-ASCII:      [A-Za-z0-9];
-WHITESPACE: [ \r\n\t]+ -> skip;
-NEWLINE: '\r'? '\n';
+DIGIT:          [0-9];
+TRUE:           'true';
+FALSE:          'false';
+LETTER:         [A-Za-z];
+ASCII:          [ -~];
+NEWLINE:        '\r\n' | '\r' | '\n';
+WHITESPACE:     [ ]+ -> skip;
 
 /*
  * Tokens (non-terminal)
@@ -35,7 +35,9 @@ string: '"' ASCII* '"';
 /*
  * Identifiers
  */
-id: LETTER (LETTER | DIGIT | '\'' | '_')*;
+id
+    : LETTER (LETTER | DIGIT | '\'' | '_')*                                                                                           # idAlpha
+    | ('!' | '%' | '&' | '$' | '#' | '+' | '-' | '/' | ':' | '<' | '=' | '>' | '?' | '@' | '\\' | '~' | '\'' | '^' | '|' | '*')+      # idSymbol;
 
 variable: '\'' (LETTER | DIGIT | '\'' | '_' )*;
 
@@ -53,7 +55,7 @@ type
  * Expressions
  */
 exp
-    : constant      # expConst
+    : constant      # expCon
     | '(' exp ')'   # expPar
     | exp exp       # expAppPrefix
     | exp id exp    # expAppInfix;
@@ -61,10 +63,12 @@ exp
 /*
  * Declarations
  */
-
+dec
+    : exp           # decExp;
 
 /*
  * Programs
  */
 prog
-    : exp (';' exp)*;
+    : dec               # progDec
+    | prog ';' prog     # progSeq;

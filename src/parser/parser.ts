@@ -6,31 +6,37 @@ import { RuleNode } from 'antlr4ts/tree/RuleNode'
 import { TerminalNode } from 'antlr4ts/tree/TerminalNode'
 import * as es from 'estree'
 
-import { SmlLexer } from '../lang/SmlLexer'
+import { smlLexer } from '../lang/smlLexer'
 import {
-  SmlParser,
   NumberContext,
   ConstantContext,
   IntContext,
   RealContext,
   BoolContext,
   CharContext,
-  StringContext,
-  IdContext,
-  VariableContext,
-  LabelContext,
-  TypeContext,
-  TypeVarContext,
-  TypeParContext,
-  TypeFunContext,
-  ExpContext,
-  ExpConstContext,
-  ExpParContext,
-  ExpAppPrefixContext,
+  DecContext,
+  DecExpContext,
   ExpAppInfixContext,
-  ProgContext
-} from '../lang/SmlParser'
-import { SmlVisitor } from '../lang/SmlVisitor'
+  ExpAppPrefixContext,
+  ExpConContext,
+  ExpContext,
+  ExpParContext,
+  IdContext,
+  IdAlphaContext,
+  IdSymbolContext,
+  LabelContext,
+  ProgContext,
+  ProgDecContext,
+  ProgSeqContext,
+  smlParser,
+  StringContext,
+  TypeContext,
+  TypeFunContext,
+  TypeParContext,
+  TypeVarContext,
+  VariableContext
+} from '../lang/smlParser'
+import { smlVisitor } from '../lang/smlVisitor'
 import { Context, ErrorSeverity, ErrorType, SourceError, Variable } from '../types'
 import { expressionStatement } from '../utils/astCreator'
 import { stripIndent } from '../utils/formatters'
@@ -133,7 +139,7 @@ export class TrailingCommaError implements SourceError {
 //   }
 // }
 
-// class ExpressionGenerator implements SmlVisitor<es.Expression> {
+// class ExpressionGenerator implements smlVisitor<es.Expression> {
 //   visitNumber(ctx: NumberContext): es.Expression {
 //     return {
 //       type: 'Literal',
@@ -261,7 +267,7 @@ function contextToLocation(ctx: ExpContext): es.SourceLocation {
   }
 }
 
-class ProgramGenerator implements SmlVisitor<es.Expression> {
+class ProgramGenerator implements smlVisitor<es.Expression> {
   visitNumber(ctx: NumberContext): es.Expression {
     return {
       type: 'Literal',
@@ -334,6 +340,24 @@ class ProgramGenerator implements SmlVisitor<es.Expression> {
     }
   }
 
+  visitIdAlpha(ctx: IdAlphaContext): es.Expression {
+    return {
+      type: 'Literal',
+      value: parseInt(ctx.text),
+      raw: ctx.text,
+      loc: contextToLocation(ctx)
+    }
+  }
+
+  visitIdSymbol(ctx: IdSymbolContext): es.Expression {
+    return {
+      type: 'Literal',
+      value: parseInt(ctx.text),
+      raw: ctx.text,
+      loc: contextToLocation(ctx)
+    }
+  }
+
   visitVariable(ctx: VariableContext): es.Expression {
     return {
       type: 'Literal',
@@ -397,7 +421,7 @@ class ProgramGenerator implements SmlVisitor<es.Expression> {
     }
   }
 
-  visitExpConst(ctx: ExpConstContext): es.Expression {
+  visitExpConst(ctx: ExpConContext): es.Expression {
     return {
       type: 'Literal',
       value: parseInt(ctx.text),
@@ -433,6 +457,26 @@ class ProgramGenerator implements SmlVisitor<es.Expression> {
     }
   }
 
+  visitDec(ctx: DecContext): es.Expression {
+    console.log('dec')
+    return {
+      type: 'Literal',
+      value: parseInt(ctx.text),
+      raw: ctx.text,
+      loc: contextToLocation(ctx)
+    }
+  }
+
+  visitDecExp(ctx: DecExpContext): es.Expression {
+    console.log('decexp')
+    return {
+      type: 'Literal',
+      value: parseInt(ctx.text),
+      raw: ctx.text,
+      loc: contextToLocation(ctx)
+    }
+  }
+
   visitProg(ctx: ProgContext): es.Expression {
     console.log('prog')
     return {
@@ -443,13 +487,33 @@ class ProgramGenerator implements SmlVisitor<es.Expression> {
     }
   }
 
+  visitProgDec(ctx: ProgDecContext): es.Expression {
+    console.log('progdec')
+    return {
+      type: 'Literal',
+      value: parseInt(ctx.text),
+      raw: ctx.text,
+      loc: contextToLocation(ctx)
+    }
+  }
+
+  visitProgSeq(ctx: ProgSeqContext): es.Expression {
+    console.log('progseq')
+    const expressions: es.Expression[] = []
+    for (let i = 0; i < ctx.childCount; i++) {
+      expressions.push(ctx.getChild(i).accept(this))
+    }
+    return {
+      type: 'SequenceExpression',
+      expressions
+    }
+  }
+
   visit(tree: ParseTree): es.Expression {
-    console.log('visit')
     return tree.accept(this)
   }
 
   visitChildren(node: RuleNode): es.Expression {
-    console.log('children')
     const expressions: es.Expression[] = []
     for (let i = 0; i < node.childCount; i++) {
       expressions.push(node.getChild(i).accept(this))
@@ -481,7 +545,8 @@ class ProgramGenerator implements SmlVisitor<es.Expression> {
   }
 }
 
-function convertSml(program: ProgContext): es.Program | undefined {
+function convertsml(program: ProgContext): es.Program | undefined {
+  console.log(program)
   const generator = new ProgramGenerator()
   console.log(program.accept(generator))
   return undefined
@@ -492,13 +557,13 @@ export function parse(source: string, context: Context) {
 
   if (context.variant === 'sml') {
     const inputStream = CharStreams.fromString(source)
-    const lexer = new SmlLexer(inputStream)
+    const lexer = new smlLexer(inputStream)
     const tokenStream = new CommonTokenStream(lexer)
-    const parser = new SmlParser(tokenStream)
+    const parser = new smlParser(tokenStream)
     parser.buildParseTree = true
     try {
       const tree = parser.prog()
-      program = convertSml(tree)
+      program = convertsml(tree)
       console.log(program)
     } catch (error) {
       if (error instanceof FatalSyntaxError) {
