@@ -7,8 +7,8 @@ import { DecExpContext } from "./smlParser";
 import { TypeVarContext } from "./smlParser";
 import { TypeParContext } from "./smlParser";
 import { TypeFunContext } from "./smlParser";
-import { ProgDecContext } from "./smlParser";
 import { ProgSeqContext } from "./smlParser";
+import { ProgDecContext } from "./smlParser";
 import { IdAlphaContext } from "./smlParser";
 import { IdSymbolContext } from "./smlParser";
 import { ExpConContext } from "./smlParser";
@@ -89,19 +89,6 @@ export interface smlListener extends ParseTreeListener {
 	exitTypeFun?: (ctx: TypeFunContext) => void;
 
 	/**
-	 * Enter a parse tree produced by the `progDec`
-	 * labeled alternative in `smlParser.prog`.
-	 * @param ctx the parse tree
-	 */
-	enterProgDec?: (ctx: ProgDecContext) => void;
-	/**
-	 * Exit a parse tree produced by the `progDec`
-	 * labeled alternative in `smlParser.prog`.
-	 * @param ctx the parse tree
-	 */
-	exitProgDec?: (ctx: ProgDecContext) => void;
-
-	/**
 	 * Enter a parse tree produced by the `progSeq`
 	 * labeled alternative in `smlParser.prog`.
 	 * @param ctx the parse tree
@@ -113,6 +100,19 @@ export interface smlListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitProgSeq?: (ctx: ProgSeqContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `progDec`
+	 * labeled alternative in `smlParser.prog`.
+	 * @param ctx the parse tree
+	 */
+	enterProgDec?: (ctx: ProgDecContext) => void;
+	/**
+	 * Exit a parse tree produced by the `progDec`
+	 * labeled alternative in `smlParser.prog`.
+	 * @param ctx the parse tree
+	 */
+	exitProgDec?: (ctx: ProgDecContext) => void;
 
 	/**
 	 * Enter a parse tree produced by the `idAlpha`

@@ -8,8 +8,8 @@ TRUE:           'true';
 FALSE:          'false';
 LETTER:         [A-Za-z];
 ASCII:          [ -~];
-NEWLINE:        '\r\n' | '\r' | '\n';
-WHITESPACE:     [ ]+ -> skip;
+// NEWLINE:        '\r\n' | '\r' | '\n';
+WHITESPACE:     [ \r\n\t]+ -> skip;
 
 /*
  * Tokens (non-terminal)
@@ -74,6 +74,6 @@ dec
  * Programs
  */
 prog
-    : dec                           # progDec
-    | left=prog ';' right=prog      # progSeq
+    : left=prog ';' right=prog      # progSeq
+    | dec                           # progDec
     ;

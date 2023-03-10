@@ -61,8 +61,7 @@ export class smlParser extends Parser {
 	public static readonly FALSE = 31;
 	public static readonly LETTER = 32;
 	public static readonly ASCII = 33;
-	public static readonly NEWLINE = 34;
-	public static readonly WHITESPACE = 35;
+	public static readonly WHITESPACE = 34;
 	public static readonly RULE_number = 0;
 	public static readonly RULE_constant = 1;
 	public static readonly RULE_int = 2;
@@ -94,7 +93,7 @@ export class smlParser extends Parser {
 		undefined, undefined, undefined, undefined, undefined, undefined, undefined, 
 		undefined, undefined, undefined, undefined, undefined, undefined, undefined, 
 		undefined, undefined, undefined, undefined, undefined, undefined, undefined, 
-		undefined, "DIGIT", "TRUE", "FALSE", "LETTER", "ASCII", "NEWLINE", "WHITESPACE",
+		undefined, "DIGIT", "TRUE", "FALSE", "LETTER", "ASCII", "WHITESPACE",
 	];
 	public static readonly VOCABULARY: Vocabulary = new VocabularyImpl(smlParser._LITERAL_NAMES, smlParser._SYMBOLIC_NAMES, []);
 
@@ -894,13 +893,13 @@ export class smlParser extends Parser {
 					(_localctx as ProgSeqContext)._left = _prevctx;
 					this.pushNewRecursionContext(_localctx, _startState, smlParser.RULE_prog);
 					this.state = 126;
-					if (!(this.precpred(this._ctx, 1))) {
-						throw this.createFailedPredicateException("this.precpred(this._ctx, 1)");
+					if (!(this.precpred(this._ctx, 2))) {
+						throw this.createFailedPredicateException("this.precpred(this._ctx, 2)");
 					}
 					this.state = 127;
 					this.match(smlParser.T__27);
 					this.state = 128;
-					(_localctx as ProgSeqContext)._right = this.prog(2);
+					(_localctx as ProgSeqContext)._right = this.prog(3);
 					}
 					}
 				}
@@ -958,13 +957,13 @@ export class smlParser extends Parser {
 	private prog_sempred(_localctx: ProgContext, predIndex: number): boolean {
 		switch (predIndex) {
 		case 3:
-			return this.precpred(this._ctx, 1);
+			return this.precpred(this._ctx, 2);
 		}
 		return true;
 	}
 
 	public static readonly _serializedATN: string =
-		"\x03\uC91D\uCABA\u058D\uAFBA\u4F53\u0607\uEA8B\uC241\x03%\x89\x04\x02" +
+		"\x03\uC91D\uCABA\u058D\uAFBA\u4F53\u0607\uEA8B\uC241\x03$\x89\x04\x02" +
 		"\t\x02\x04\x03\t\x03\x04\x04\t\x04\x04\x05\t\x05\x04\x06\t\x06\x04\x07" +
 		"\t\x07\x04\b\t\b\x04\t\t\t\x04\n\t\n\x04\v\t\v\x04\f\t\f\x04\r\t\r\x04" +
 		"\x0E\t\x0E\x04\x0F\t\x0F\x03\x02\x06\x02 \n\x02\r\x02\x0E\x02!\x03\x03" +
@@ -1013,8 +1012,8 @@ export class smlParser extends Parser {
 		"\x02\x02\x02vp\x03\x02\x02\x02vr\x03\x02\x02\x02wz\x03\x02\x02\x02xv\x03" +
 		"\x02\x02\x02xy\x03\x02\x02\x02y\x19\x03\x02\x02\x02zx\x03\x02\x02\x02" +
 		"{|\x05\x18\r\x02|\x1B\x03\x02\x02\x02}~\b\x0F\x01\x02~\x7F\x05\x1A\x0E" +
-		"\x02\x7F\x85\x03\x02\x02\x02\x80\x81\f\x03\x02\x02\x81\x82\x07\x1E\x02" +
-		"\x02\x82\x84\x05\x1C\x0F\x04\x83\x80\x03\x02\x02\x02\x84\x87\x03\x02\x02" +
+		"\x02\x7F\x85\x03\x02\x02\x02\x80\x81\f\x04\x02\x02\x81\x82\x07\x1E\x02" +
+		"\x02\x82\x84\x05\x1C\x0F\x05\x83\x80\x03\x02\x02\x02\x84\x87\x03\x02\x02" +
 		"\x02\x85\x83\x03\x02\x02\x02\x85\x86\x03\x02\x02\x02\x86\x1D\x03\x02\x02" +
 		"\x02\x87\x85\x03\x02\x02\x02\x10!(:CIKQV^envx\x85";
 	public static __ATN: ATN;
@@ -1749,35 +1748,6 @@ export class ProgContext extends ParserRuleContext {
 		super.copyFrom(ctx);
 	}
 }
-export class ProgDecContext extends ProgContext {
-	public dec(): DecContext {
-		return this.getRuleContext(0, DecContext);
-	}
-	constructor(ctx: ProgContext) {
-		super(ctx.parent, ctx.invokingState);
-		this.copyFrom(ctx);
-	}
-	// @Override
-	public enterRule(listener: smlListener): void {
-		if (listener.enterProgDec) {
-			listener.enterProgDec(this);
-		}
-	}
-	// @Override
-	public exitRule(listener: smlListener): void {
-		if (listener.exitProgDec) {
-			listener.exitProgDec(this);
-		}
-	}
-	// @Override
-	public accept<Result>(visitor: smlVisitor<Result>): Result {
-		if (visitor.visitProgDec) {
-			return visitor.visitProgDec(this);
-		} else {
-			return visitor.visitChildren(this);
-		}
-	}
-}
 export class ProgSeqContext extends ProgContext {
 	public _left!: ProgContext;
 	public _right!: ProgContext;
@@ -1810,6 +1780,35 @@ export class ProgSeqContext extends ProgContext {
 	public accept<Result>(visitor: smlVisitor<Result>): Result {
 		if (visitor.visitProgSeq) {
 			return visitor.visitProgSeq(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
+}
+export class ProgDecContext extends ProgContext {
+	public dec(): DecContext {
+		return this.getRuleContext(0, DecContext);
+	}
+	constructor(ctx: ProgContext) {
+		super(ctx.parent, ctx.invokingState);
+		this.copyFrom(ctx);
+	}
+	// @Override
+	public enterRule(listener: smlListener): void {
+		if (listener.enterProgDec) {
+			listener.enterProgDec(this);
+		}
+	}
+	// @Override
+	public exitRule(listener: smlListener): void {
+		if (listener.exitProgDec) {
+			listener.exitProgDec(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: smlVisitor<Result>): Result {
+		if (visitor.visitProgDec) {
+			return visitor.visitProgDec(this);
 		} else {
 			return visitor.visitChildren(this);
 		}

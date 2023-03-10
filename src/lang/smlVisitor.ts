@@ -7,8 +7,8 @@ import { DecExpContext } from "./smlParser";
 import { TypeVarContext } from "./smlParser";
 import { TypeParContext } from "./smlParser";
 import { TypeFunContext } from "./smlParser";
-import { ProgDecContext } from "./smlParser";
 import { ProgSeqContext } from "./smlParser";
+import { ProgDecContext } from "./smlParser";
 import { IdAlphaContext } from "./smlParser";
 import { IdSymbolContext } from "./smlParser";
 import { ExpConContext } from "./smlParser";
@@ -72,20 +72,20 @@ export interface smlVisitor<Result> extends ParseTreeVisitor<Result> {
 	visitTypeFun?: (ctx: TypeFunContext) => Result;
 
 	/**
-	 * Visit a parse tree produced by the `progDec`
-	 * labeled alternative in `smlParser.prog`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitProgDec?: (ctx: ProgDecContext) => Result;
-
-	/**
 	 * Visit a parse tree produced by the `progSeq`
 	 * labeled alternative in `smlParser.prog`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	visitProgSeq?: (ctx: ProgSeqContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `progDec`
+	 * labeled alternative in `smlParser.prog`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitProgDec?: (ctx: ProgDecContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by the `idAlpha`
