@@ -283,13 +283,17 @@ class ProgramGenerator implements smlVisitor<sml.Declaration> {
 
 function convertSml(program: ProgramContext): sml.Program | undefined {
   const generator = new ProgramGenerator()
-  const declarations = program.accept(generator)
-  console.log(declarations)
-  return undefined
-  // return {
-  //   type: 'Program',
-  //   body: declarations
-  // }
+  let declarations = []
+  const programBody = program.accept(generator)
+  if (programBody.type === 'SequenceDeclaration') {
+    declarations = programBody.declarations
+  } else {
+    declarations.push(programBody)
+  }
+  return {
+    type: 'Program',
+    body: declarations
+  }
 }
 
 export function parse(source: string, context: Context) {
@@ -304,6 +308,7 @@ export function parse(source: string, context: Context) {
     try {
       const tree = parser.program()
       program = convertSml(tree)
+      console.log(program)
     } catch (error) {
       // if (error instanceof FatalSyntaxError) {
       //   context.errors.push(error)
