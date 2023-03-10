@@ -3,77 +3,83 @@ grammar sml;
 /*
  * Tokens (terminal)
  */
-DIGIT:          [0-9];
 TRUE:           'true';
 FALSE:          'false';
+DIGIT:          [0-9];
 LETTER:         [A-Za-z];
-ASCII:          [ -~];
-// NEWLINE:        '\r\n' | '\r' | '\n';
-WHITESPACE:     [ \r\n\t]+ -> skip;
+SYMBOL:         [!-~];
+WHITESPACE:     [ \t]+ -> skip;
+NEWLINE:        ('\r'? '\n' | '\r');
+
 
 /*
  * Tokens (non-terminal)
  */
-number: DIGIT+;
+NUMBER:         DIGIT+;
+
 
 /*
  * Constants
  */
-constant
-    : int
-    | real
-    | bool
-    | char
-    | string
-    ;
+// constant:       integer | real | bool | character | string;
+constant:       integer | real | bool;
 
-int:    number;
-real:   number '.' number;
-bool:   TRUE | FALSE;
-char:   '#"' ASCII '"';
-string: '"' ASCII* '"';
+integer:        NUMBER;
+real:           NUMBER '.' NUMBER;
+bool:           TRUE | FALSE;
+// character:      '#"' (' ' | SYMBOL) '"';
+// string:         '"' (' ' | SYMBOL)* '"';
+
 
 /*
  * Identifiers
  */
 id
-    : LETTER (LETTER | DIGIT | '\'' | '_')*                                                                                         # idAlpha
-    | ('!' | '%' | '&' | '$' | '#' | '+' | '-' | '/' | ':' | '<' | '=' | '>' | '?' | '@' | '\\' | '~' | '\'' | '^' | '|' | '*')+    # idSymbol
+    :       LETTER (LETTER | DIGIT | '\'' | '_')*                                                                                           # idAlpha
+    |       ('!' | '%' | '&' | '$' | '#' | '+' | '-' | '/' | ':' | '<' | '=' | '>' | '?' | '@' | '\\' | '~' | '\'' | '^' | '|' | '*')+      # idSymbol
     ;
 
-variable: '\'' (LETTER | DIGIT | '\'' | '_' )*;
+variable:   '\'' (LETTER | DIGIT | '\'' | '_' )*;
 
-label: id | number;
+label:      id | NUMBER;
 
-/*
- * Types
- */
-type
-    : variable              # typeVar
-    | '(' inner=exp ')'     # typePar
-    | type '->' type        # typeFun
-    ;
 
 /*
  * Expressions
  */
-exp
-    : constant                          # expCon
-    | '(' inner=exp ')'                 # expPar
-    | operator=exp operand=exp          # expAppPrefix
-    | left=exp operator=id right=exp    # expAppInfix
+expression
+    : constant                                          # expressionConstant
+    | '(' inner=expression ')'                          # expressionParentheses
+    | operator=expression operand=expression            # expressionApplicationPrefix
+    | left=expression operator=id right=expression      # expressionApplicationInfix
     ;
+
+
+/*
+ * Patterns
+ */
+pattern
+    : constant      # patternConstant
+    | id            # patternId
+    ;
+
 
 /*
  * Declarations
  */
-dec
-    : exp           # decExp;
+declaration
+    : expression        # declarationExpression
+    | 'val' valbind     # declarationValue
+    ;
+
+valbind
+    : pattern '=' expression;
+
 
 /*
  * Programs
  */
-prog
-    : left=prog ';' right=prog      # progSeq
-    | dec                           # progDec
+program
+    : declaration                       # programDeclaration
+    | left=program ';' right=program    # programSequence
     ;

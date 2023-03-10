@@ -4,129 +4,55 @@ import { ErrorNode } from 'antlr4ts/tree/ErrorNode'
 import { ParseTree } from 'antlr4ts/tree/ParseTree'
 import { RuleNode } from 'antlr4ts/tree/RuleNode'
 import { TerminalNode } from 'antlr4ts/tree/TerminalNode'
-import * as es from 'estree'
-
+import * as sml from '../sml/types'
 import { smlLexer } from '../lang/smlLexer'
 import {
-  BoolContext,
-  CharContext,
   ConstantContext,
-  DecContext,
-  DecExpContext,
-  ExpAppInfixContext,
-  ExpAppPrefixContext,
-  ExpConContext,
-  ExpContext,
-  ExpParContext,
-  IdAlphaContext,
-  IdContext,
-  IdSymbolContext,
-  IntContext,
-  LabelContext,
-  NumberContext,
-  ProgContext,
-  ProgDecContext,
-  ProgSeqContext,
+  IntegerContext,
   RealContext,
-  smlParser,
-  StringContext,
-  TypeContext,
-  TypeFunContext,
-  TypeParContext,
-  TypeVarContext,
-  VariableContext
+  BoolContext,
+  // CharacterContext,
+  // StringContext,
+  IdContext,
+  IdAlphaContext,
+  IdSymbolContext,
+  VariableContext,
+  LabelContext,
+  ExpressionContext,
+  ExpressionConstantContext,
+  ExpressionParenthesesContext,
+  ExpressionApplicationPrefixContext,
+  ExpressionApplicationInfixContext,
+  PatternContext,
+  PatternConstantContext,
+  PatternIdContext,
+  DeclarationContext,
+  DeclarationExpressionContext,
+  DeclarationValueContext,
+  ValbindContext,
+  ProgramContext,
+  ProgramDeclarationContext,
+  ProgramSequenceContext,
+  smlParser
 } from '../lang/smlParser'
 import { smlVisitor } from '../lang/smlVisitor'
-import { Context, ErrorSeverity, ErrorType, SourceError, Variable } from '../types'
-import { expressionStatement } from '../utils/astCreator'
-import { stripIndent } from '../utils/formatters'
+import { Context, ErrorSeverity } from '../types'
 
-export class DisallowedConstructError implements SourceError {
-  public type = ErrorType.SYNTAX
-  public severity = ErrorSeverity.ERROR
-  public nodeType: string
+// export class FatalSyntaxError implements SourceError {
+//   public type = ErrorType.SYNTAX
+//   public severity = ErrorSeverity.ERROR
+//   public constructor(public location: es.SourceLocation, public message: string) {}
 
-  constructor(public node: es.Node) {
-    this.nodeType = this.formatNodeType(this.node.type)
-  }
+//   public explain() {
+//     return this.message
+//   }
 
-  get location() {
-    return this.node.loc!
-  }
+//   public elaborate() {
+//     return 'There is a syntax error in your program'
+//   }
+// }
 
-  public explain() {
-    return `${this.nodeType} are not allowed`
-  }
-
-  public elaborate() {
-    return stripIndent`
-      You are trying to use ${this.nodeType}, which is not allowed (yet).
-    `
-  }
-
-  /**
-   * Converts estree node.type into english
-   * e.g. ThisExpression -> 'this' expressions
-   *      Property -> Properties
-   *      EmptyStatement -> Empty Statements
-   */
-  private formatNodeType(nodeType: string) {
-    switch (nodeType) {
-      case 'ThisExpression':
-        return "'this' expressions"
-      case 'Property':
-        return 'Properties'
-      default: {
-        const words = nodeType.split(/(?=[A-Z])/)
-        return words.map((word, i) => (i === 0 ? word : word.toLowerCase())).join(' ') + 's'
-      }
-    }
-  }
-}
-
-export class FatalSyntaxError implements SourceError {
-  public type = ErrorType.SYNTAX
-  public severity = ErrorSeverity.ERROR
-  public constructor(public location: es.SourceLocation, public message: string) {}
-
-  public explain() {
-    return this.message
-  }
-
-  public elaborate() {
-    return 'There is a syntax error in your program'
-  }
-}
-
-export class MissingSemicolonError implements SourceError {
-  public type = ErrorType.SYNTAX
-  public severity = ErrorSeverity.ERROR
-  public constructor(public location: es.SourceLocation) {}
-
-  public explain() {
-    return 'Missing semicolon at the end of statement'
-  }
-
-  public elaborate() {
-    return 'Every statement must be terminated by a semicolon.'
-  }
-}
-
-export class TrailingCommaError implements SourceError {
-  public type: ErrorType.SYNTAX
-  public severity: ErrorSeverity.WARNING
-  public constructor(public location: es.SourceLocation) {}
-
-  public explain() {
-    return 'Trailing comma'
-  }
-
-  public elaborate() {
-    return 'Please remove the trailing comma'
-  }
-}
-
-function contextToLocation(ctx: ExpContext): es.SourceLocation {
+function contextToLocation(ctx: DeclarationContext): sml.SourceLocation {
   return {
     start: {
       line: ctx.start.line,
@@ -139,72 +65,61 @@ function contextToLocation(ctx: ExpContext): es.SourceLocation {
   }
 }
 
-class ProgramGenerator implements smlVisitor<es.Expression> {
-  visitNumber?: ((ctx: NumberContext) => es.Expression) | undefined
-
-  visitConstant(ctx: ConstantContext): es.Expression {
-    console.log('con')
-    console.log(ctx)
-    console.log('================================')
-    return ctx.getChild(0).accept(this)
+class ProgramGenerator implements smlVisitor<sml.Declaration> {
+  visitConstant(ctx: ConstantContext): sml.Declaration {
+    throw new Error(`not supported yet: ${ctx}`)
   }
 
-  visitInt(ctx: IntContext): es.Expression {
+  visitInteger(ctx: IntegerContext): sml.Declaration {
     return {
-      type: 'Literal',
+      type: 'Constant',
       value: parseInt(ctx.text),
       raw: ctx.text,
       loc: contextToLocation(ctx)
     }
   }
 
-  visitReal(ctx: RealContext): es.Expression {
+  visitReal(ctx: RealContext): sml.Declaration {
     return {
-      type: 'Literal',
+      type: 'Constant',
       value: parseFloat(ctx.text),
       raw: ctx.text,
       loc: contextToLocation(ctx)
     }
   }
 
-  visitBool(ctx: BoolContext): es.Expression {
+  visitBool(ctx: BoolContext): sml.Declaration {
     return {
-      type: 'Literal',
+      type: 'Constant',
       value: JSON.parse(ctx.text) as boolean,
       raw: ctx.text,
       loc: contextToLocation(ctx)
     }
   }
 
-  visitChar(ctx: CharContext): es.Expression {
-    return {
-      type: 'Literal',
-      value: ctx.text,
-      raw: ctx.text,
-      loc: contextToLocation(ctx)
-    }
+  // visitCharacter(ctx: CharacterContext): sml.Declaration {
+  //   return {
+  //     type: 'Constant',
+  //     value: ctx.text,
+  //     raw: ctx.text,
+  //     loc: contextToLocation(ctx)
+  //   }
+  // }
+
+  // visitString(ctx: StringContext): sml.Declaration {
+  //   return {
+  //     type: 'Constant',
+  //     value: ctx.text,
+  //     raw: ctx.text,
+  //     loc: contextToLocation(ctx)
+  //   }
+  // }
+
+  visitId(ctx: IdContext): sml.Declaration {
+    return ctx.getChild(0).accept(this)
   }
 
-  visitString(ctx: StringContext): es.Expression {
-    return {
-      type: 'Literal',
-      value: ctx.text,
-      raw: ctx.text,
-      loc: contextToLocation(ctx)
-    }
-  }
-
-  visitId?: ((ctx: TypeContext) => es.Expression) | undefined
-
-  visitIdAlpha(ctx: IdAlphaContext): es.Expression {
-    return {
-      type: 'Identifier',
-      name: ctx.text,
-      loc: contextToLocation(ctx)
-    }
-  }
-
-  visitIdSymbol(ctx: IdSymbolContext): es.Expression {
+  visitIdAlpha(ctx: IdAlphaContext): sml.Declaration {
     return {
       type: 'Identifier',
       name: ctx.text,
@@ -212,141 +127,166 @@ class ProgramGenerator implements smlVisitor<es.Expression> {
     }
   }
 
-  visitVariable(ctx: VariableContext): es.Expression {
+  visitIdSymbol(ctx: IdSymbolContext): sml.Declaration {
+    return {
+      type: 'Identifier',
+      name: ctx.text,
+      loc: contextToLocation(ctx)
+    }
+  }
+
+  visitVariable(ctx: VariableContext): sml.Declaration {
     throw new Error(`not supported yet: ${ctx}`)
   }
 
-  visitLabel(ctx: LabelContext): es.Expression {
+  visitLabel(ctx: LabelContext): sml.Declaration {
     throw new Error(`not supported yet: ${ctx}`)
   }
 
-  visitType?: ((ctx: TypeContext) => es.Expression) | undefined
-
-  visitTypeVar(ctx: TypeVarContext): es.Expression {
-    throw new Error(`not supported yet: ${ctx}`)
+  visitExpression(ctx: ExpressionContext): sml.Declaration {
+    return ctx.getChild(0).accept(this)
   }
 
-  visitTypePar(ctx: TypeParContext): es.Expression {
-    throw new Error(`not supported yet: ${ctx}`)
-  }
-
-  visitTypeFun(ctx: TypeFunContext): es.Expression {
-    throw new Error(`not supported yet: ${ctx}`)
-  }
-
-  visitExp?: ((ctx: ExpContext) => es.Expression) | undefined
-
-  visitExpCon(ctx: ExpConContext): es.Expression {
+  visitExpressionConstant(ctx: ExpressionConstantContext): sml.Declaration {
     console.log('expcon')
     console.log(ctx)
     console.log('================================')
     return ctx.getChild(0).accept(this)
   }
 
-  visitExpPar(ctx: ExpParContext): es.Expression {
+  visitExpressionParentheses(ctx: ExpressionParenthesesContext): sml.Declaration {
     console.log('exppar')
     console.log(ctx)
     console.log('================================')
     return ctx.getChild(0).accept(this)
   }
 
-  visitExpAppPrefix(ctx: ExpAppPrefixContext): es.Expression {
+  visitExpressionApplicationPrefix(ctx: ExpressionApplicationPrefixContext): sml.Declaration {
     throw new Error(`not supported yet: ${ctx}`)
   }
 
-  visitExpAppInfix(ctx: ExpAppInfixContext): es.Expression {
+  visitExpressionApplicationInfix(ctx: ExpressionApplicationInfixContext): sml.Declaration {
     console.log('expappinfix')
     console.log(ctx)
     console.log('================================')
     return {
-      type: 'BinaryExpression',
-      operator: ctx._operator.text as es.BinaryOperator,
-      left: ctx._left.accept(this),
-      right: ctx._right.accept(this),
+      type: 'InfixApplicationExpression',
+      operator: ctx._operator.text as sml.InfixOperator,
+      left: ctx._left.accept(this) as sml.Expression,
+      right: ctx._right.accept(this) as sml.Expression,
       loc: contextToLocation(ctx)
     }
   }
 
-  visitDec?: ((ctx: DecContext) => es.Expression) | undefined
+  visitPattern(ctx: PatternContext): sml.Declaration {
+    return ctx.getChild(0).accept(this)
+  }
 
-  visitDecExp(ctx: DecExpContext): es.Expression {
+  visitPatternConstant(ctx: PatternConstantContext): sml.Declaration {
+    throw new Error(`not supported yet: ${ctx}`)
+  }
+
+  visitPatternId(ctx: PatternIdContext): sml.Declaration {
+    throw new Error(`not supported yet: ${ctx}`)
+  }
+
+  visitDeclaration(ctx: DeclarationContext): sml.Declaration {
+    return ctx.getChild(0).accept(this)
+  }
+
+  visitDeclarationExpression(ctx: DeclarationExpressionContext): sml.Declaration {
     console.log('decexp')
     console.log(ctx)
     console.log('================================')
     return ctx.getChild(0).accept(this)
   }
 
-  // visitProg?: ((ctx: ProgContext) => es.Expression) | undefined
+  visitDeclarationValue(ctx: DeclarationValueContext): sml.Declaration {
+    console.log('decexp')
+    console.log(ctx)
+    console.log('================================')
+    return ctx.getChild(0).accept(this)
+  }
 
-  visitProg(ctx: ProgContext): es.Expression {
+  visitValbind(ctx: ValbindContext): sml.Declaration {
+    throw new Error(`not supported yet: ${ctx}`)
+  }
+
+  visitProgram(ctx: ProgramContext): sml.Declaration {
     console.log('prog')
     console.log(ctx)
     console.log('================================')
     return ctx.getChild(0).accept(this)
   }
 
-  visitProgDec(ctx: ProgDecContext): es.Expression {
+  visitProgramDeclaration(ctx: ProgramDeclarationContext): sml.Declaration {
     console.log('progdec')
     console.log(ctx)
     console.log('================================')
     return ctx.getChild(0).accept(this)
   }
 
-  visitProgSeq(ctx: ProgSeqContext): es.Expression {
+  visitProgramSequence(ctx: ProgramSequenceContext): sml.Declaration {
     console.log('progseq')
-    const expressions: es.Expression[] = []
-    expressions.push(ctx._left.accept(this))
-    expressions.push(ctx._right.accept(this))
+    const declarations = []
+    declarations.push(ctx._left.accept(this))
+    declarations.push(ctx._right.accept(this))
     return {
-      type: 'SequenceExpression',
-      expressions
+      type: 'SequenceDeclaration',
+      declarations: declarations
     }
   }
 
-  visit(tree: ParseTree): es.Expression {
+  visit(tree: ParseTree): sml.Declaration {
     return tree.accept(this)
   }
 
-  visitChildren(node: RuleNode): es.Expression {
-    const expressions: es.Expression[] = []
+  visitChildren(node: RuleNode): sml.Declaration {
+    const declarations = []
     for (let i = 0; i < node.childCount; i++) {
-      expressions.push(node.getChild(i).accept(this))
+      declarations.push(node.getChild(i).accept(this))
     }
     return {
-      type: 'SequenceExpression',
-      expressions
+      type: 'SequenceDeclaration',
+      declarations: declarations
     }
   }
 
-  visitTerminal(node: TerminalNode): es.Expression {
+  visitTerminal(node: TerminalNode): sml.Declaration {
     return node.accept(this)
   }
 
-  visitErrorNode(node: ErrorNode): es.Expression {
-    throw new FatalSyntaxError(
-      {
-        start: {
-          line: node.symbol.line,
-          column: node.symbol.charPositionInLine
-        },
-        end: {
-          line: node.symbol.line,
-          column: node.symbol.charPositionInLine + 1
-        }
-      },
-      `invalid syntax ${node.text}`
-    )
+  visitErrorNode(node: ErrorNode): sml.Declaration {
+    // throw new FatalSyntaxError(
+    //   {
+    //     start: {
+    //       line: node.symbol.line,
+    //       column: node.symbol.charPositionInLine
+    //     },
+    //     end: {
+    //       line: node.symbol.line,
+    //       column: node.symbol.charPositionInLine + 1
+    //     }
+    //   },
+    //   `invalid syntax ${node.text}`
+    // )
+    throw new Error(`node error: ${node}`)
   }
 }
 
-function convertSml(program: ProgContext): es.Program | undefined {
+function convertSml(program: ProgramContext): sml.Program | undefined {
   const generator = new ProgramGenerator()
-  console.log(program.accept(generator))
+  const declarations = program.accept(generator)
+  console.log(declarations)
   return undefined
+  // return {
+  //   type: 'Program',
+  //   body: declarations
+  // }
 }
 
 export function parse(source: string, context: Context) {
-  let program: es.Program | undefined
+  let program: sml.Program | undefined
 
   if (context.variant === 'sml') {
     const inputStream = CharStreams.fromString(source)
@@ -355,15 +295,16 @@ export function parse(source: string, context: Context) {
     const parser = new smlParser(tokenStream)
     parser.buildParseTree = true
     try {
-      const tree = parser.prog()
-      // console.log(tree)
+      const tree = parser.program()
+      console.log(tree)
       program = convertSml(tree)
     } catch (error) {
-      if (error instanceof FatalSyntaxError) {
-        context.errors.push(error)
-      } else {
-        throw error
-      }
+      // if (error instanceof FatalSyntaxError) {
+      //   context.errors.push(error)
+      // } else {
+      //   throw error
+      // }
+      throw error
     }
     const hasErrors = context.errors.find(m => m.severity === ErrorSeverity.ERROR)
     if (program && !hasErrors) {

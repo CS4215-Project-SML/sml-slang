@@ -1,4 +1,3 @@
-import * as es from 'estree'
 import { json } from 'stream/consumers'
 
 import { IOptions, Result } from '..'
@@ -12,6 +11,7 @@ import { PreemptiveScheduler } from '../schedulers'
 import { Context, Scheduler, Variant } from '../types'
 import { validateAndAnnotate } from '../validator/validator'
 import { determineVariant, resolvedErrorPromise } from './utils'
+import * as sml from '../sml/types'
 
 const DEFAULT_SML_OPTIONS: IOptions = {
   scheduler: 'preemptive',
@@ -25,7 +25,7 @@ const DEFAULT_SML_OPTIONS: IOptions = {
   throwInfiniteLoops: true
 }
 
-function runInterpreter(program: es.Program, context: Context, options: IOptions): Result {
+function runInterpreter(program: sml.Program, context: Context, options: IOptions): Result {
   // runTypeChecker()
   // runEvaluator()
   return { status: 'error' }
@@ -36,7 +36,7 @@ export function smlRunner(code: string, context: Context, options: Partial<IOpti
   context.variant = determineVariant(context, options)
   context.errors = []
 
-  const program: es.Program | undefined = parse(code, context)
+  const program: sml.Program | undefined = parse(code, context)
   if (!program) {
     return { status: 'error' }
   }
