@@ -69,7 +69,7 @@ export interface DeclarationMap {
 
 export type Declaration = DeclarationMap[keyof DeclarationMap]
 
-export interface BaseDeclaration extends BaseNode {}
+export type BaseDeclaration = BaseNode
 
 export interface ExpressionDeclaration extends BaseDeclaration {
   type: 'ExpressionDeclaration'
@@ -94,7 +94,7 @@ export interface PatternMap {
 
 export type Pattern = PatternMap[keyof PatternMap]
 
-export interface BasePattern extends BaseNode {}
+export type BasePattern = BaseNode
 
 export interface ExpressionMap {
   Constant: Constant
@@ -104,7 +104,7 @@ export interface ExpressionMap {
 
 export type Expression = ExpressionMap[keyof ExpressionMap]
 
-export interface BaseExpression extends BaseNode {}
+export type BaseExpression = BaseNode
 
 export interface PrefixApplicationExpression extends BaseExpression {
   type: 'PrefixApplicationExpression'

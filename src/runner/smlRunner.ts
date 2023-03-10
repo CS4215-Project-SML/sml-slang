@@ -8,10 +8,10 @@ import { removeExports } from '../localImports/transformers/removeExports'
 import { removeNonSourceModuleImports } from '../localImports/transformers/removeNonSourceModuleImports'
 import { parse } from '../parser/parser'
 import { PreemptiveScheduler } from '../schedulers'
+import * as sml from '../sml/types'
 import { Context, Scheduler, Variant } from '../types'
 import { validateAndAnnotate } from '../validator/validator'
 import { determineVariant, resolvedErrorPromise } from './utils'
-import * as sml from '../sml/types'
 
 const DEFAULT_SML_OPTIONS: IOptions = {
   scheduler: 'preemptive',

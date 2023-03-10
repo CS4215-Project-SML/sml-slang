@@ -4,38 +4,39 @@ import { ErrorNode } from 'antlr4ts/tree/ErrorNode'
 import { ParseTree } from 'antlr4ts/tree/ParseTree'
 import { RuleNode } from 'antlr4ts/tree/RuleNode'
 import { TerminalNode } from 'antlr4ts/tree/TerminalNode'
-import * as sml from '../sml/types'
+
 import { smlLexer } from '../lang/smlLexer'
 import {
-  ConstantContext,
-  IntegerContext,
-  RealContext,
   BoolContext,
-  // CharacterContext,
-  // StringContext,
-  IdContext,
-  IdAlphaContext,
-  IdSymbolContext,
-  VariableContext,
-  LabelContext,
-  ExpressionContext,
-  ExpressionConstantContext,
-  ExpressionParenthesesContext,
-  ExpressionApplicationPrefixContext,
-  ExpressionApplicationInfixContext,
-  PatternContext,
-  PatternConstantContext,
-  PatternIdContext,
+  ConstantContext,
   DeclarationContext,
   DeclarationExpressionContext,
   DeclarationValueContext,
-  ValbindContext,
+  ExpressionApplicationInfixContext,
+  ExpressionApplicationPrefixContext,
+  ExpressionConstantContext,
+  ExpressionContext,
+  ExpressionParenthesesContext,
+  IdAlphaContext,
+  // CharacterContext,
+  // StringContext,
+  IdContext,
+  IdSymbolContext,
+  IntegerContext,
+  LabelContext,
+  PatternConstantContext,
+  PatternContext,
+  PatternIdContext,
   ProgramContext,
   ProgramDeclarationContext,
   ProgramSequenceContext,
-  smlParser
+  RealContext,
+  smlParser,
+  ValbindContext,
+  VariableContext
 } from '../lang/smlParser'
 import { smlVisitor } from '../lang/smlVisitor'
+import * as sml from '../sml/types'
 import { Context, ErrorSeverity } from '../types'
 
 // export class FatalSyntaxError implements SourceError {
@@ -67,7 +68,10 @@ function contextToLocation(ctx: DeclarationContext): sml.SourceLocation {
 
 class ProgramGenerator implements smlVisitor<sml.Declaration> {
   visitConstant(ctx: ConstantContext): sml.Declaration {
-    throw new Error(`not supported yet: ${ctx}`)
+    console.log('con')
+    console.log(ctx)
+    console.log('================================')
+    return ctx.getChild(0).accept(this)
   }
 
   visitInteger(ctx: IntegerContext): sml.Declaration {
@@ -144,6 +148,9 @@ class ProgramGenerator implements smlVisitor<sml.Declaration> {
   }
 
   visitExpression(ctx: ExpressionContext): sml.Declaration {
+    console.log('exp')
+    console.log(ctx)
+    console.log('================================')
     return ctx.getChild(0).accept(this)
   }
 
@@ -296,7 +303,6 @@ export function parse(source: string, context: Context) {
     parser.buildParseTree = true
     try {
       const tree = parser.program()
-      console.log(tree)
       program = convertSml(tree)
     } catch (error) {
       // if (error instanceof FatalSyntaxError) {

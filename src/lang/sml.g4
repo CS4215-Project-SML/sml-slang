@@ -7,28 +7,22 @@ TRUE:           'true';
 FALSE:          'false';
 DIGIT:          [0-9];
 LETTER:         [A-Za-z];
-SYMBOL:         [!-~];
 WHITESPACE:     [ \t]+ -> skip;
 NEWLINE:        ('\r'? '\n' | '\r');
-
-
-/*
- * Tokens (non-terminal)
- */
-NUMBER:         DIGIT+;
+SYMBOL:         [!-~];
 
 
 /*
  * Constants
  */
-// constant:       integer | real | bool | character | string;
+// constant:       integer | real | bool | character | str;
 constant:       integer | real | bool;
 
-integer:        NUMBER;
-real:           NUMBER '.' NUMBER;
+integer:        DIGIT+;
+real:           integer '.' integer;
 bool:           TRUE | FALSE;
 // character:      '#"' (' ' | SYMBOL) '"';
-// string:         '"' (' ' | SYMBOL)* '"';
+// str:         '"' (' ' | SYMBOL)* '"';
 
 
 /*
@@ -41,7 +35,7 @@ id
 
 variable:   '\'' (LETTER | DIGIT | '\'' | '_' )*;
 
-label:      id | NUMBER;
+label:      id | integer;
 
 
 /*
