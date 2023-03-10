@@ -654,7 +654,7 @@ export class smlParser extends Parser {
 				this.state = 88;
 				this.match(smlParser.T__24);
 				this.state = 89;
-				this.exp(0);
+				(_localctx as TypeParContext)._inner = this.exp(0);
 				this.state = 90;
 				this.match(smlParser.T__25);
 				}
@@ -751,7 +751,7 @@ export class smlParser extends Parser {
 				this.state = 104;
 				this.match(smlParser.T__24);
 				this.state = 105;
-				this.exp(0);
+				(_localctx as ExpParContext)._inner = this.exp(0);
 				this.state = 106;
 				this.match(smlParser.T__25);
 				}
@@ -776,28 +776,30 @@ export class smlParser extends Parser {
 					case 1:
 						{
 						_localctx = new ExpAppPrefixContext(new ExpContext(_parentctx, _parentState));
+						(_localctx as ExpAppPrefixContext)._operator = _prevctx;
 						this.pushNewRecursionContext(_localctx, _startState, smlParser.RULE_exp);
 						this.state = 110;
 						if (!(this.precpred(this._ctx, 2))) {
 							throw this.createFailedPredicateException("this.precpred(this._ctx, 2)");
 						}
 						this.state = 111;
-						this.exp(3);
+						(_localctx as ExpAppPrefixContext)._operand = this.exp(3);
 						}
 						break;
 
 					case 2:
 						{
 						_localctx = new ExpAppInfixContext(new ExpContext(_parentctx, _parentState));
+						(_localctx as ExpAppInfixContext)._left = _prevctx;
 						this.pushNewRecursionContext(_localctx, _startState, smlParser.RULE_exp);
 						this.state = 112;
 						if (!(this.precpred(this._ctx, 1))) {
 							throw this.createFailedPredicateException("this.precpred(this._ctx, 1)");
 						}
 						this.state = 113;
-						this.id();
+						(_localctx as ExpAppInfixContext)._operator = this.id();
 						this.state = 114;
-						this.exp(2);
+						(_localctx as ExpAppInfixContext)._right = this.exp(2);
 						}
 						break;
 					}
@@ -889,6 +891,7 @@ export class smlParser extends Parser {
 					{
 					{
 					_localctx = new ProgSeqContext(new ProgContext(_parentctx, _parentState));
+					(_localctx as ProgSeqContext)._left = _prevctx;
 					this.pushNewRecursionContext(_localctx, _startState, smlParser.RULE_prog);
 					this.state = 126;
 					if (!(this.precpred(this._ctx, 1))) {
@@ -897,7 +900,7 @@ export class smlParser extends Parser {
 					this.state = 127;
 					this.match(smlParser.T__27);
 					this.state = 128;
-					this.prog(2);
+					(_localctx as ProgSeqContext)._right = this.prog(2);
 					}
 					}
 				}
@@ -1480,6 +1483,7 @@ export class TypeVarContext extends TypeContext {
 	}
 }
 export class TypeParContext extends TypeContext {
+	public _inner!: ExpContext;
 	public exp(): ExpContext {
 		return this.getRuleContext(0, ExpContext);
 	}
@@ -1585,6 +1589,7 @@ export class ExpConContext extends ExpContext {
 	}
 }
 export class ExpParContext extends ExpContext {
+	public _inner!: ExpContext;
 	public exp(): ExpContext {
 		return this.getRuleContext(0, ExpContext);
 	}
@@ -1614,6 +1619,8 @@ export class ExpParContext extends ExpContext {
 	}
 }
 export class ExpAppPrefixContext extends ExpContext {
+	public _operator!: ExpContext;
+	public _operand!: ExpContext;
 	public exp(): ExpContext[];
 	public exp(i: number): ExpContext;
 	public exp(i?: number): ExpContext | ExpContext[] {
@@ -1649,6 +1656,9 @@ export class ExpAppPrefixContext extends ExpContext {
 	}
 }
 export class ExpAppInfixContext extends ExpContext {
+	public _left!: ExpContext;
+	public _operator!: IdContext;
+	public _right!: ExpContext;
 	public exp(): ExpContext[];
 	public exp(i: number): ExpContext;
 	public exp(i?: number): ExpContext | ExpContext[] {
@@ -1769,6 +1779,8 @@ export class ProgDecContext extends ProgContext {
 	}
 }
 export class ProgSeqContext extends ProgContext {
+	public _left!: ProgContext;
+	public _right!: ProgContext;
 	public prog(): ProgContext[];
 	public prog(i: number): ProgContext;
 	public prog(i?: number): ProgContext | ProgContext[] {

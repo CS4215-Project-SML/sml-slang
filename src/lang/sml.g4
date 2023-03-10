@@ -24,7 +24,8 @@ constant
     | real
     | bool
     | char
-    | string;
+    | string
+    ;
 
 int:    number;
 real:   number '.' number;
@@ -36,8 +37,9 @@ string: '"' ASCII* '"';
  * Identifiers
  */
 id
-    : LETTER (LETTER | DIGIT | '\'' | '_')*                                                                                           # idAlpha
-    | ('!' | '%' | '&' | '$' | '#' | '+' | '-' | '/' | ':' | '<' | '=' | '>' | '?' | '@' | '\\' | '~' | '\'' | '^' | '|' | '*')+      # idSymbol;
+    : LETTER (LETTER | DIGIT | '\'' | '_')*                                                                                         # idAlpha
+    | ('!' | '%' | '&' | '$' | '#' | '+' | '-' | '/' | ':' | '<' | '=' | '>' | '?' | '@' | '\\' | '~' | '\'' | '^' | '|' | '*')+    # idSymbol
+    ;
 
 variable: '\'' (LETTER | DIGIT | '\'' | '_' )*;
 
@@ -47,18 +49,20 @@ label: id | number;
  * Types
  */
 type
-    : variable          # typeVar
-    | '(' exp ')'       # typePar
-    | type '->' type    # typeFun;
+    : variable              # typeVar
+    | '(' inner=exp ')'     # typePar
+    | type '->' type        # typeFun
+    ;
 
 /*
  * Expressions
  */
 exp
-    : constant      # expCon
-    | '(' exp ')'   # expPar
-    | exp exp       # expAppPrefix
-    | exp id exp    # expAppInfix;
+    : constant                          # expCon
+    | '(' inner=exp ')'                 # expPar
+    | operator=exp operand=exp          # expAppPrefix
+    | left=exp operator=id right=exp    # expAppInfix
+    ;
 
 /*
  * Declarations
@@ -70,5 +74,6 @@ dec
  * Programs
  */
 prog
-    : dec               # progDec
-    | prog ';' prog     # progSeq;
+    : dec                           # progDec
+    | left=prog ';' right=prog      # progSeq
+    ;

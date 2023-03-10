@@ -8,12 +8,9 @@ import * as es from 'estree'
 
 import { smlLexer } from '../lang/smlLexer'
 import {
-  NumberContext,
-  ConstantContext,
-  IntContext,
-  RealContext,
   BoolContext,
   CharContext,
+  ConstantContext,
   DecContext,
   DecExpContext,
   ExpAppInfixContext,
@@ -21,13 +18,16 @@ import {
   ExpConContext,
   ExpContext,
   ExpParContext,
-  IdContext,
   IdAlphaContext,
+  IdContext,
   IdSymbolContext,
+  IntContext,
   LabelContext,
+  NumberContext,
   ProgContext,
   ProgDecContext,
   ProgSeqContext,
+  RealContext,
   smlParser,
   StringContext,
   TypeContext,
@@ -126,134 +126,6 @@ export class TrailingCommaError implements SourceError {
   }
 }
 
-// function contextToLocation(ctx: ExpressionContext): es.SourceLocation {
-//   return {
-//     start: {
-//       line: ctx.start.line,
-//       column: ctx.start.charPositionInLine
-//     },
-//     end: {
-//       line: ctx.stop ? ctx.stop.line : ctx.start.line,
-//       column: ctx.stop ? ctx.stop.charPositionInLine : ctx.start.charPositionInLine
-//     }
-//   }
-// }
-
-// class ExpressionGenerator implements smlVisitor<es.Expression> {
-//   visitNumber(ctx: NumberContext): es.Expression {
-//     return {
-//       type: 'Literal',
-//       value: parseInt(ctx.text),
-//       raw: ctx.text,
-//       loc: contextToLocation(ctx)
-//     }
-//   }
-//   visitParentheses(ctx: ParenthesesContext): es.Expression {
-//     return this.visit(ctx.expression())
-//   }
-//   visitPower(ctx: PowerContext): es.Expression {
-//     return {
-//       type: 'BinaryExpression',
-//       operator: '^',
-//       left: this.visit(ctx._left),
-//       right: this.visit(ctx._right),
-//       loc: contextToLocation(ctx)
-//     }
-//   }
-
-//   visitMultiplication(ctx: MultiplicationContext): es.Expression {
-//     return {
-//       type: 'BinaryExpression',
-//       operator: '*',
-//       left: this.visit(ctx._left),
-//       right: this.visit(ctx._right),
-//       loc: contextToLocation(ctx)
-//     }
-//   }
-//   visitDivision(ctx: DivisionContext): es.Expression {
-//     return {
-//       type: 'BinaryExpression',
-//       operator: '/',
-//       left: this.visit(ctx._left),
-//       right: this.visit(ctx._right),
-//       loc: contextToLocation(ctx)
-//     }
-//   }
-//   visitAddition(ctx: AdditionContext): es.Expression {
-//     return {
-//       type: 'BinaryExpression',
-//       operator: '+',
-//       left: this.visit(ctx._left),
-//       right: this.visit(ctx._right),
-//       loc: contextToLocation(ctx)
-//     }
-//   }
-
-//   visitSubtraction(ctx: SubtractionContext): es.Expression {
-//     return {
-//       type: 'BinaryExpression',
-//       operator: '-',
-//       left: this.visit(ctx._left),
-//       right: this.visit(ctx._right),
-//       loc: contextToLocation(ctx)
-//     }
-//   }
-
-//   visitExpression?: ((ctx: ExpressionContext) => es.Expression) | undefined
-//   visitStart?: ((ctx: StartContext) => es.Expression) | undefined
-
-//   visit(tree: ParseTree): es.Expression {
-//     return tree.accept(this)
-//   }
-//   visitChildren(node: RuleNode): es.Expression {
-//     const expressions: es.Expression[] = []
-//     for (let i = 0; i < node.childCount; i++) {
-//       expressions.push(node.getChild(i).accept(this))
-//     }
-//     return {
-//       type: 'SequenceExpression',
-//       expressions
-//     }
-//   }
-//   visitTerminal(node: TerminalNode): es.Expression {
-//     return node.accept(this)
-//   }
-
-//   visitErrorNode(node: ErrorNode): es.Expression {
-//     throw new FatalSyntaxError(
-//       {
-//         start: {
-//           line: node.symbol.line,
-//           column: node.symbol.charPositionInLine
-//         },
-//         end: {
-//           line: node.symbol.line,
-//           column: node.symbol.charPositionInLine + 1
-//         }
-//       },
-//       `invalid syntax ${node.text}`
-//     )
-//   }
-// }
-
-// function convertExpression(expression: ExpressionContext): es.Expression {
-//   const generator = new ExpressionGenerator()
-//   return expression.accept(generator)
-// }
-
-// function convertSource(expression: ExpressionContext): es.Program {
-//   return {
-//     type: 'Program',
-//     sourceType: 'script',
-//     body: [
-//       {
-//         type: 'ExpressionStatement',
-//         expression: convertExpression(expression)
-//       }
-//     ]
-//   }
-// }
-
 function contextToLocation(ctx: ExpContext): es.SourceLocation {
   return {
     start: {
@@ -268,22 +140,13 @@ function contextToLocation(ctx: ExpContext): es.SourceLocation {
 }
 
 class ProgramGenerator implements smlVisitor<es.Expression> {
-  visitNumber(ctx: NumberContext): es.Expression {
-    return {
-      type: 'Literal',
-      value: parseInt(ctx.text),
-      raw: ctx.text,
-      loc: contextToLocation(ctx)
-    }
-  }
+  visitNumber?: ((ctx: ProgContext) => es.Expression) | undefined
 
   visitConstant(ctx: ConstantContext): es.Expression {
-    return {
-      type: 'Literal',
-      value: parseInt(ctx.text),
-      raw: ctx.text,
-      loc: contextToLocation(ctx)
-    }
+    console.log('con')
+    console.log(ctx)
+    console.log('================================')
+    return ctx.getChild(0).accept(this)
   }
 
   visitInt(ctx: IntContext): es.Expression {
@@ -296,213 +159,101 @@ class ProgramGenerator implements smlVisitor<es.Expression> {
   }
 
   visitReal(ctx: RealContext): es.Expression {
-    return {
-      type: 'Literal',
-      value: parseInt(ctx.text),
-      raw: ctx.text,
-      loc: contextToLocation(ctx)
-    }
+    throw new Error(`not supported yet: ${ctx}`)
   }
 
   visitBool(ctx: BoolContext): es.Expression {
-    return {
-      type: 'Literal',
-      value: parseInt(ctx.text),
-      raw: ctx.text,
-      loc: contextToLocation(ctx)
-    }
+    throw new Error(`not supported yet: ${ctx}`)
   }
 
   visitChar(ctx: CharContext): es.Expression {
-    return {
-      type: 'Literal',
-      value: parseInt(ctx.text),
-      raw: ctx.text,
-      loc: contextToLocation(ctx)
-    }
+    throw new Error(`not supported yet: ${ctx}`)
   }
 
   visitString(ctx: StringContext): es.Expression {
-    return {
-      type: 'Literal',
-      value: parseInt(ctx.text),
-      raw: ctx.text,
-      loc: contextToLocation(ctx)
-    }
+    throw new Error(`not supported yet: ${ctx}`)
   }
 
   visitId(ctx: IdContext): es.Expression {
-    return {
-      type: 'Literal',
-      value: parseInt(ctx.text),
-      raw: ctx.text,
-      loc: contextToLocation(ctx)
-    }
+    throw new Error(`not supported yet: ${ctx}`)
   }
 
   visitIdAlpha(ctx: IdAlphaContext): es.Expression {
-    return {
-      type: 'Literal',
-      value: parseInt(ctx.text),
-      raw: ctx.text,
-      loc: contextToLocation(ctx)
-    }
+    throw new Error(`not supported yet: ${ctx}`)
   }
 
   visitIdSymbol(ctx: IdSymbolContext): es.Expression {
-    return {
-      type: 'Literal',
-      value: parseInt(ctx.text),
-      raw: ctx.text,
-      loc: contextToLocation(ctx)
-    }
+    throw new Error(`not supported yet: ${ctx}`)
   }
 
   visitVariable(ctx: VariableContext): es.Expression {
-    return {
-      type: 'Literal',
-      value: parseInt(ctx.text),
-      raw: ctx.text,
-      loc: contextToLocation(ctx)
-    }
+    throw new Error(`not supported yet: ${ctx}`)
   }
 
   visitLabel(ctx: LabelContext): es.Expression {
-    return {
-      type: 'Literal',
-      value: parseInt(ctx.text),
-      raw: ctx.text,
-      loc: contextToLocation(ctx)
-    }
+    throw new Error(`not supported yet: ${ctx}`)
   }
 
   visitType(ctx: TypeContext): es.Expression {
-    return {
-      type: 'Literal',
-      value: parseInt(ctx.text),
-      raw: ctx.text,
-      loc: contextToLocation(ctx)
-    }
+    throw new Error(`not supported yet: ${ctx}`)
   }
 
   visitTypeVar(ctx: TypeVarContext): es.Expression {
-    return {
-      type: 'Literal',
-      value: parseInt(ctx.text),
-      raw: ctx.text,
-      loc: contextToLocation(ctx)
-    }
+    throw new Error(`not supported yet: ${ctx}`)
   }
 
   visitTypePar(ctx: TypeParContext): es.Expression {
-    return {
-      type: 'Literal',
-      value: parseInt(ctx.text),
-      raw: ctx.text,
-      loc: contextToLocation(ctx)
-    }
+    throw new Error(`not supported yet: ${ctx}`)
   }
 
   visitTypeFun(ctx: TypeFunContext): es.Expression {
-    return {
-      type: 'Literal',
-      value: parseInt(ctx.text),
-      raw: ctx.text,
-      loc: contextToLocation(ctx)
-    }
+    throw new Error(`not supported yet: ${ctx}`)
   }
 
-  visitExp(ctx: ExpContext): es.Expression {
-    return {
-      type: 'Literal',
-      value: parseInt(ctx.text),
-      raw: ctx.text,
-      loc: contextToLocation(ctx)
-    }
-  }
+  visitExp?: ((ctx: ProgContext) => es.Expression) | undefined
 
-  visitExpConst(ctx: ExpConContext): es.Expression {
-    return {
-      type: 'Literal',
-      value: parseInt(ctx.text),
-      raw: ctx.text,
-      loc: contextToLocation(ctx)
-    }
+  visitExpCon(ctx: ExpConContext): es.Expression {
+    console.log('expcon')
+    console.log(ctx)
+    console.log('================================')
+    return ctx.getChild(0).accept(this)
   }
 
   visitExpPar(ctx: ExpParContext): es.Expression {
-    return {
-      type: 'Literal',
-      value: parseInt(ctx.text),
-      raw: ctx.text,
-      loc: contextToLocation(ctx)
-    }
+    throw new Error(`not supported yet: ${ctx}`)
   }
 
   visitExpAppPrefix(ctx: ExpAppPrefixContext): es.Expression {
-    return {
-      type: 'Literal',
-      value: parseInt(ctx.text),
-      raw: ctx.text,
-      loc: contextToLocation(ctx)
-    }
+    throw new Error(`not supported yet: ${ctx}`)
   }
 
   visitExpAppInfix(ctx: ExpAppInfixContext): es.Expression {
-    return {
-      type: 'Literal',
-      value: parseInt(ctx.text),
-      raw: ctx.text,
-      loc: contextToLocation(ctx)
-    }
+    throw new Error(`not supported yet: ${ctx}`)
   }
 
-  visitDec(ctx: DecContext): es.Expression {
-    console.log('dec')
-    return {
-      type: 'Literal',
-      value: parseInt(ctx.text),
-      raw: ctx.text,
-      loc: contextToLocation(ctx)
-    }
-  }
+  visitDec?: ((ctx: ProgContext) => es.Expression) | undefined
 
   visitDecExp(ctx: DecExpContext): es.Expression {
     console.log('decexp')
-    return {
-      type: 'Literal',
-      value: parseInt(ctx.text),
-      raw: ctx.text,
-      loc: contextToLocation(ctx)
-    }
+    console.log(ctx)
+    console.log('================================')
+    return ctx.getChild(0).accept(this)
   }
 
-  visitProg(ctx: ProgContext): es.Expression {
-    console.log('prog')
-    return {
-      type: 'Literal',
-      value: parseInt(ctx.text),
-      raw: ctx.text,
-      loc: contextToLocation(ctx)
-    }
-  }
+  visitProg?: ((ctx: ProgContext) => es.Expression) | undefined
 
   visitProgDec(ctx: ProgDecContext): es.Expression {
     console.log('progdec')
-    return {
-      type: 'Literal',
-      value: parseInt(ctx.text),
-      raw: ctx.text,
-      loc: contextToLocation(ctx)
-    }
+    console.log(ctx)
+    console.log('================================')
+    return ctx.getChild(0).accept(this)
   }
 
   visitProgSeq(ctx: ProgSeqContext): es.Expression {
     console.log('progseq')
     const expressions: es.Expression[] = []
-    for (let i = 0; i < ctx.childCount; i++) {
-      expressions.push(ctx.getChild(i).accept(this))
-    }
+    expressions.push(ctx._left.accept(this))
+    expressions.push(ctx._right.accept(this))
     return {
       type: 'SequenceExpression',
       expressions
@@ -545,8 +296,7 @@ class ProgramGenerator implements smlVisitor<es.Expression> {
   }
 }
 
-function convertsml(program: ProgContext): es.Program | undefined {
-  console.log(program)
+function convertSml(program: ProgContext): es.Program | undefined {
   const generator = new ProgramGenerator()
   console.log(program.accept(generator))
   return undefined
@@ -563,8 +313,9 @@ export function parse(source: string, context: Context) {
     parser.buildParseTree = true
     try {
       const tree = parser.prog()
-      program = convertsml(tree)
-      console.log(program)
+      console.log(tree)
+      program = convertSml(tree)
+      // console.log(program)
     } catch (error) {
       if (error instanceof FatalSyntaxError) {
         context.errors.push(error)
