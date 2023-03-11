@@ -13,6 +13,7 @@ interface BaseNode extends BaseNodeWithoutComments {
 }
 
 interface NodeMap {
+  Empty: Empty
   Constant: Constant
   Identifier: Identifier
   Expression: Expression
@@ -51,6 +52,7 @@ export interface DeclarationMap {
   ExpressionDeclaration: ExpressionDeclaration
   ValueDeclaration: ValueDeclaration
   SequenceDeclaration: SequenceDeclaration
+  Empty: Empty
   Constant: Constant
   Identifier: Identifier
   Expression: Expression
@@ -116,6 +118,10 @@ export interface Constant extends BaseNode {
   type: 'Constant'
   value: number | boolean | string
   raw?: string | undefined
+}
+
+export interface Empty extends BaseNode {
+  type: 'Empty'
 }
 
 export type InfixOperator =

@@ -4,8 +4,9 @@ grammar sml;
  * Programs
  */
 program
-    : declaration                       # programDeclaration
-    | left=program ';' right=program    # programSequence
+    : left=program ';' right=program    # programSequence
+    | declaration                       # programDeclaration
+    |                                   # programEmpty
     ;
 
 
@@ -13,8 +14,8 @@ program
  * Declarations
  */
 declaration
-    : expression        # declarationExpression
-    | VAL valbind       # declarationValue
+    : VAL valbind       # declarationValue
+    | expression        # declarationExpression
     ;
 
 valbind
@@ -34,10 +35,11 @@ pattern
  * Expressions
  */
 expression
-    : constant                                          # expressionConstant
-    | '(' inner=expression ')'                          # expressionParentheses
-    | operator=expression operand=expression            # expressionApplicationPrefix
+    : '(' inner=expression ')'                          # expressionParentheses
     | left=expression operator=id right=expression      # expressionApplicationInfix
+    | operator=expression operand=expression            # expressionApplicationPrefix
+    | constant                                          # expressionConstant
+    | id                                                # expressionId
     ;
 
 

@@ -4,6 +4,7 @@ import { ErrorNode } from 'antlr4ts/tree/ErrorNode'
 import { ParseTree } from 'antlr4ts/tree/ParseTree'
 import { RuleNode } from 'antlr4ts/tree/RuleNode'
 import { TerminalNode } from 'antlr4ts/tree/TerminalNode'
+import * as es from 'estree'
 
 import { smlLexer } from '../lang/smlLexer'
 import {
@@ -20,6 +21,7 @@ import {
   ExpressionApplicationPrefixContext,
   ExpressionConstantContext,
   ExpressionContext,
+  ExpressionIdContext,
   ExpressionParenthesesContext,
   IdAlphaContext,
   IdContext,
@@ -30,13 +32,13 @@ import {
   PatternIdContext,
   ProgramContext,
   ProgramDeclarationContext,
+  ProgramEmptyContext,
   ProgramSequenceContext,
   smlParser,
   ValbindContext,
   VariableContext
 } from '../lang/smlParser'
 import { smlVisitor } from '../lang/smlVisitor'
-import * as es from 'estree'
 import * as sml from '../sml/types'
 import { Context, ErrorSeverity, ErrorType, SourceError } from '../types'
 
@@ -74,6 +76,12 @@ class ProgramGenerator implements smlVisitor<sml.Declaration> {
     return ctx.getChild(0).accept(this)
   }
 
+  visitProgramEmpty(ctx: ProgramEmptyContext): sml.Declaration {
+    this.debugVisit('Program Empty', ctx)
+
+    return { type: 'Empty' }
+  }
+
   visitProgramDeclaration(ctx: ProgramDeclarationContext): sml.Declaration {
     this.debugVisit('Program Declaration', ctx)
 
@@ -88,14 +96,14 @@ class ProgramGenerator implements smlVisitor<sml.Declaration> {
     const left = ctx._left.accept(this)
     if (left.type === 'SequenceDeclaration') {
       declarations.push(...left.declarations)
-    } else {
+    } else if (left.type !== 'Empty') {
       declarations.push(left)
     }
 
     const right = ctx._right.accept(this)
     if (right.type === 'SequenceDeclaration') {
       declarations.push(...right.declarations)
-    } else {
+    } else if (right.type !== 'Empty') {
       declarations.push(right)
     }
 
@@ -162,6 +170,12 @@ class ProgramGenerator implements smlVisitor<sml.Declaration> {
 
   visitExpressionConstant(ctx: ExpressionConstantContext): sml.Declaration {
     this.debugVisit('Expression Constant', ctx)
+
+    return ctx.getChild(0).accept(this)
+  }
+
+  visitExpressionId(ctx: ExpressionIdContext): sml.Declaration {
+    this.debugVisit('Expression Id', ctx)
 
     return ctx.getChild(0).accept(this)
   }
