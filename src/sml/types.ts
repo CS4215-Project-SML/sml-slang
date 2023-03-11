@@ -47,16 +47,6 @@ export interface Program extends BaseNode {
   comments?: Array<Comment> | undefined
 }
 
-// export interface ProgramBodyMap {
-//   Constant: Constant
-//   Identifier: Identifier
-//   Expression: Expression
-//   Pattern: Pattern
-//   Declaration: Declaration
-// }
-
-// export type ProgramBody = ProgramBodyMap[keyof ProgramBodyMap]
-
 export interface DeclarationMap {
   ExpressionDeclaration: ExpressionDeclaration
   ValueDeclaration: ValueDeclaration
@@ -73,13 +63,13 @@ export type BaseDeclaration = BaseNode
 
 export interface ExpressionDeclaration extends BaseDeclaration {
   type: 'ExpressionDeclaration'
-  expression: Expression
+  value: Expression
 }
 
 export interface ValueDeclaration extends BaseDeclaration {
   type: 'ValueDeclaration'
-  pattern: Pattern
-  expression: Expression
+  bind: Pattern
+  value: Expression
 }
 
 export interface SequenceDeclaration extends BaseDeclaration {

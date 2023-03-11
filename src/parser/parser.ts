@@ -7,11 +7,11 @@ import { TerminalNode } from 'antlr4ts/tree/TerminalNode'
 
 import { smlLexer } from '../lang/smlLexer'
 import {
+  ConstantBoolContext,
+  ConstantCharContext,
   ConstantContext,
   ConstantIntContext,
   ConstantRealContext,
-  ConstantBoolContext,
-  ConstantCharContext,
   ConstantStrContext,
   DeclarationContext,
   DeclarationExpressionContext,
@@ -36,22 +36,23 @@ import {
   VariableContext
 } from '../lang/smlParser'
 import { smlVisitor } from '../lang/smlVisitor'
+import * as es from 'estree'
 import * as sml from '../sml/types'
-import { Context, ErrorSeverity } from '../types'
+import { Context, ErrorSeverity, ErrorType, SourceError } from '../types'
 
-// export class FatalSyntaxError implements SourceError {
-//   public type = ErrorType.SYNTAX
-//   public severity = ErrorSeverity.ERROR
-//   public constructor(public location: es.SourceLocation, public message: string) {}
+export class FatalSyntaxError implements SourceError {
+  public type = ErrorType.SYNTAX
+  public severity = ErrorSeverity.ERROR
+  public constructor(public location: es.SourceLocation, public message: string) {}
 
-//   public explain() {
-//     return this.message
-//   }
+  public explain() {
+    return this.message
+  }
 
-//   public elaborate() {
-//     return 'There is a syntax error in your program'
-//   }
-// }
+  public elaborate() {
+    return 'There is a syntax error in your program'
+  }
+}
 
 function contextToLocation(ctx: DeclarationContext): sml.SourceLocation {
   return {
@@ -83,8 +84,21 @@ class ProgramGenerator implements smlVisitor<sml.Declaration> {
     this.debugVisit('Program Sequence', ctx)
 
     const declarations = []
-    declarations.push(ctx._left.accept(this))
-    declarations.push(ctx._right.accept(this))
+
+    const left = ctx._left.accept(this)
+    if (left.type === 'SequenceDeclaration') {
+      declarations.push(...left.declarations)
+    } else {
+      declarations.push(left)
+    }
+
+    const right = ctx._right.accept(this)
+    if (right.type === 'SequenceDeclaration') {
+      declarations.push(...right.declarations)
+    } else {
+      declarations.push(right)
+    }
+
     return {
       type: 'SequenceDeclaration',
       declarations: declarations
@@ -100,19 +114,26 @@ class ProgramGenerator implements smlVisitor<sml.Declaration> {
   visitDeclarationExpression(ctx: DeclarationExpressionContext): sml.Declaration {
     this.debugVisit('Declaration Expression', ctx)
 
-    return ctx.getChild(0).accept(this)
+    return {
+      type: 'ExpressionDeclaration',
+      value: ctx.getChild(0).accept(this) as sml.Expression
+    }
   }
 
   visitDeclarationValue(ctx: DeclarationValueContext): sml.Declaration {
     this.debugVisit('Declaration Value', ctx)
 
-    return ctx.getChild(0).accept(this)
+    return ctx.getChild(1).accept(this)
   }
 
   visitValbind(ctx: ValbindContext): sml.Declaration {
     this.debugVisit('Valbind', ctx)
 
-    throw new Error(`not supported yet: ${ctx}`)
+    return {
+      type: 'ValueDeclaration',
+      bind: ctx._bind.accept(this) as sml.Pattern,
+      value: ctx._value.accept(this) as sml.Expression
+    }
   }
 
   visitPattern(ctx: PatternContext): sml.Declaration {
@@ -124,13 +145,13 @@ class ProgramGenerator implements smlVisitor<sml.Declaration> {
   visitPatternConstant(ctx: PatternConstantContext): sml.Declaration {
     this.debugVisit('Pattern Constant', ctx)
 
-    throw new Error(`not supported yet: ${ctx}`)
+    return ctx.getChild(0).accept(this)
   }
 
   visitPatternId(ctx: PatternIdContext): sml.Declaration {
     this.debugVisit('Pattern Id', ctx)
 
-    throw new Error(`not supported yet: ${ctx}`)
+    return ctx.getChild(0).accept(this)
   }
 
   visitExpression(ctx: ExpressionContext): sml.Declaration {
@@ -148,7 +169,7 @@ class ProgramGenerator implements smlVisitor<sml.Declaration> {
   visitExpressionParentheses(ctx: ExpressionParenthesesContext): sml.Declaration {
     this.debugVisit('Expression Parentheses', ctx)
 
-    return ctx.getChild(0).accept(this)
+    return ctx._inner.accept(this)
   }
 
   visitExpressionApplicationPrefix(ctx: ExpressionApplicationPrefixContext): sml.Declaration {
@@ -288,20 +309,19 @@ class ProgramGenerator implements smlVisitor<sml.Declaration> {
   }
 
   visitErrorNode(node: ErrorNode): sml.Declaration {
-    // throw new FatalSyntaxError(
-    //   {
-    //     start: {
-    //       line: node.symbol.line,
-    //       column: node.symbol.charPositionInLine
-    //     },
-    //     end: {
-    //       line: node.symbol.line,
-    //       column: node.symbol.charPositionInLine + 1
-    //     }
-    //   },
-    //   `invalid syntax ${node.text}`
-    // )
-    throw new Error(`node error: ${node}`)
+    throw new FatalSyntaxError(
+      {
+        start: {
+          line: node.symbol.line,
+          column: node.symbol.charPositionInLine
+        },
+        end: {
+          line: node.symbol.line,
+          column: node.symbol.charPositionInLine + 1
+        }
+      },
+      `invalid syntax ${node.text}`
+    )
   }
 
   debugVisit(phase: string, tree: ParseTree) {
