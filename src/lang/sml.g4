@@ -1,41 +1,33 @@
 grammar sml;
 
 /*
- * Tokens (terminal)
+ * Programs
  */
-TRUE:           'true';
-FALSE:          'false';
-DIGIT:          [0-9];
-LETTER:         [A-Za-z];
-WHITESPACE:     [ \t]+ -> skip;
-NEWLINE:        ('\r'? '\n' | '\r');
-SYMBOL:         [!-~];
-
-
-/*
- * Constants
- */
-// constant:       integer | real | bool | character | str;
-constant:       integer | real | bool;
-
-integer:        DIGIT+;
-real:           integer '.' integer;
-bool:           TRUE | FALSE;
-// character:      '#"' (' ' | SYMBOL) '"';
-// str:         '"' (' ' | SYMBOL)* '"';
-
-
-/*
- * Identifiers
- */
-id
-    :       LETTER (LETTER | DIGIT | '\'' | '_')*                                                                                           # idAlpha
-    |       ('!' | '%' | '&' | '$' | '#' | '+' | '-' | '/' | ':' | '<' | '=' | '>' | '?' | '@' | '\\' | '~' | '\'' | '^' | '|' | '*')+      # idSymbol
+program
+    : declaration                       # programDeclaration
+    | left=program ';' right=program    # programSequence
     ;
 
-variable:   '\'' (LETTER | DIGIT | '\'' | '_' )*;
 
-label:      id | integer;
+/*
+ * Declarations
+ */
+declaration
+    : expression        # declarationExpression
+    | VAL valbind       # declarationValue
+    ;
+
+valbind
+    : bind=pattern '=' value=expression;
+
+
+/*
+ * Patterns
+ */
+pattern
+    : constant      # patternConstant
+    | id            # patternId
+    ;
 
 
 /*
@@ -50,30 +42,74 @@ expression
 
 
 /*
- * Patterns
+ * Identifiers
  */
-pattern
-    : constant      # patternConstant
-    | id            # patternId
+label:      id | INT;
+
+id
+    :       LETTER (LETTER | DIGIT | '\'' | '_')*                                                                                           # idAlpha
+    |       ('!' | '%' | '&' | '$' | '#' | '+' | '-' | '/' | ':' | '<' | '=' | '>' | '?' | '@' | '\\' | '~' | '\'' | '^' | '|' | '*')+      # idSymbol
     ;
+
+variable:   '\'' (LETTER | DIGIT | '\'' | '_' )*;
 
 
 /*
- * Declarations
+ * Constants
  */
-declaration
-    : expression        # declarationExpression
-    | 'val' valbind     # declarationValue
-    ;
-
-valbind
-    : pattern '=' expression;
+constant
+    : INT           # constantInt
+    | REAL          # constantReal
+    | BOOL          # constantBool
+    | CHAR          # constantChar
+    | STR           # constantStr;
 
 
 /*
- * Programs
+ * Tokens (processed by Lexer)
  */
-program
-    : declaration                       # programDeclaration
-    | left=program ';' right=program    # programSequence
-    ;
+CHAR:           '#"' (WHITESPACE | DIGIT | LETTER) '"';
+STR:            '"' (WHITESPACE | DIGIT | LETTER)* '"';
+BOOL:           TRUE | FALSE;
+REAL:           DIGIT+ '.' DIGIT+;
+INT:            DIGIT+;
+
+ABSTYPE:        'abstype';
+AND:            'and';
+ANDALSO:        'andalso';
+AS:             'as';
+CASE:           'case';
+DATATYPE:       'datatype';
+DO:             'do';
+ELSE:           'else';
+END:            'end';
+EXCEPTION:      'exception';
+FN:             'fn';
+FUN:            'fun';
+HANDLE:         'handle';
+IF:             'if';
+IN:             'in';
+INFIX:          'infix';
+INFIXR:         'infixr';
+LET:            'let';
+LOCAL:          'local';
+NONFIX:         'nonfix';
+OF:             'of';
+OP:             'op';
+OPEN:           'open';
+ORELSE:         'orelse';
+RAISE:          'raise';
+REC:            'rec';
+THEN:           'then';
+TYPE:           'type';
+VAL:            'val';
+WITH:           'with';
+WITHTYPE:       'withtype';
+WHILE:          'while';
+TRUE:           'true';
+FALSE:          'false';
+
+DIGIT:          [0-9];
+LETTER:         [A-Za-z];
+NEWLINE:        ('\r'? '\n' | '\r');
+WHITESPACE:     [ \t]+ -> skip;
