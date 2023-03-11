@@ -16,8 +16,11 @@ export interface NodeMap {
   Empty: Empty
   Constant: Constant
   Identifier: Identifier
-  Expression: Expression
   Pattern: Pattern
+  Keyvalue: Keyvalue
+  Record: Record
+  Expression: Expression
+  Valbind: Valbind
   Declaration: Declaration
   Program: Program
 }
@@ -49,14 +52,17 @@ export interface Program extends BaseNode {
 }
 
 export interface DeclarationMap {
+  Valbind: Valbind
   ExpressionDeclaration: ExpressionDeclaration
   ValueDeclaration: ValueDeclaration
   SequenceDeclaration: SequenceDeclaration
   Empty: Empty
   Constant: Constant
   Identifier: Identifier
-  Expression: Expression
   Pattern: Pattern
+  Keyvalue: Keyvalue
+  Record: Record
+  Expression: Expression
 }
 
 export type Declaration = DeclarationMap[keyof DeclarationMap]
@@ -70,13 +76,19 @@ export interface ExpressionDeclaration extends BaseDeclaration {
 
 export interface ValueDeclaration extends BaseDeclaration {
   type: 'ValueDeclaration'
-  id: Identifier
+  name: Identifier
   value: Expression
 }
 
 export interface SequenceDeclaration extends BaseDeclaration {
   type: 'SequenceDeclaration'
   declarations: Array<Declaration>
+}
+
+export interface Valbind extends BaseNode {
+  type: 'Valbind'
+  name: Identifier
+  value: Expression
 }
 
 export interface PatternMap {
@@ -87,6 +99,22 @@ export interface PatternMap {
 export type Pattern = PatternMap[keyof PatternMap]
 
 export type BasePattern = BaseNode
+
+export type BaseKeyvalue = BaseNode
+
+export interface Keyvalue extends BaseKeyvalue {
+  type: 'Keyvalue'
+  key: Identifier | number
+  value: Expression
+}
+
+export type BaseRecord = BaseNode
+
+export interface Record extends BaseRecord {
+  type: 'Record'
+  length: number
+  items: Array<Keyvalue>
+}
 
 export interface ExpressionMap {
   Constant: Constant

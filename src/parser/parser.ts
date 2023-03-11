@@ -23,10 +23,15 @@ import {
   ExpressionContext,
   ExpressionIdContext,
   ExpressionParenthesesContext,
+  ExpressionRecordContext,
+  ExpressionRecordSelectorContext,
+  KeyvalueContext,
   IdAlphaContext,
   IdContext,
   IdSymbolContext,
   LabelContext,
+  LabelIdContext,
+  LabelIntContext,
   PatternConstantContext,
   PatternContext,
   PatternIdContext,
@@ -76,18 +81,6 @@ class ProgramGenerator implements smlVisitor<sml.Declaration> {
     return ctx.getChild(0).accept(this)
   }
 
-  visitProgramEmpty(ctx: ProgramEmptyContext): sml.Declaration {
-    this.debugVisit('Program Empty', ctx)
-
-    return { type: 'Empty' }
-  }
-
-  visitProgramDeclaration(ctx: ProgramDeclarationContext): sml.Declaration {
-    this.debugVisit('Program Declaration', ctx)
-
-    return ctx.getChild(0).accept(this)
-  }
-
   visitProgramSequence(ctx: ProgramSequenceContext): sml.Declaration {
     this.debugVisit('Program Sequence', ctx)
 
@@ -113,10 +106,34 @@ class ProgramGenerator implements smlVisitor<sml.Declaration> {
     }
   }
 
+  visitProgramDeclaration(ctx: ProgramDeclarationContext): sml.Declaration {
+    this.debugVisit('Program Declaration', ctx)
+
+    return ctx.getChild(0).accept(this)
+  }
+
+  visitProgramEmpty(ctx: ProgramEmptyContext): sml.Declaration {
+    this.debugVisit('Program Empty', ctx)
+
+    return { type: 'Empty' }
+  }
+
   visitDeclaration(ctx: DeclarationContext): sml.Declaration {
     this.debugVisit('Declaration', ctx)
 
     return ctx.getChild(0).accept(this)
+  }
+
+  visitDeclarationValue(ctx: DeclarationValueContext): sml.Declaration {
+    this.debugVisit('Declaration Value', ctx)
+
+    const valbind = ctx.getChild(1).accept(this) as sml.Valbind
+
+    return {
+      type: 'ValueDeclaration',
+      name: valbind.name,
+      value: valbind.value
+    }
   }
 
   visitDeclarationExpression(ctx: DeclarationExpressionContext): sml.Declaration {
@@ -128,18 +145,12 @@ class ProgramGenerator implements smlVisitor<sml.Declaration> {
     }
   }
 
-  visitDeclarationValue(ctx: DeclarationValueContext): sml.Declaration {
-    this.debugVisit('Declaration Value', ctx)
-
-    return ctx.getChild(1).accept(this)
-  }
-
   visitValbind(ctx: ValbindContext): sml.Declaration {
     this.debugVisit('Valbind', ctx)
 
     return {
-      type: 'ValueDeclaration',
-      id: ctx._name.accept(this) as sml.Identifier,
+      type: 'Valbind',
+      name: ctx._name.accept(this) as sml.Identifier,
       value: ctx._value.accept(this) as sml.Expression
     }
   }
@@ -168,28 +179,10 @@ class ProgramGenerator implements smlVisitor<sml.Declaration> {
     return ctx.getChild(0).accept(this)
   }
 
-  visitExpressionConstant(ctx: ExpressionConstantContext): sml.Declaration {
-    this.debugVisit('Expression Constant', ctx)
-
-    return ctx.getChild(0).accept(this)
-  }
-
-  visitExpressionId(ctx: ExpressionIdContext): sml.Declaration {
-    this.debugVisit('Expression Id', ctx)
-
-    return ctx.getChild(0).accept(this)
-  }
-
   visitExpressionParentheses(ctx: ExpressionParenthesesContext): sml.Declaration {
     this.debugVisit('Expression Parentheses', ctx)
 
     return ctx._inner.accept(this)
-  }
-
-  visitExpressionApplicationPrefix(ctx: ExpressionApplicationPrefixContext): sml.Declaration {
-    this.debugVisit('Expression Application Prefix', ctx)
-
-    throw new Error(`not supported yet: ${ctx}`)
   }
 
   visitExpressionApplicationInfix(ctx: ExpressionApplicationInfixContext): sml.Declaration {
@@ -204,10 +197,75 @@ class ProgramGenerator implements smlVisitor<sml.Declaration> {
     }
   }
 
+  visitExpressionApplicationPrefix(ctx: ExpressionApplicationPrefixContext): sml.Declaration {
+    this.debugVisit('Expression Application Prefix', ctx)
+
+    throw new Error(`not supported yet: ${ctx}`)
+  }
+
+  visitExpressionRecord(ctx: ExpressionRecordContext): sml.Declaration {
+    this.debugVisit('Expression Record', ctx)
+
+    const items = []
+    for (let i = 1; i < ctx.childCount; i += 2) {
+      items.push(ctx.getChild(i).accept(this))
+    }
+
+    return {
+      type: 'Record',
+      length: items.length,
+      items: items as Array<sml.Keyvalue>,
+      loc: contextToLocation(ctx)
+    }
+  }
+
+  visitExpressionRecordSelector(ctx: ExpressionRecordSelectorContext): sml.Declaration {
+    this.debugVisit('Expression Record Selector', ctx)
+
+    throw new Error(`not supported yet: ${ctx}`)
+  }
+
+  visitExpressionConstant(ctx: ExpressionConstantContext): sml.Declaration {
+    this.debugVisit('Expression Constant', ctx)
+
+    return ctx.getChild(0).accept(this)
+  }
+
+  visitExpressionId(ctx: ExpressionIdContext): sml.Declaration {
+    this.debugVisit('Expression Id', ctx)
+
+    return ctx.getChild(0).accept(this)
+  }
+
+  visitKeyvalue(ctx: KeyvalueContext): sml.Declaration {
+    this.debugVisit('Keyvalue', ctx)
+
+    return {
+      type: 'Keyvalue',
+      key: ctx._key.accept(this) as sml.Identifier | number,
+      value: ctx._value.accept(this) as sml.Expression
+    }
+  }
+
   visitLabel(ctx: LabelContext): sml.Declaration {
     this.debugVisit('Label', ctx)
 
-    throw new Error(`not supported yet: ${ctx}`)
+    return ctx.getChild(0).accept(this)
+  }
+
+  visitLabelId(ctx: LabelIdContext): sml.Declaration {
+    this.debugVisit('Label Id', ctx)
+
+    return ctx.getChild(0).accept(this)
+  }
+
+  visitLabelInt(ctx: LabelIntContext): sml.Declaration {
+    this.debugVisit('Label Int', ctx)
+
+    return {
+      type: 'Constant',
+      value: parseInt(ctx.text)
+    }
   }
 
   visitId(ctx: IdContext): sml.Declaration {

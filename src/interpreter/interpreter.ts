@@ -140,7 +140,7 @@ const microcode = {
     push(A, { type: 'BindInstruction', name: 'it' }, cmd.value)
   },
   ValueDeclaration: (cmd: sml.ValueDeclaration) => {
-    push(A, { type: 'BindInstruction', name: cmd.id.name }, cmd.value)
+    push(A, { type: 'BindInstruction', name: cmd.name }, cmd.value)
   },
   InfixApplicationExpression: (cmd: sml.InfixApplicationExpression) => {
     push(A, { type: 'InfixApplicationInstruction', operator: cmd.operator }, cmd.right, cmd.left)

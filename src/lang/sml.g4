@@ -35,18 +35,24 @@ pattern
  * Expressions
  */
 expression
-    : '(' inner=expression ')'                          # expressionParentheses
-    | left=expression operator=id right=expression      # expressionApplicationInfix
-    | operator=expression operand=expression            # expressionApplicationPrefix
-    | constant                                          # expressionConstant
-    | id                                                # expressionId
+    : '(' inner=expression ')'                              # expressionParentheses
+    | left=expression operator=id right=expression          # expressionApplicationInfix
+    | operator=expression operand=expression                # expressionApplicationPrefix
+    | '{' (keyvalue? | (keyvalue (',' keyvalue)+)) '}'      # expressionRecord
+    | '#' label                                             # expressionRecordSelector
+    | constant                                              # expressionConstant
+    | id                                                    # expressionId
     ;
 
+keyvalue
+    : key=label '=' value=expression;
 
 /*
  * Identifiers
  */
-label:      id | INT;
+label
+    :       id      # labelId
+    |       INT     # labelInt;
 
 id
     :       LETTER (LETTER | DIGIT | '\'' | '_')*                                                                                           # idAlpha
