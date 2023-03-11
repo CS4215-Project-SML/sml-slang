@@ -19,7 +19,7 @@ declaration
     ;
 
 valbind
-    : bind=pattern '=' value=expression;
+    : name=id '=' value=expression;
 
 
 /*

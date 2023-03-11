@@ -1,4 +1,4 @@
-interface BaseNodeWithoutComments {
+export interface BaseNodeWithoutComments {
   // Every leaf interface that extends BaseNode must specify a type property.
   // The type property should be a string literal. For example, Identifier
   // has: `type: "Identifier"`
@@ -7,12 +7,12 @@ interface BaseNodeWithoutComments {
   range?: [number, number] | undefined
 }
 
-interface BaseNode extends BaseNodeWithoutComments {
+export interface BaseNode extends BaseNodeWithoutComments {
   leadingComments?: Array<Comment> | undefined
   trailingComments?: Array<Comment> | undefined
 }
 
-interface NodeMap {
+export interface NodeMap {
   Empty: Empty
   Constant: Constant
   Identifier: Identifier
@@ -44,7 +44,7 @@ export interface Position {
 
 export interface Program extends BaseNode {
   type: 'Program'
-  body: Array<Declaration>
+  body: Declaration
   comments?: Array<Comment> | undefined
 }
 
@@ -61,7 +61,7 @@ export interface DeclarationMap {
 
 export type Declaration = DeclarationMap[keyof DeclarationMap]
 
-export type BaseDeclaration = BaseNode
+export interface BaseDeclaration extends BaseNode {}
 
 export interface ExpressionDeclaration extends BaseDeclaration {
   type: 'ExpressionDeclaration'
@@ -70,7 +70,7 @@ export interface ExpressionDeclaration extends BaseDeclaration {
 
 export interface ValueDeclaration extends BaseDeclaration {
   type: 'ValueDeclaration'
-  bind: Pattern
+  id: Identifier
   value: Expression
 }
 
@@ -86,17 +86,18 @@ export interface PatternMap {
 
 export type Pattern = PatternMap[keyof PatternMap]
 
-export type BasePattern = BaseNode
+export interface BasePattern extends BaseNode {}
 
 export interface ExpressionMap {
   Constant: Constant
+  Identifier: Identifier
   PrefixApplicationExpression: PrefixApplicationExpression
   InfixApplicationExpression: InfixApplicationExpression
 }
 
 export type Expression = ExpressionMap[keyof ExpressionMap]
 
-export type BaseExpression = BaseNode
+export interface BaseExpression extends BaseNode {}
 
 export interface PrefixApplicationExpression extends BaseExpression {
   type: 'PrefixApplicationExpression'
@@ -111,13 +112,12 @@ export interface InfixApplicationExpression extends BaseExpression {
 
 export interface Identifier extends BaseNode {
   type: 'Identifier'
-  name: String
+  name: string
 }
 
 export interface Constant extends BaseNode {
   type: 'Constant'
   value: number | boolean | string
-  raw?: string | undefined
 }
 
 export interface Empty extends BaseNode {

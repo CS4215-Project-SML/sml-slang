@@ -1,17 +1,9 @@
-import { json } from 'stream/consumers'
-
 import { IOptions, Result } from '..'
-import { CannotFindModuleError } from '../errors/localImportErrors'
 import { evaluate } from '../interpreter/interpreter'
-import { hoistAndMergeImports } from '../localImports/transformers/hoistAndMergeImports'
-import { removeExports } from '../localImports/transformers/removeExports'
-import { removeNonSourceModuleImports } from '../localImports/transformers/removeNonSourceModuleImports'
 import { parse } from '../parser/parser'
-import { PreemptiveScheduler } from '../schedulers'
 import * as sml from '../sml/types'
-import { Context, Scheduler, Variant } from '../types'
-import { validateAndAnnotate } from '../validator/validator'
-import { determineVariant, resolvedErrorPromise } from './utils'
+import { Context, Variant } from '../types'
+import { determineVariant } from './utils'
 
 const DEFAULT_SML_OPTIONS: IOptions = {
   scheduler: 'preemptive',
@@ -25,9 +17,14 @@ const DEFAULT_SML_OPTIONS: IOptions = {
   throwInfiniteLoops: true
 }
 
+function runEvaluator(program: sml.Program, context: Context) {
+  return evaluate(program, context)
+}
+
 function runInterpreter(program: sml.Program, context: Context, options: IOptions): Result {
-  // runTypeChecker()
-  // runEvaluator()
+  console.log('Interpreter is running...')
+  // runTypeChecker(program, context)
+  runEvaluator(program, context)
   return { status: 'error' }
 }
 

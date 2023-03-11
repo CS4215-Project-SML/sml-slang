@@ -139,7 +139,7 @@ class ProgramGenerator implements smlVisitor<sml.Declaration> {
 
     return {
       type: 'ValueDeclaration',
-      bind: ctx._bind.accept(this) as sml.Pattern,
+      id: ctx._name.accept(this) as sml.Identifier,
       value: ctx._value.accept(this) as sml.Expression
     }
   }
@@ -254,7 +254,6 @@ class ProgramGenerator implements smlVisitor<sml.Declaration> {
     return {
       type: 'Constant',
       value: parseInt(ctx.text),
-      raw: ctx.text,
       loc: contextToLocation(ctx)
     }
   }
@@ -265,7 +264,6 @@ class ProgramGenerator implements smlVisitor<sml.Declaration> {
     return {
       type: 'Constant',
       value: parseFloat(ctx.text),
-      raw: ctx.text,
       loc: contextToLocation(ctx)
     }
   }
@@ -276,7 +274,6 @@ class ProgramGenerator implements smlVisitor<sml.Declaration> {
     return {
       type: 'Constant',
       value: JSON.parse(ctx.text) as boolean,
-      raw: ctx.text,
       loc: contextToLocation(ctx)
     }
   }
@@ -286,8 +283,7 @@ class ProgramGenerator implements smlVisitor<sml.Declaration> {
 
     return {
       type: 'Constant',
-      value: ctx.text,
-      raw: ctx.text,
+      value: ctx.text.slice(2, ctx.text.length - 1),
       loc: contextToLocation(ctx)
     }
   }
@@ -297,8 +293,7 @@ class ProgramGenerator implements smlVisitor<sml.Declaration> {
 
     return {
       type: 'Constant',
-      value: ctx.text,
-      raw: ctx.text,
+      value: ctx.text.slice(1, ctx.text.length - 1),
       loc: contextToLocation(ctx)
     }
   }
@@ -347,16 +342,9 @@ class ProgramGenerator implements smlVisitor<sml.Declaration> {
 
 function convertSml(program: ProgramContext): sml.Program | undefined {
   const generator = new ProgramGenerator()
-  const declarations = []
-  const programBody = program.accept(generator)
-  if (programBody.type === 'SequenceDeclaration') {
-    declarations.push(...programBody.declarations)
-  } else {
-    declarations.push(programBody)
-  }
   return {
     type: 'Program',
-    body: declarations
+    body: program.accept(generator)
   }
 }
 
@@ -372,14 +360,13 @@ export function parse(source: string, context: Context) {
     try {
       const tree = parser.program()
       program = convertSml(tree)
-      console.log(program)
+      // console.log(program)
     } catch (error) {
-      // if (error instanceof FatalSyntaxError) {
-      //   context.errors.push(error)
-      // } else {
-      //   throw error
-      // }
-      throw error
+      if (error instanceof FatalSyntaxError) {
+        context.errors.push(error)
+      } else {
+        throw error
+      }
     }
     const hasErrors = context.errors.find(m => m.severity === ErrorSeverity.ERROR)
     if (program && !hasErrors) {

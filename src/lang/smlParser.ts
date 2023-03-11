@@ -322,7 +322,7 @@ export class smlParser extends Parser {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			this.state = 36;
-			_localctx._bind = this.pattern();
+			_localctx._name = this.id();
 			this.state = 37;
 			this.match(smlParser.T__1);
 			this.state = 38;
@@ -900,7 +900,7 @@ export class smlParser extends Parser {
 		"\x19\x03\x02\x02\x02\x1D \x03\x02\x02\x02\x1E\x1C\x03\x02\x02\x02\x1E" +
 		"\x1F\x03\x02\x02\x02\x1F\x03\x03\x02\x02\x02 \x1E\x03\x02\x02\x02!\"\x07" +
 		"<\x02\x02\"%\x05\x06\x04\x02#%\x05\n\x06\x02$!\x03\x02\x02\x02$#\x03\x02" +
-		"\x02\x02%\x05\x03\x02\x02\x02&\'\x05\b\x05\x02\'(\x07\x04\x02\x02()\x05" +
+		"\x02\x02%\x05\x03\x02\x02\x02&\'\x05\x0E\b\x02\'(\x07\x04\x02\x02()\x05" +
 		"\n\x06\x02)\x07\x03\x02\x02\x02*-\x05\x12\n\x02+-\x05\x0E\b\x02,*\x03" +
 		"\x02\x02\x02,+\x03\x02\x02\x02-\t\x03\x02\x02\x02./\b\x06\x01\x02/0\x07" +
 		"\x05\x02\x0201\x05\n\x06\x0212\x07\x06\x02\x0226\x03\x02\x02\x0236\x05" +
@@ -1107,10 +1107,10 @@ export class DeclarationExpressionContext extends DeclarationContext {
 
 
 export class ValbindContext extends ParserRuleContext {
-	public _bind!: PatternContext;
+	public _name!: IdContext;
 	public _value!: ExpressionContext;
-	public pattern(): PatternContext {
-		return this.getRuleContext(0, PatternContext);
+	public id(): IdContext {
+		return this.getRuleContext(0, IdContext);
 	}
 	public expression(): ExpressionContext {
 		return this.getRuleContext(0, ExpressionContext);

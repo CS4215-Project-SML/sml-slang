@@ -1,11 +1,8 @@
 #!/usr/bin/env node
-// import { start } from 'repl' // 'repl' here refers to the module named 'repl' in index.d.ts
-// import { inspect } from 'util'
 
 import { createContext, IOptions } from '../index'
 import { smlRunner } from '../runner/smlRunner'
 import { Variant } from '../types'
-// import { ExecutionMethod, Variant } from '../types'
 
 function startRepl(useRepl: boolean, code: string) {
   const context = createContext(Variant.DEFAULT, undefined, undefined)

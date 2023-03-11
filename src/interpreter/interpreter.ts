@@ -1,209 +1,224 @@
-/* tslint:disable:max-classes-per-file */
-import * as es from 'estree'
+import * as sml from '../sml/types'
+import { Context } from '../types'
 
-import { RuntimeSourceError } from '../errors/runtimeSourceError'
-import { Context, Environment, Value } from '../types'
-import { evaluateBinaryExpression, evaluateUnaryExpression } from '../utils/operators'
-import * as rttc from '../utils/rttc'
+/* **********************
+ * operators and builtins
+ * **********************/
 
-class Thunk {
-  public value: Value
-  public isMemoized: boolean
-  constructor(public exp: es.Node, public env: Environment) {
-    this.isMemoized = false
-    this.value = null
-  }
+const infixOperatorMicrocode = {
+  '+': (x: number, y: number): number => x + y,
+  '-': (x: number, y: number): number => x - y,
+  '*': (x: number, y: number): number => x * y,
+  '/': (x: number, y: number): number => x / y,
+  '<': (x: number, y: number): boolean => x < y,
+  '>': (x: number, y: number): boolean => x > y,
+  '=': (x: number, y: number): boolean => x === y,
+  '<=': (x: number, y: number): boolean => x <= y,
+  '>=': (x: number, y: number): boolean => x >= y,
+  '<>': (x: number, y: number): boolean => x !== y,
+  '^': (x: string, y: string): string => x + y,
+  andalso: (x: boolean, y: boolean): boolean => x && y,
+  orelse: (x: boolean, y: boolean): boolean => x || y
 }
 
-function* forceIt(val: any, context: Context): Value {
-  if (val instanceof Thunk) {
-    if (val.isMemoized) return val.value
-
-    pushEnvironment(context, val.env)
-    const evalRes = yield* actualValue(val.exp, context)
-    popEnvironment(context)
-    val.value = evalRes
-    val.isMemoized = true
-    return evalRes
-  } else return val
+// right is popped before left
+function applyInfixOperator(
+  op: string,
+  left: number | boolean | string,
+  right: number | boolean | string
+) {
+  return infixOperatorMicrocode[op](left, right)
 }
 
-export function* actualValue(exp: es.Node, context: Context): Value {
-  const evalResult = yield* evaluate(exp, context)
-  const forced = yield* forceIt(evalResult, context)
-  return forced
-}
+/* ************
+ * environments
+ * ************/
 
-const handleRuntimeError = (context: Context, error: RuntimeSourceError): never => {
-  context.errors.push(error)
-  context.runtime.environments = context.runtime.environments.slice(
-    -context.numberOfOuterEnvironments
-  )
-  throw error
-}
+// Frames are objects that map symbols (strings) to values.
 
-function* visit(context: Context, node: es.Node) {
-  context.runtime.nodes.unshift(node)
-  yield context
-}
+const GLOBAL_FRAME = {}
+const GLOBAL_ENVIRONMENT = [GLOBAL_FRAME]
 
-function* leave(context: Context) {
-  context.runtime.break = false
-  context.runtime.nodes.shift()
-  yield context
-}
-
-const popEnvironment = (context: Context) => context.runtime.environments.shift()
-export const pushEnvironment = (context: Context, environment: Environment) => {
-  context.runtime.environments.unshift(environment)
-  context.runtime.environmentTree.insert(environment)
-}
-
-export type Evaluator<T extends es.Node> = (node: T, context: Context) => IterableIterator<Value>
-
-function* evaluateBlockSatement(context: Context, node: es.BlockStatement) {
-  let result
-  for (const statement of node.body) {
-    result = yield* evaluate(statement, context)
-  }
-  return result
-}
-
-/**
- * WARNING: Do not use object literal shorthands, e.g.
- *   {
- *     *Literal(node: es.Literal, ...) {...},
- *     *ThisExpression(node: es.ThisExpression, ..._ {...},
- *     ...
- *   }
- * They do not minify well, raising uncaught syntax errors in production.
- * See: https://github.com/webpack/webpack/issues/7566
- */
-// tslint:disable:object-literal-shorthand
-// prettier-ignore
-export const evaluators: { [nodeType: string]: Evaluator<es.Node> } = {
-  /** Simple Values */
-  Literal: function* (node: es.Literal, _context: Context) {
-    return node.value
-  },
-
-  TemplateLiteral: function* (node: es.TemplateLiteral) {
-    // Expressions like `${1}` are not allowed, so no processing needed
-    return node.quasis[0].value.cooked
-  },
-
-  ThisExpression: function* (node: es.ThisExpression, context: Context) {
-    throw new Error(`not supported yet: ${node.type}`)
-  },
-
-  ArrayExpression: function* (node: es.ArrayExpression, context: Context) {
-    throw new Error(`not supported yet: ${node.type}`)
-  },
-
-
-  FunctionExpression: function* (node: es.FunctionExpression, context: Context) {
-    throw new Error(`not supported yet: ${node.type}`)
-  },
-
-  ArrowFunctionExpression: function* (node: es.ArrowFunctionExpression, context: Context) {
-    throw new Error(`not supported yet: ${node.type}`)
-  },
-
-  Identifier: function* (node: es.Identifier, context: Context) {
-    throw new Error(`not supported yet: ${node.type}`)
-  },
-
-  CallExpression: function* (node: es.CallExpression, context: Context) {
-    throw new Error(`not supported yet: ${node.type}`)
-  },
-
-  NewExpression: function* (node: es.NewExpression, context: Context) {
-    throw new Error(`not supported yet: ${node.type}`)
-  },
-
-  UnaryExpression: function* (node: es.UnaryExpression, context: Context) {
-    const value = yield* actualValue(node.argument, context)
-
-    const error = rttc.checkUnaryExpression(node, node.operator, value)
-    if (error) {
-      return handleRuntimeError(context, error)
+function lookup(name: string, env: Array<Object>): sml.Constant {
+  for (let i = env.length - 1; i >= 0; i--) {
+    const frame = env[i]
+    if (frame.hasOwnProperty(name)) {
+      return frame[name]
     }
-    return evaluateUnaryExpression(node.operator, value)
-  },
+  }
+  throw new Error()
+}
 
-  BinaryExpression: function* (node: es.BinaryExpression, context: Context) {
-    const left = yield* actualValue(node.left, context)
-    const right = yield* actualValue(node.right, context)
-    const error = rttc.checkBinaryExpression(node, node.operator, left, right)
-    if (error) {
-      return handleRuntimeError(context, error)
+function bind(name: string, value: sml.Constant, env: Array<Object>) {
+  const frame = env[env.length - 1]
+  frame[name] = value
+}
+
+function extend(env: Array<Object>): number {
+  return env.push({})
+}
+
+/* **********************
+ * using arrays as stacks
+ * **********************/
+
+// add values destructively to the end of
+// given array; return the array
+function push(array: Array<any>, ...items: Array<any>): Array<any> {
+  array.splice(array.length, 0, ...items)
+  return array
+}
+
+// return the last element of given array
+// without changing the array
+function peek(array: Array<any>) {
+  return array.slice(-1)[0]
+}
+
+/* **************************
+ * interpreter configurations
+ * **************************/
+
+// An interpreter configuration has three parts:
+// A: agenda: stack of commands
+// S: stash: stack of values
+// E: environment: list of frames
+
+// agenda A
+
+// The agenda A is a stack of commands that still need
+// to be executed by the interpreter. The agenda follows
+// stack discipline: pop, push, peek at end of the array.
+
+// Commands are nodes of syntax tree or instructions.
+
+// Instructions are objects whose tag value ends in '_i'.
+
+// Execution initializes A as a singleton array
+// containing the given program.
+
+let A: Array<Object>
+
+// stash S
+
+// stash S is array of values that stores intermediate
+// results. The stash follows strict stack discipline:
+// pop, push, peek at the end of the array.
+
+// Execution initializes stash S as an empty array.
+
+let S: Array<sml.Constant | sml.Identifier>
+
+// environment E
+
+// See *environments* above. Execution initializes
+// environment E as the global environment.
+
+let E: Array<Object>
+
+/* *********************
+ * interpreter microcode
+ * *********************/
+
+// The interpreter dispaches for each command type to the
+// microcode that belong to the type.
+
+// microcode.cmd.type is the microcode for the command,
+// a function that takes a command as argument and
+// changes the configuration according to the meaning of
+// the command. The return value is not used.
+
+const microcode = {
+  Constant: (cmd: sml.Constant) => {
+    push(S, { type: 'Constant', value: cmd.value })
+  },
+  Identifier: (cmd: sml.Identifier) => {
+    const value = lookup(cmd.name, E)
+    push(S, value)
+  },
+  ExpressionDeclaration: (cmd: sml.ExpressionDeclaration) => {
+    push(A, { type: 'BindInstruction', name: 'it' }, cmd.value)
+  },
+  ValueDeclaration: (cmd: sml.ValueDeclaration) => {
+    push(A, { type: 'BindInstruction', name: cmd.id.name }, cmd.value)
+  },
+  InfixApplicationExpression: (cmd: sml.InfixApplicationExpression) => {
+    push(A, { type: 'InfixApplicationInstruction', operator: cmd.operator }, cmd.right, cmd.left)
+  },
+  SequenceDeclaration: (cmd: sml.SequenceDeclaration) => {
+    push(A, cmd.declarations[cmd.declarations.length - 1])
+    for (let i = cmd.declarations.length - 2; i >= 0; i--) {
+      push(A, { type: 'PopInstruction' }, cmd.declarations[i])
     }
-    return evaluateBinaryExpression(node.operator, left, right)
   },
 
-  ConditionalExpression: function* (node: es.ConditionalExpression, context: Context) {
-    throw new Error(`not supported yet: ${node.type}`)
+  PopInstruction: (_: PopInstruction) => {
+    S.pop()
   },
-
-  LogicalExpression: function* (node: es.LogicalExpression, context: Context) {
-    throw new Error(`not supported yet: ${node.type}`)
+  BindInstruction: (cmd: BindInstruction) => {
+    const value = S.pop() as sml.Constant
+    bind(cmd.name, value, E)
+    push(S, { type: 'Identifier', name: cmd.name })
   },
-
-  VariableDeclaration: function* (node: es.VariableDeclaration, context: Context) {
-    throw new Error(`not supported yet: ${node.type}`)
-  },
-
-  ContinueStatement: function* (_node: es.ContinueStatement, _context: Context) {
-    throw new Error(`not supported yet: ${_node.type}`)
-  },
-
-  BreakStatement: function* (_node: es.BreakStatement, _context: Context) {
-    throw new Error(`not supported yet: ${_node.type}`)
-  },
-
-  ForStatement: function* (node: es.ForStatement, context: Context) {
-    throw new Error(`not supported yet: ${node.type}`)
-  },
-
-
-  AssignmentExpression: function* (node: es.AssignmentExpression, context: Context) {
-    throw new Error(`not supported yet: ${node.type}`)
-  },
-
-  FunctionDeclaration: function* (node: es.FunctionDeclaration, context: Context) {
-    throw new Error(`not supported yet: ${node.type}`)
-  },
-
-  IfStatement: function* (node: es.IfStatement | es.ConditionalExpression, context: Context) {
-    throw new Error(`not supported yet: ${node.type}`)
-  },
-
-  ExpressionStatement: function* (node: es.ExpressionStatement, context: Context) {
-    return yield* evaluate(node.expression, context)
-  },
-
-  ReturnStatement: function* (node: es.ReturnStatement, context: Context) {
-    throw new Error(`not supported yet: ${node.type}`)
-  },
-
-  WhileStatement: function* (node: es.WhileStatement, context: Context) {
-    throw new Error(`not supported yet: ${node.type}`)
-  },
-
-
-  BlockStatement: function* (node: es.BlockStatement, context: Context) {
-    throw new Error(`not supported yet: ${node.type}`)
-  },
-
-  Program: function* (node: es.BlockStatement, context: Context) {
-    const result = yield* forceIt(yield* evaluateBlockSatement(context, node), context);
-    return result;
+  InfixApplicationInstruction: (cmd: InfixApplicationInstruction) => {
+    const right = (S.pop() as sml.Constant).value
+    const left = (S.pop() as sml.Constant).value
+    push(S, { type: 'Constant', value: applyInfixOperator(cmd.operator, left, right) })
   }
 }
-// tslint:enable:object-literal-shorthand
 
-export function* evaluate(node: es.Node, context: Context) {
-  const result = yield* evaluators[node.type](node, context)
-  yield* leave(context)
-  return result
+/* **********************
+ * microcode instructions
+ * **********************/
+interface PopInstruction {
+  type: 'Pop'
+}
+
+interface BindInstruction {
+  type: 'Bind'
+  name: string
+}
+
+interface InfixApplicationInstruction {
+  type: 'InfixApplicationInstruction'
+  operator: sml.InfixOperator
+}
+
+/* ****************
+ * interpreter loop
+ * ****************/
+
+const STEP_LIMIT = 1000000
+
+export function evaluate(program: sml.Program, context: Context) {
+  A = [program.body]
+  S = []
+  E = GLOBAL_ENVIRONMENT
+
+  let i = 0
+  while (i < STEP_LIMIT) {
+    if (A.length === 0) break
+
+    const cmd = A.pop() as sml.Declaration
+
+    console.log('Executed command:')
+    console.log(cmd)
+
+    if (microcode.hasOwnProperty(cmd.type)) {
+      microcode[cmd.type](cmd)
+    } else {
+      // Throw error unknown command
+    }
+
+    console.log('Resulting registers:')
+    console.log('A')
+    console.log(A)
+    console.log('S')
+    console.log(S)
+    console.log('E')
+    console.log(E)
+    console.log('================================\n')
+
+    i++
+  }
 }
