@@ -104,7 +104,7 @@ export type BaseKeyvalue = BaseNode
 
 export interface Keyvalue extends BaseKeyvalue {
   type: 'Keyvalue'
-  key: Identifier | number
+  key: Constant
   value: Expression
 }
 

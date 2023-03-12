@@ -107,7 +107,7 @@ let A: Array<Object>
 
 // Execution initializes stash S as an empty array.
 
-let S: Array<sml.Constant | sml.Identifier>
+let S: Array<sml.Constant | sml.Identifier | sml.Record | sml.Keyvalue>
 
 // environment E
 
@@ -136,6 +136,12 @@ const microcode = {
     const value = lookup(cmd.name, E)
     push(S, value)
   },
+  Record: (cmd: sml.Record) => {
+    push(A, { type: 'RecordInstruction', length: cmd.items.length }, ...cmd.items.reverse())
+  },
+  Keyvalue: (cmd: sml.Keyvalue) => {
+    push(A, { type: 'KeyvalueInstruction', key: cmd.key }, cmd.value)
+  },
   ExpressionDeclaration: (cmd: sml.ExpressionDeclaration) => {
     push(A, { type: 'BindInstruction', name: 'it' }, cmd.value)
   },
@@ -160,6 +166,16 @@ const microcode = {
     bind(cmd.name, value, E)
     push(S, { type: 'Identifier', name: cmd.name })
   },
+  RecordInstruction: (cmd: RecordInstruction) => {
+    const items: Array<sml.Keyvalue> = []
+    for (let i = 0; i < cmd.length; i++) {
+      items.push(S.pop() as sml.Keyvalue)
+    }
+    push(S, { type: 'Record', length: cmd.length, items: items.reverse() })
+  },
+  KeyvalueInstruction: (cmd: KeyvalueInstruction) => {
+    push(S, { type: 'Keyvalue', key: cmd.key, value: S.pop() as sml.Constant })
+  },
   InfixApplicationInstruction: (cmd: InfixApplicationInstruction) => {
     const right = (S.pop() as sml.Constant).value
     const left = (S.pop() as sml.Constant).value
@@ -177,6 +193,16 @@ interface PopInstruction {
 interface BindInstruction {
   type: 'Bind'
   name: string
+}
+
+interface RecordInstruction {
+  type: 'Record'
+  length: number
+}
+
+interface KeyvalueInstruction {
+  type: 'Keyvalue'
+  key: sml.Constant
 }
 
 interface InfixApplicationInstruction {

@@ -25,10 +25,10 @@ import {
   ExpressionParenthesesContext,
   ExpressionRecordContext,
   ExpressionRecordSelectorContext,
-  KeyvalueContext,
   IdAlphaContext,
   IdContext,
   IdSymbolContext,
+  KeyvalueContext,
   LabelContext,
   LabelIdContext,
   LabelIntContext,
@@ -242,7 +242,7 @@ class ProgramGenerator implements smlVisitor<sml.Declaration> {
 
     return {
       type: 'Keyvalue',
-      key: ctx._key.accept(this) as sml.Identifier | number,
+      key: ctx._key.accept(this) as sml.Constant,
       value: ctx._value.accept(this) as sml.Expression
     }
   }
@@ -256,7 +256,12 @@ class ProgramGenerator implements smlVisitor<sml.Declaration> {
   visitLabelId(ctx: LabelIdContext): sml.Declaration {
     this.debugVisit('Label Id', ctx)
 
-    return ctx.getChild(0).accept(this)
+    const label = ctx.getChild(0).accept(this)
+
+    return {
+      type: 'Constant',
+      value: ctx.text
+    }
   }
 
   visitLabelInt(ctx: LabelIntContext): sml.Declaration {
