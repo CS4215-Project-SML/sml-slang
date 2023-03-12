@@ -150,7 +150,7 @@ class ProgramGenerator implements smlVisitor<sml.Declaration> {
 
     return {
       type: 'Valbind',
-      name: ctx._name.accept(this) as sml.Identifier,
+      name: (ctx._name.accept(this) as sml.Identifier).name,
       value: ctx._value.accept(this) as sml.Expression
     }
   }
@@ -200,21 +200,38 @@ class ProgramGenerator implements smlVisitor<sml.Declaration> {
   visitExpressionApplicationPrefix(ctx: ExpressionApplicationPrefixContext): sml.Declaration {
     this.debugVisit('Expression Application Prefix', ctx)
 
-    throw new Error(`not supported yet: ${ctx}`)
+    const operator = ctx._operator.accept(this)
+    const operand = ctx._operand.accept(this)
+
+    if (
+      operator.type === 'RecordSelector' &&
+      (operand.type === 'Record' || operand.type === 'Identifier')
+    ) {
+      return {
+        type: 'RecordSelector',
+        label: operator.label,
+        record: operand
+      }
+    } else {
+      throw new Error(`not supported yet: ${ctx}`)
+    }
   }
 
   visitExpressionRecord(ctx: ExpressionRecordContext): sml.Declaration {
     this.debugVisit('Expression Record', ctx)
 
-    const items = []
-    for (let i = 1; i < ctx.childCount; i += 2) {
-      items.push(ctx.getChild(i).accept(this))
+    const items = {}
+    let count = 0
+    for (let i = 1; ctx.childCount > 2 && i < ctx.childCount; i += 2) {
+      const keyvalue = ctx.getChild(i).accept(this) as sml.Keyvalue
+      items[keyvalue.key] = keyvalue.value
+      count++
     }
 
     return {
       type: 'Record',
-      length: items.length,
-      items: items as Array<sml.Keyvalue>,
+      length: count,
+      items: items,
       loc: contextToLocation(ctx)
     }
   }
@@ -222,7 +239,13 @@ class ProgramGenerator implements smlVisitor<sml.Declaration> {
   visitExpressionRecordSelector(ctx: ExpressionRecordSelectorContext): sml.Declaration {
     this.debugVisit('Expression Record Selector', ctx)
 
-    throw new Error(`not supported yet: ${ctx}`)
+    const label = ctx.getChild(1).accept(this) as sml.Constant
+
+    return {
+      type: 'RecordSelector',
+      label: label.value.toString(),
+      loc: contextToLocation(ctx)
+    }
   }
 
   visitExpressionConstant(ctx: ExpressionConstantContext): sml.Declaration {
@@ -242,7 +265,7 @@ class ProgramGenerator implements smlVisitor<sml.Declaration> {
 
     return {
       type: 'Keyvalue',
-      key: ctx._key.accept(this) as sml.Constant,
+      key: (ctx._key.accept(this) as sml.Constant).value.toString(),
       value: ctx._value.accept(this) as sml.Expression
     }
   }
@@ -256,11 +279,11 @@ class ProgramGenerator implements smlVisitor<sml.Declaration> {
   visitLabelId(ctx: LabelIdContext): sml.Declaration {
     this.debugVisit('Label Id', ctx)
 
-    const label = ctx.getChild(0).accept(this)
+    const label = ctx.getChild(0).accept(this) as sml.Identifier
 
     return {
       type: 'Constant',
-      value: ctx.text
+      value: label.name
     }
   }
 

@@ -137,10 +137,18 @@ const microcode = {
     push(S, value)
   },
   Record: (cmd: sml.Record) => {
-    push(A, { type: 'RecordInstruction', length: cmd.items.length }, ...cmd.items.reverse())
+    const items = []
+    for (let [key, value] of Object.entries(cmd.items)) {
+      items.push({ type: 'Keyvalue', key: key, value: value })
+    }
+    push(A, { type: 'RecordInstruction', length: cmd.length }, ...items.reverse())
   },
   Keyvalue: (cmd: sml.Keyvalue) => {
     push(A, { type: 'KeyvalueInstruction', key: cmd.key }, cmd.value)
+  },
+  RecordSelector: (cmd: sml.RecordSelector) => {
+    if (cmd.record === undefined) throw new Error('bruh') // TODO: this shouldn't happen, we should enforce this during type-checking
+    push(A, { type: 'RecordSelectorInstruction', label: cmd.label }, cmd.record)
   },
   ExpressionDeclaration: (cmd: sml.ExpressionDeclaration) => {
     push(A, { type: 'BindInstruction', name: 'it' }, cmd.value)
@@ -167,14 +175,23 @@ const microcode = {
     push(S, { type: 'Identifier', name: cmd.name })
   },
   RecordInstruction: (cmd: RecordInstruction) => {
-    const items: Array<sml.Keyvalue> = []
+    const items = {}
     for (let i = 0; i < cmd.length; i++) {
-      items.push(S.pop() as sml.Keyvalue)
+      const keyvalue = S.pop() as sml.Keyvalue
+      items[keyvalue.key] = keyvalue.value
     }
-    push(S, { type: 'Record', length: cmd.length, items: items.reverse() })
+    push(S, { type: 'Record', length: cmd.length, items: items })
   },
   KeyvalueInstruction: (cmd: KeyvalueInstruction) => {
     push(S, { type: 'Keyvalue', key: cmd.key, value: S.pop() as sml.Constant })
+  },
+  RecordSelectorInstruction: (cmd: RecordSelectorInstruction) => {
+    const items = (S.pop() as sml.Record).items // TODO: should be a record, type-check this
+    if (items.hasOwnProperty(cmd.label)) {
+      push(S, items[cmd.label])
+    } else {
+      throw new Error('bruh') // TODO: proper error handling
+    }
   },
   InfixApplicationInstruction: (cmd: InfixApplicationInstruction) => {
     const right = (S.pop() as sml.Constant).value
@@ -202,7 +219,12 @@ interface RecordInstruction {
 
 interface KeyvalueInstruction {
   type: 'Keyvalue'
-  key: sml.Constant
+  key: string
+}
+
+interface RecordSelectorInstruction {
+  type: 'RecordSelectorInstruction'
+  label: string
 }
 
 interface InfixApplicationInstruction {

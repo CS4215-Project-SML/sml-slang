@@ -17,10 +17,9 @@ export interface NodeMap {
   Constant: Constant
   Identifier: Identifier
   Pattern: Pattern
-  Keyvalue: Keyvalue
   Record: Record
+  RecordSelector: RecordSelector
   Expression: Expression
-  Valbind: Valbind
   Declaration: Declaration
   Program: Program
 }
@@ -62,6 +61,7 @@ export interface DeclarationMap {
   Pattern: Pattern
   Keyvalue: Keyvalue
   Record: Record
+  RecordSelector: RecordSelector
   Expression: Expression
 }
 
@@ -76,7 +76,7 @@ export interface ExpressionDeclaration extends BaseDeclaration {
 
 export interface ValueDeclaration extends BaseDeclaration {
   type: 'ValueDeclaration'
-  name: Identifier
+  name: string
   value: Expression
 }
 
@@ -87,7 +87,7 @@ export interface SequenceDeclaration extends BaseDeclaration {
 
 export interface Valbind extends BaseNode {
   type: 'Valbind'
-  name: Identifier
+  name: string
   value: Expression
 }
 
@@ -104,7 +104,7 @@ export type BaseKeyvalue = BaseNode
 
 export interface Keyvalue extends BaseKeyvalue {
   type: 'Keyvalue'
-  key: Constant
+  key: string
   value: Expression
 }
 
@@ -113,12 +113,22 @@ export type BaseRecord = BaseNode
 export interface Record extends BaseRecord {
   type: 'Record'
   length: number
-  items: Array<Keyvalue>
+  items: Object
+}
+
+export type BaseRecordSelector = BaseNode
+
+export interface RecordSelector extends BaseRecord {
+  type: 'RecordSelector'
+  label: string
+  record?: Record | Identifier
 }
 
 export interface ExpressionMap {
   Constant: Constant
   Identifier: Identifier
+  Record: Record
+  RecordSelector: RecordSelector
   PrefixApplicationExpression: PrefixApplicationExpression
   InfixApplicationExpression: InfixApplicationExpression
 }
