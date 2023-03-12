@@ -1,5 +1,4 @@
 import * as sml from '../sml/types'
-import { Context } from '../types'
 
 /* **********************
  * operators and builtins
@@ -138,7 +137,7 @@ const microcode = {
   },
   Record: (cmd: sml.Record) => {
     const items = []
-    for (let [key, value] of Object.entries(cmd.items)) {
+    for (const [key, value] of Object.entries(cmd.items)) {
       items.push({ type: 'Keyvalue', key: key, value: value })
     }
     push(A, { type: 'RecordInstruction', length: cmd.length }, ...items.reverse())
@@ -238,7 +237,7 @@ interface InfixApplicationInstruction {
 
 const STEP_LIMIT = 1000000
 
-export function evaluate(program: sml.Program, context: Context) {
+export function evaluate(program: sml.Program) {
   A = [program.body]
   S = []
   E = GLOBAL_ENVIRONMENT

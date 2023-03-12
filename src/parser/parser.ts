@@ -4,7 +4,6 @@ import { ErrorNode } from 'antlr4ts/tree/ErrorNode'
 import { ParseTree } from 'antlr4ts/tree/ParseTree'
 import { RuleNode } from 'antlr4ts/tree/RuleNode'
 import { TerminalNode } from 'antlr4ts/tree/TerminalNode'
-import * as es from 'estree'
 
 import { smlLexer } from '../lang/smlLexer'
 import {
@@ -45,21 +44,6 @@ import {
 } from '../lang/smlParser'
 import { smlVisitor } from '../lang/smlVisitor'
 import * as sml from '../sml/types'
-import { Context, ErrorSeverity, ErrorType, SourceError } from '../types'
-
-export class FatalSyntaxError implements SourceError {
-  public type = ErrorType.SYNTAX
-  public severity = ErrorSeverity.ERROR
-  public constructor(public location: es.SourceLocation, public message: string) {}
-
-  public explain() {
-    return this.message
-  }
-
-  public elaborate() {
-    return 'There is a syntax error in your program'
-  }
-}
 
 function contextToLocation(ctx: DeclarationContext): sml.SourceLocation {
   return {
@@ -404,19 +388,7 @@ class ProgramGenerator implements smlVisitor<sml.Declaration> {
   }
 
   visitErrorNode(node: ErrorNode): sml.Declaration {
-    throw new FatalSyntaxError(
-      {
-        start: {
-          line: node.symbol.line,
-          column: node.symbol.charPositionInLine
-        },
-        end: {
-          line: node.symbol.line,
-          column: node.symbol.charPositionInLine + 1
-        }
-      },
-      `invalid syntax ${node.text}`
-    )
+    throw new Error('bruh') // TODO: implement proper error type
   }
 
   debugVisit(phase: string, tree: ParseTree) {
@@ -434,33 +406,13 @@ function convertSml(program: ProgramContext): sml.Program | undefined {
   }
 }
 
-export function parse(source: string, context: Context) {
-  let program: sml.Program | undefined
-
-  if (context.variant === 'sml') {
-    const inputStream = CharStreams.fromString(source)
-    const lexer = new smlLexer(inputStream)
-    const tokenStream = new CommonTokenStream(lexer)
-    const parser = new smlParser(tokenStream)
-    parser.buildParseTree = true
-    try {
-      const tree = parser.program()
-      program = convertSml(tree)
-      // console.log(program)
-    } catch (error) {
-      if (error instanceof FatalSyntaxError) {
-        context.errors.push(error)
-      } else {
-        throw error
-      }
-    }
-    const hasErrors = context.errors.find(m => m.severity === ErrorSeverity.ERROR)
-    if (program && !hasErrors) {
-      return program
-    } else {
-      return undefined
-    }
-  } else {
-    return undefined
-  }
+export function parse(source: string): sml.Program | undefined {
+  const inputStream = CharStreams.fromString(source)
+  const lexer = new smlLexer(inputStream)
+  const tokenStream = new CommonTokenStream(lexer)
+  const parser = new smlParser(tokenStream)
+  parser.buildParseTree = true
+  const tree = parser.program()
+  const program = convertSml(tree)
+  return program
 }

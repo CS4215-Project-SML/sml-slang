@@ -1,21 +1,11 @@
 #!/usr/bin/env node
 
-import { createContext, IOptions } from '../index'
-import { smlRunner } from '../runner/smlRunner'
-import { Variant } from '../types'
+import { smlRunner } from '../runner/runner'
 
 function startRepl(useRepl: boolean, code: string) {
-  const context = createContext(Variant.DEFAULT, undefined, undefined)
-  const options: Partial<IOptions> = {
-    scheduler: 'preemptive',
-    executionMethod: 'interpreter',
-    variant: Variant.DEFAULT
-  }
-
-  const res = smlRunner(code, context, options)
+  const res = smlRunner(code)
 
   if (res.status === 'finished') {
-    console.dir(res.value, { depth: null })
     if (!useRepl) {
       return
     }
