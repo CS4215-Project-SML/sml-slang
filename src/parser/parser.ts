@@ -4,6 +4,7 @@ import { ErrorNode } from 'antlr4ts/tree/ErrorNode'
 import { ParseTree } from 'antlr4ts/tree/ParseTree'
 import { RuleNode } from 'antlr4ts/tree/RuleNode'
 import { TerminalNode } from 'antlr4ts/tree/TerminalNode'
+import * as es from 'estree'
 
 import { smlLexer } from '../lang/smlLexer'
 import {
@@ -44,6 +45,7 @@ import {
 } from '../lang/smlParser'
 import { smlVisitor } from '../lang/smlVisitor'
 import * as sml from '../sml/types'
+import { Context } from '../types'
 
 function contextToLocation(ctx: DeclarationContext): sml.SourceLocation {
   return {
@@ -398,7 +400,7 @@ class ProgramGenerator implements smlVisitor<sml.Declaration> {
   }
 }
 
-function convertSml(program: ProgramContext): sml.Program | undefined {
+function convertSml(program: ProgramContext): sml.Program {
   const generator = new ProgramGenerator()
   return {
     type: 'Program',
@@ -406,7 +408,7 @@ function convertSml(program: ProgramContext): sml.Program | undefined {
   }
 }
 
-export function parse(source: string): sml.Program | undefined {
+export function parse(source: string, context: Context) {
   const inputStream = CharStreams.fromString(source)
   const lexer = new smlLexer(inputStream)
   const tokenStream = new CommonTokenStream(lexer)
@@ -414,5 +416,12 @@ export function parse(source: string): sml.Program | undefined {
   parser.buildParseTree = true
   const tree = parser.program()
   const program = convertSml(tree)
-  return program
+  return {
+    sml: program,
+    es: {
+      type: 'Program',
+      sourceType: 'script',
+      body: []
+    }
+  }
 }

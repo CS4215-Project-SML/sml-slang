@@ -1,4 +1,5 @@
 import * as sml from '../sml/types'
+import { Context } from '../types'
 
 /* **********************
  * operators and builtins
@@ -237,7 +238,7 @@ interface InfixApplicationInstruction {
 
 const STEP_LIMIT = 1000000
 
-export function evaluate(program: sml.Program) {
+export function evaluate(program: sml.Program, context: Context) {
   A = [program.body]
   S = []
   E = GLOBAL_ENVIRONMENT

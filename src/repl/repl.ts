@@ -1,16 +1,15 @@
 #!/usr/bin/env node
 
-import { smlRunner } from '../runner/runner'
+import { createContext } from '../index'
+import { smlRunner } from '../runner/smlRunner'
+import { Variant } from '../types'
 
 function startRepl(useRepl: boolean, code: string) {
-  const res = smlRunner(code)
+  const context = createContext(Variant.DEFAULT, undefined, undefined)
 
-  if (res.status === 'finished') {
-    if (!useRepl) {
-      return
-    }
+  smlRunner(code, context).then(res => {
     // TODO: implement REPL
-  }
+  })
 }
 
 function main() {
