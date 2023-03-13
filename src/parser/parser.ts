@@ -4,7 +4,6 @@ import { ErrorNode } from 'antlr4ts/tree/ErrorNode'
 import { ParseTree } from 'antlr4ts/tree/ParseTree'
 import { RuleNode } from 'antlr4ts/tree/RuleNode'
 import { TerminalNode } from 'antlr4ts/tree/TerminalNode'
-import * as es from 'estree'
 
 import { smlLexer } from '../lang/smlLexer'
 import {
@@ -44,7 +43,7 @@ import {
   VariableContext
 } from '../lang/smlParser'
 import { smlVisitor } from '../lang/smlVisitor'
-import * as sml from '../sml/types'
+import * as sml from '../sml/nodes'
 import { Context } from '../types'
 
 function contextToLocation(ctx: DeclarationContext): sml.SourceLocation {
@@ -60,122 +59,124 @@ function contextToLocation(ctx: DeclarationContext): sml.SourceLocation {
   }
 }
 
-class ProgramGenerator implements smlVisitor<sml.Declaration> {
-  visitProgram(ctx: ProgramContext): sml.Declaration {
+class ProgramGenerator implements smlVisitor<sml.Node> {
+  visitProgram(ctx: ProgramContext): sml.Node {
     this.debugVisit('Program', ctx)
 
     return ctx.getChild(0).accept(this)
   }
 
-  visitProgramSequence(ctx: ProgramSequenceContext): sml.Declaration {
+  visitProgramSequence(ctx: ProgramSequenceContext): sml.Node {
     this.debugVisit('Program Sequence', ctx)
 
-    const declarations = []
+    const declarations: Array<sml.Declaration> = []
 
     const left = ctx._left.accept(this)
-    if (left.type === 'SequenceDeclaration') {
+    if (left.tag === 'SequenceDeclaration') {
       declarations.push(...left.declarations)
-    } else if (left.type !== 'Empty') {
-      declarations.push(left)
+    } else if (left.tag !== 'Empty') {
+      declarations.push(left as sml.Declaration)
     }
 
     const right = ctx._right.accept(this)
-    if (right.type === 'SequenceDeclaration') {
+    if (right.tag === 'SequenceDeclaration') {
       declarations.push(...right.declarations)
-    } else if (right.type !== 'Empty') {
-      declarations.push(right)
+    } else if (right.tag !== 'Empty') {
+      declarations.push(right as sml.Declaration)
     }
 
     return {
-      type: 'SequenceDeclaration',
+      tag: 'SequenceDeclaration',
       declarations: declarations
     }
   }
 
-  visitProgramDeclaration(ctx: ProgramDeclarationContext): sml.Declaration {
+  visitProgramDeclaration(ctx: ProgramDeclarationContext): sml.Node {
     this.debugVisit('Program Declaration', ctx)
 
     return ctx.getChild(0).accept(this)
   }
 
-  visitProgramEmpty(ctx: ProgramEmptyContext): sml.Declaration {
+  visitProgramEmpty(ctx: ProgramEmptyContext): sml.Node {
     this.debugVisit('Program Empty', ctx)
 
-    return { type: 'Empty' }
+    return { tag: 'Empty' }
   }
 
-  visitDeclaration(ctx: DeclarationContext): sml.Declaration {
+  visitDeclaration(ctx: DeclarationContext): sml.Node {
     this.debugVisit('Declaration', ctx)
 
     return ctx.getChild(0).accept(this)
   }
 
-  visitDeclarationValue(ctx: DeclarationValueContext): sml.Declaration {
+  visitDeclarationValue(ctx: DeclarationValueContext): sml.Node {
     this.debugVisit('Declaration Value', ctx)
 
     const valbind = ctx.getChild(1).accept(this) as sml.Valbind
 
     return {
-      type: 'ValueDeclaration',
+      tag: 'ValueDeclaration',
       name: valbind.name,
-      value: valbind.value
+      value: valbind.value,
+      loc: contextToLocation(ctx)
     }
   }
 
-  visitDeclarationExpression(ctx: DeclarationExpressionContext): sml.Declaration {
+  visitDeclarationExpression(ctx: DeclarationExpressionContext): sml.Node {
     this.debugVisit('Declaration Expression', ctx)
 
     return {
-      type: 'ExpressionDeclaration',
-      value: ctx.getChild(0).accept(this) as sml.Expression
+      tag: 'ExpressionDeclaration',
+      value: ctx.getChild(0).accept(this) as sml.Expression,
+      loc: contextToLocation(ctx)
     }
   }
 
-  visitValbind(ctx: ValbindContext): sml.Declaration {
+  visitValbind(ctx: ValbindContext): sml.Node {
     this.debugVisit('Valbind', ctx)
 
     return {
-      type: 'Valbind',
+      tag: 'Valbind',
       name: (ctx._name.accept(this) as sml.Identifier).name,
       value: ctx._value.accept(this) as sml.Expression
     }
   }
 
-  visitPattern(ctx: PatternContext): sml.Declaration {
+  visitPattern(ctx: PatternContext): sml.Node {
     this.debugVisit('Pattern', ctx)
 
     return ctx.getChild(0).accept(this)
   }
 
-  visitPatternConstant(ctx: PatternConstantContext): sml.Declaration {
+  visitPatternConstant(ctx: PatternConstantContext): sml.Node {
     this.debugVisit('Pattern Constant', ctx)
 
     return ctx.getChild(0).accept(this)
   }
 
-  visitPatternId(ctx: PatternIdContext): sml.Declaration {
+  visitPatternId(ctx: PatternIdContext): sml.Node {
     this.debugVisit('Pattern Id', ctx)
 
     return ctx.getChild(0).accept(this)
   }
 
-  visitExpression(ctx: ExpressionContext): sml.Declaration {
+  visitExpression(ctx: ExpressionContext): sml.Node {
     this.debugVisit('Expression', ctx)
 
     return ctx.getChild(0).accept(this)
   }
 
-  visitExpressionParentheses(ctx: ExpressionParenthesesContext): sml.Declaration {
+  visitExpressionParentheses(ctx: ExpressionParenthesesContext): sml.Node {
     this.debugVisit('Expression Parentheses', ctx)
 
     return ctx._inner.accept(this)
   }
 
-  visitExpressionApplicationInfix(ctx: ExpressionApplicationInfixContext): sml.Declaration {
+  visitExpressionApplicationInfix(ctx: ExpressionApplicationInfixContext): sml.Node {
     this.debugVisit('Expression Application Infix', ctx)
 
     return {
-      type: 'InfixApplicationExpression',
+      tag: 'InfixApplicationExpression',
       operator: ctx._operator.text as sml.InfixOperator,
       left: ctx._left.accept(this) as sml.Expression,
       right: ctx._right.accept(this) as sml.Expression,
@@ -183,27 +184,28 @@ class ProgramGenerator implements smlVisitor<sml.Declaration> {
     }
   }
 
-  visitExpressionApplicationPrefix(ctx: ExpressionApplicationPrefixContext): sml.Declaration {
+  visitExpressionApplicationPrefix(ctx: ExpressionApplicationPrefixContext): sml.Node {
     this.debugVisit('Expression Application Prefix', ctx)
 
     const operator = ctx._operator.accept(this)
     const operand = ctx._operand.accept(this)
 
     if (
-      operator.type === 'RecordSelector' &&
-      (operand.type === 'Record' || operand.type === 'Identifier')
+      operator.tag === 'RecordSelector' &&
+      (operand.tag === 'Record' || operand.tag === 'Identifier')
     ) {
       return {
-        type: 'RecordSelector',
+        tag: 'RecordSelector',
         label: operator.label,
-        record: operand
+        record: operand,
+        loc: contextToLocation(ctx)
       }
     } else {
       throw new Error(`not supported yet: ${ctx}`)
     }
   }
 
-  visitExpressionRecord(ctx: ExpressionRecordContext): sml.Declaration {
+  visitExpressionRecord(ctx: ExpressionRecordContext): sml.Node {
     this.debugVisit('Expression Record', ctx)
 
     const items = {}
@@ -215,181 +217,183 @@ class ProgramGenerator implements smlVisitor<sml.Declaration> {
     }
 
     return {
-      type: 'Record',
+      tag: 'Record',
       length: count,
       items: items,
       loc: contextToLocation(ctx)
     }
   }
 
-  visitExpressionRecordSelector(ctx: ExpressionRecordSelectorContext): sml.Declaration {
+  visitExpressionRecordSelector(ctx: ExpressionRecordSelectorContext): sml.Node {
     this.debugVisit('Expression Record Selector', ctx)
 
-    const label = ctx.getChild(1).accept(this) as sml.Constant
+    let name: string
+    const label = ctx.getChild(1).accept(this) as sml.Constant | sml.Identifier
+
+    if (label.tag === 'Constant') {
+      name = label.value.toString()
+    } else if (label.tag === 'Identifier') {
+      name = label.name.toString()
+    } else {
+      throw new Error('bruh')
+    }
 
     return {
-      type: 'RecordSelector',
-      label: label.value.toString(),
+      tag: 'RecordSelector',
+      label: name,
       loc: contextToLocation(ctx)
     }
   }
 
-  visitExpressionConstant(ctx: ExpressionConstantContext): sml.Declaration {
+  visitExpressionConstant(ctx: ExpressionConstantContext): sml.Node {
     this.debugVisit('Expression Constant', ctx)
 
     return ctx.getChild(0).accept(this)
   }
 
-  visitExpressionId(ctx: ExpressionIdContext): sml.Declaration {
+  visitExpressionId(ctx: ExpressionIdContext): sml.Node {
     this.debugVisit('Expression Id', ctx)
 
     return ctx.getChild(0).accept(this)
   }
 
-  visitKeyvalue(ctx: KeyvalueContext): sml.Declaration {
+  visitKeyvalue(ctx: KeyvalueContext): sml.Node {
     this.debugVisit('Keyvalue', ctx)
 
     return {
-      type: 'Keyvalue',
+      tag: 'Keyvalue',
       key: (ctx._key.accept(this) as sml.Constant).value.toString(),
       value: ctx._value.accept(this) as sml.Expression
     }
   }
 
-  visitLabel(ctx: LabelContext): sml.Declaration {
+  visitLabel(ctx: LabelContext): sml.Node {
     this.debugVisit('Label', ctx)
 
     return ctx.getChild(0).accept(this)
   }
 
-  visitLabelId(ctx: LabelIdContext): sml.Declaration {
+  visitLabelId(ctx: LabelIdContext): sml.Node {
     this.debugVisit('Label Id', ctx)
 
     const label = ctx.getChild(0).accept(this) as sml.Identifier
 
     return {
-      type: 'Constant',
+      tag: 'Constant',
       value: label.name
     }
   }
 
-  visitLabelInt(ctx: LabelIntContext): sml.Declaration {
+  visitLabelInt(ctx: LabelIntContext): sml.Node {
     this.debugVisit('Label Int', ctx)
 
     return {
-      type: 'Constant',
+      tag: 'Constant',
       value: parseInt(ctx.text)
     }
   }
 
-  visitId(ctx: IdContext): sml.Declaration {
+  visitId(ctx: IdContext): sml.Node {
     this.debugVisit('Identifier', ctx)
 
     return ctx.getChild(0).accept(this)
   }
 
-  visitIdAlpha(ctx: IdAlphaContext): sml.Declaration {
+  visitIdAlpha(ctx: IdAlphaContext): sml.Node {
     this.debugVisit('Identifier Alpha', ctx)
 
     return {
-      type: 'Identifier',
+      tag: 'Identifier',
       name: ctx.text,
       loc: contextToLocation(ctx)
     }
   }
 
-  visitIdSymbol(ctx: IdSymbolContext): sml.Declaration {
+  visitIdSymbol(ctx: IdSymbolContext): sml.Node {
     this.debugVisit('Identifier Symbol', ctx)
 
     return {
-      type: 'Identifier',
+      tag: 'Identifier',
       name: ctx.text,
       loc: contextToLocation(ctx)
     }
   }
 
-  visitVariable(ctx: VariableContext): sml.Declaration {
+  visitVariable(ctx: VariableContext): sml.Node {
     this.debugVisit('Variable', ctx)
 
     throw new Error(`not supported yet: ${ctx}`)
   }
 
-  visitConstant(ctx: ConstantContext): sml.Declaration {
+  visitConstant(ctx: ConstantContext): sml.Node {
     this.debugVisit('Constant', ctx)
 
     return ctx.getChild(0).accept(this)
   }
 
-  visitConstantInt(ctx: ConstantIntContext): sml.Declaration {
+  visitConstantInt(ctx: ConstantIntContext): sml.Node {
     this.debugVisit('Constant Int', ctx)
 
     return {
-      type: 'Constant',
+      tag: 'Constant',
       value: parseInt(ctx.text),
       loc: contextToLocation(ctx)
     }
   }
 
-  visitConstantReal(ctx: ConstantRealContext): sml.Declaration {
+  visitConstantReal(ctx: ConstantRealContext): sml.Node {
     this.debugVisit('Constant Real', ctx)
 
     return {
-      type: 'Constant',
+      tag: 'Constant',
       value: parseFloat(ctx.text),
       loc: contextToLocation(ctx)
     }
   }
 
-  visitConstantBool(ctx: ConstantBoolContext): sml.Declaration {
+  visitConstantBool(ctx: ConstantBoolContext): sml.Node {
     this.debugVisit('Constant Bool', ctx)
 
     return {
-      type: 'Constant',
+      tag: 'Constant',
       value: JSON.parse(ctx.text) as boolean,
       loc: contextToLocation(ctx)
     }
   }
 
-  visitConstantChar(ctx: ConstantCharContext): sml.Declaration {
+  visitConstantChar(ctx: ConstantCharContext): sml.Node {
     this.debugVisit('Constant Char', ctx)
 
     return {
-      type: 'Constant',
+      tag: 'Constant',
       value: ctx.text.slice(2, ctx.text.length - 1),
       loc: contextToLocation(ctx)
     }
   }
 
-  visitConstantStr(ctx: ConstantStrContext): sml.Declaration {
+  visitConstantStr(ctx: ConstantStrContext): sml.Node {
     this.debugVisit('Constant Str', ctx)
 
     return {
-      type: 'Constant',
+      tag: 'Constant',
       value: ctx.text.slice(1, ctx.text.length - 1),
       loc: contextToLocation(ctx)
     }
   }
 
-  visit(tree: ParseTree): sml.Declaration {
+  visit(tree: ParseTree): sml.Node {
     return tree.accept(this)
   }
 
-  visitChildren(node: RuleNode): sml.Declaration {
-    const declarations = []
-    for (let i = 0; i < node.childCount; i++) {
-      declarations.push(node.getChild(i).accept(this))
-    }
-    return {
-      type: 'SequenceDeclaration',
-      declarations: declarations
-    }
+  visitChildren(node: RuleNode): sml.Node {
+    throw new Error(`not supported yet: ${node}`)
   }
 
-  visitTerminal(node: TerminalNode): sml.Declaration {
+  visitTerminal(node: TerminalNode): sml.Node {
     return node.accept(this)
   }
 
-  visitErrorNode(node: ErrorNode): sml.Declaration {
+  visitErrorNode(node: ErrorNode): sml.Node {
     throw new Error('bruh') // TODO: implement proper error type
   }
 
@@ -403,8 +407,8 @@ class ProgramGenerator implements smlVisitor<sml.Declaration> {
 function convertSml(program: ProgramContext): sml.Program {
   const generator = new ProgramGenerator()
   return {
-    type: 'Program',
-    body: program.accept(generator)
+    tag: 'Program',
+    body: program.accept(generator) as sml.Declaration
   }
 }
 

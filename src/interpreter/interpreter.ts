@@ -1,4 +1,4 @@
-import * as sml from '../sml/types'
+import * as sml from '../sml/nodes'
 import { Context } from '../types'
 
 /* **********************
@@ -39,7 +39,7 @@ function applyInfixOperator(
 const GLOBAL_FRAME = {}
 const GLOBAL_ENVIRONMENT = [GLOBAL_FRAME]
 
-function lookup(name: string, env: Array<Object>): sml.Constant {
+function lookup(name: string, env: Array<Object>): sml.Constant | sml.Record {
   for (let i = env.length - 1; i >= 0; i--) {
     const frame = env[i]
     if (frame.hasOwnProperty(name)) {
@@ -130,7 +130,7 @@ let E: Array<Object>
 
 const microcode = {
   Constant: (cmd: sml.Constant) => {
-    push(S, { type: 'Constant', value: cmd.value })
+    push(S, { tag: 'Constant', value: cmd.value })
   },
   Identifier: (cmd: sml.Identifier) => {
     const value = lookup(cmd.name, E)
@@ -139,30 +139,30 @@ const microcode = {
   Record: (cmd: sml.Record) => {
     const items = []
     for (const [key, value] of Object.entries(cmd.items)) {
-      items.push({ type: 'Keyvalue', key: key, value: value })
+      items.push({ tag: 'Keyvalue', key: key, value: value })
     }
-    push(A, { type: 'RecordInstruction', length: cmd.length }, ...items.reverse())
+    push(A, { tag: 'RecordInstruction', length: cmd.length }, ...items.reverse())
   },
   Keyvalue: (cmd: sml.Keyvalue) => {
-    push(A, { type: 'KeyvalueInstruction', key: cmd.key }, cmd.value)
+    push(A, { tag: 'KeyvalueInstruction', key: cmd.key }, cmd.value)
   },
   RecordSelector: (cmd: sml.RecordSelector) => {
     if (cmd.record === undefined) throw new Error('bruh') // TODO: this shouldn't happen, we should enforce this during type-checking
-    push(A, { type: 'RecordSelectorInstruction', label: cmd.label }, cmd.record)
+    push(A, { tag: 'RecordSelectorInstruction', label: cmd.label }, cmd.record)
   },
   ExpressionDeclaration: (cmd: sml.ExpressionDeclaration) => {
-    push(A, { type: 'BindInstruction', name: 'it' }, cmd.value)
+    push(A, { tag: 'BindInstruction', name: 'it' }, cmd.value)
   },
   ValueDeclaration: (cmd: sml.ValueDeclaration) => {
-    push(A, { type: 'BindInstruction', name: cmd.name }, cmd.value)
+    push(A, { tag: 'BindInstruction', name: cmd.name }, cmd.value)
   },
   InfixApplicationExpression: (cmd: sml.InfixApplicationExpression) => {
-    push(A, { type: 'InfixApplicationInstruction', operator: cmd.operator }, cmd.right, cmd.left)
+    push(A, { tag: 'InfixApplicationInstruction', operator: cmd.operator }, cmd.right, cmd.left)
   },
   SequenceDeclaration: (cmd: sml.SequenceDeclaration) => {
     push(A, cmd.declarations[cmd.declarations.length - 1])
     for (let i = cmd.declarations.length - 2; i >= 0; i--) {
-      push(A, { type: 'PopInstruction' }, cmd.declarations[i])
+      push(A, { tag: 'PopInstruction' }, cmd.declarations[i])
     }
   },
 
@@ -172,18 +172,24 @@ const microcode = {
   BindInstruction: (cmd: BindInstruction) => {
     const value = S.pop() as sml.Constant
     bind(cmd.name, value, E)
-    push(S, { type: 'Identifier', name: cmd.name })
+    push(S, { tag: 'Identifier', name: cmd.name })
   },
   RecordInstruction: (cmd: RecordInstruction) => {
+    const entries = []
+    for (let i = 0; i < cmd.length; i++) {
+      entries.push(S.pop())
+    }
+    entries.reverse()
+
     const items = {}
     for (let i = 0; i < cmd.length; i++) {
-      const keyvalue = S.pop() as sml.Keyvalue
+      const keyvalue = entries[i] as sml.Keyvalue
       items[keyvalue.key] = keyvalue.value
     }
-    push(S, { type: 'Record', length: cmd.length, items: items })
+    push(S, { tag: 'Record', length: cmd.length, items: items })
   },
   KeyvalueInstruction: (cmd: KeyvalueInstruction) => {
-    push(S, { type: 'Keyvalue', key: cmd.key, value: S.pop() as sml.Constant })
+    push(S, { tag: 'Keyvalue', key: cmd.key, value: S.pop() as sml.Constant })
   },
   RecordSelectorInstruction: (cmd: RecordSelectorInstruction) => {
     const items = (S.pop() as sml.Record).items // TODO: should be a record, type-check this
@@ -196,7 +202,7 @@ const microcode = {
   InfixApplicationInstruction: (cmd: InfixApplicationInstruction) => {
     const right = (S.pop() as sml.Constant).value
     const left = (S.pop() as sml.Constant).value
-    push(S, { type: 'Constant', value: applyInfixOperator(cmd.operator, left, right) })
+    push(S, { tag: 'Constant', value: applyInfixOperator(cmd.operator, left, right) })
   }
 }
 
@@ -204,31 +210,31 @@ const microcode = {
  * microcode instructions
  * **********************/
 interface PopInstruction {
-  type: 'Pop'
+  tag: 'Pop'
 }
 
 interface BindInstruction {
-  type: 'Bind'
+  tag: 'Bind'
   name: string
 }
 
 interface RecordInstruction {
-  type: 'Record'
+  tag: 'Record'
   length: number
 }
 
 interface KeyvalueInstruction {
-  type: 'Keyvalue'
+  tag: 'Keyvalue'
   key: string
 }
 
 interface RecordSelectorInstruction {
-  type: 'RecordSelectorInstruction'
+  tag: 'RecordSelectorInstruction'
   label: string
 }
 
 interface InfixApplicationInstruction {
-  type: 'InfixApplicationInstruction'
+  tag: 'InfixApplicationInstruction'
   operator: sml.InfixOperator
 }
 
@@ -238,7 +244,7 @@ interface InfixApplicationInstruction {
 
 const STEP_LIMIT = 1000000
 
-export function evaluate(program: sml.Program, context: Context) {
+export function evaluate(program: sml.Program, context: Context): string {
   A = [program.body]
   S = []
   E = GLOBAL_ENVIRONMENT
@@ -247,13 +253,13 @@ export function evaluate(program: sml.Program, context: Context) {
   while (i < STEP_LIMIT) {
     if (A.length === 0) break
 
-    const cmd = A.pop() as sml.Declaration
+    const cmd = A.pop() as sml.Node
 
     console.log('Executed command:')
     console.log(cmd)
 
-    if (microcode.hasOwnProperty(cmd.type)) {
-      microcode[cmd.type](cmd)
+    if (microcode.hasOwnProperty(cmd.tag)) {
+      microcode[cmd.tag](cmd)
     } else {
       // Throw error unknown command
     }
@@ -269,4 +275,27 @@ export function evaluate(program: sml.Program, context: Context) {
 
     i++
   }
+
+  return prettier(S[0] as sml.Identifier)
+}
+
+function prettier(evaluation: sml.Identifier): string {
+  const id = evaluation.name
+  let val: any = lookup(id, E)
+  let typ = undefined
+
+  if (val.tag == 'Constant') {
+    val = val.value
+  } else if (val.tag == 'Record') {
+    let dic = '{'
+    let i = 0
+    for (const [key, value] of Object.entries(val.items)) {
+      dic += key.toString() + '=' + (value as sml.Constant).value.toString()
+      dic += i++ < val.length - 1 ? ',' : ''
+    }
+    dic += '}'
+    val = dic
+  }
+
+  return `val ${id} = ${val} : ${typ}`
 }

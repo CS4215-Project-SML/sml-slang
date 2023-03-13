@@ -1,11 +1,11 @@
 import { Result } from '..'
 import { evaluate } from '../interpreter/interpreter'
 import { parse } from '../parser/parser'
-import * as sml from '../sml/types'
+import * as sml from '../sml/nodes'
 import { Context } from '../types'
 import { resolvedErrorPromise } from './utils'
 
-function runEvaluator(program: sml.Program, context: Context) {
+function runEvaluator(program: sml.Program, context: Context): string {
   return evaluate(program, context)
 }
 
@@ -13,9 +13,12 @@ function runInterpreter(program: sml.Program, context: Context): Promise<Result>
   console.log('Interpreter is running...')
 
   // runTypeChecker(program, context)
-  runEvaluator(program, context)
+  const evaluation = runEvaluator(program, context)
+  console.log(evaluation)
 
-  return new Promise((resolve, _reject) => resolve({ status: 'error' }))
+  return new Promise((resolve, _reject) =>
+    resolve({ status: 'finished', context: context, value: evaluation })
+  )
 }
 
 export function smlRunner(code: string | undefined, context: Context): Promise<Result> {
@@ -28,6 +31,5 @@ export function smlRunner(code: string | undefined, context: Context): Promise<R
     return new Promise((resolve, _reject) => resolve({ status: 'error' }))
   }
 
-  console.log(JSON.stringify(program))
   return runInterpreter(program, context)
 }
