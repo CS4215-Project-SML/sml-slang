@@ -39,6 +39,7 @@ expression
     | left=expression operator=id right=expression          # expressionApplicationInfix
     | operator=expression operand=expression                # expressionApplicationPrefix
     | '{' (keyvalue? | (keyvalue (',' keyvalue)+)) '}'      # expressionRecord
+    | '(' expression ',' expression (',' expression)* ')'   # expressionSequence
     | '#' label                                             # expressionRecordSelector
     | constant                                              # expressionConstant
     | id                                                    # expressionId

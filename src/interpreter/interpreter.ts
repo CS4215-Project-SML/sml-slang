@@ -143,11 +143,18 @@ const microcode = {
     }
     push(A, { tag: 'RecordInstruction', length: cmd.length }, ...items.reverse())
   },
+  Sequence: (cmd: sml.Sequence) => {
+    const items = []
+    for (const [key, value] of Object.entries(cmd.items)) {
+      items.push({ tag: 'Keyvalue', key: key, value: value })
+    }
+    push(A, { tag: 'SequenceInstruction', length: cmd.length }, ...items.reverse())
+  },
   Keyvalue: (cmd: sml.Keyvalue) => {
     push(A, { tag: 'KeyvalueInstruction', key: cmd.key }, cmd.value)
   },
   RecordSelector: (cmd: sml.RecordSelector) => {
-    if (cmd.record === undefined) throw new Error('bruh') // TODO: this shouldn't happen, we should enforce this during type-checking
+    if (cmd.record === undefined) throw new Error('bruh') // TODO: this shouldn't happen
     push(A, { tag: 'RecordSelectorInstruction', label: cmd.label }, cmd.record)
   },
   ExpressionDeclaration: (cmd: sml.ExpressionDeclaration) => {
@@ -175,6 +182,7 @@ const microcode = {
     push(S, { tag: 'Identifier', name: cmd.name })
   },
   RecordInstruction: (cmd: RecordInstruction) => {
+    // Make sure that items are added to the object in the order they were specified
     const entries = []
     for (let i = 0; i < cmd.length; i++) {
       entries.push(S.pop())
@@ -188,11 +196,26 @@ const microcode = {
     }
     push(S, { tag: 'Record', length: cmd.length, items: items })
   },
+  SequenceInstruction: (cmd: SequenceInstruction) => {
+    // Make sure that items are added to the object in the order they were specified
+    const entries = []
+    for (let i = 0; i < cmd.length; i++) {
+      entries.push(S.pop())
+    }
+    entries.reverse()
+
+    const items = {}
+    for (let i = 0; i < cmd.length; i++) {
+      const keyvalue = entries[i] as sml.Keyvalue
+      items[keyvalue.key] = keyvalue.value
+    }
+    push(S, { tag: 'Sequence', length: cmd.length, items: items })
+  },
   KeyvalueInstruction: (cmd: KeyvalueInstruction) => {
     push(S, { tag: 'Keyvalue', key: cmd.key, value: S.pop() as sml.Constant })
   },
   RecordSelectorInstruction: (cmd: RecordSelectorInstruction) => {
-    const items = (S.pop() as sml.Record).items // TODO: should be a record, type-check this
+    const items = (S.pop() as sml.Record | sml.Sequence).items
     if (items.hasOwnProperty(cmd.label)) {
       push(S, items[cmd.label])
     } else {
@@ -220,6 +243,11 @@ interface BindInstruction {
 
 interface RecordInstruction {
   tag: 'Record'
+  length: number
+}
+
+interface SequenceInstruction {
+  tag: 'Sequence'
   length: number
 }
 
@@ -282,7 +310,7 @@ export function evaluate(program: sml.Program, context: Context): string {
 function prettier(evaluation: sml.Identifier): string {
   const id = evaluation.name
   let val: any = lookup(id, E)
-  let typ = undefined
+  const typ = undefined
 
   if (val.tag == 'Constant') {
     val = val.value

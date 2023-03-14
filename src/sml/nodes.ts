@@ -42,6 +42,7 @@ export interface NodeMap {
   PrefixApplicationExpression: PrefixApplicationExpression
   InfixApplicationExpression: InfixApplicationExpression
   Record: Record
+  Sequence: Sequence
   Keyvalue: Keyvalue
   RecordSelector: RecordSelector
   Pattern: Pattern
@@ -125,6 +126,14 @@ export interface Record extends BaseRecord {
   items: Object
 }
 
+export type BaseSequence = BaseNode
+
+export interface Sequence extends BaseSequence {
+  tag: 'Sequence'
+  length: number
+  items: Object
+}
+
 export type BaseKeyvalue = BaseNode
 
 export interface Keyvalue extends BaseKeyvalue {
@@ -138,7 +147,7 @@ export type BaseRecordSelector = BaseNode
 export interface RecordSelector extends BaseRecord {
   tag: 'RecordSelector'
   label: string
-  record?: Record | Identifier
+  record?: Record | Sequence | Identifier
 }
 
 export interface PatternMap {
