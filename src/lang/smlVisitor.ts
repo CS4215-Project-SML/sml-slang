@@ -8,6 +8,7 @@ import { ExpressionApplicationInfixContext } from "./smlParser";
 import { ExpressionApplicationPrefixContext } from "./smlParser";
 import { ExpressionRecordContext } from "./smlParser";
 import { ExpressionSequenceContext } from "./smlParser";
+import { ExpressionListContext } from "./smlParser";
 import { ExpressionRecordSelectorContext } from "./smlParser";
 import { ExpressionConstantContext } from "./smlParser";
 import { ExpressionIdContext } from "./smlParser";
@@ -86,6 +87,14 @@ export interface smlVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitExpressionSequence?: (ctx: ExpressionSequenceContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `expressionList`
+	 * labeled alternative in `smlParser.expression`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitExpressionList?: (ctx: ExpressionListContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by the `expressionRecordSelector`

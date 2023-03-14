@@ -21,6 +21,7 @@ import {
   ExpressionConstantContext,
   ExpressionContext,
   ExpressionIdContext,
+  ExpressionListContext,
   ExpressionParenthesesContext,
   ExpressionRecordContext,
   ExpressionRecordSelectorContext,
@@ -260,6 +261,23 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
     return {
       tag: 'RecordSelector',
       label: name,
+      loc: contextToLocation(ctx)
+    }
+  }
+
+  visitExpressionList(ctx: ExpressionListContext): sml.Node {
+    this.debugVisit('Expression List', ctx)
+
+    const items = []
+    for (let i = 1; ctx.childCount > 2 && i < ctx.childCount; i += 2) {
+      const expr = ctx.getChild(i).accept(this) as sml.Expression
+      items.push(expr)
+    }
+
+    return {
+      tag: 'List',
+      length: items.length,
+      items: items,
       loc: contextToLocation(ctx)
     }
   }

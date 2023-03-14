@@ -157,6 +157,9 @@ const microcode = {
     if (cmd.record === undefined) throw new Error('bruh') // TODO: this shouldn't happen
     push(A, { tag: 'RecordSelectorInstruction', label: cmd.label }, cmd.record)
   },
+  List: (cmd: sml.List) => {
+    push(A, { tag: 'ListInstruction', length: cmd.length }, ...cmd.items.reverse())
+  },
   ExpressionDeclaration: (cmd: sml.ExpressionDeclaration) => {
     push(A, { tag: 'BindInstruction', name: 'it' }, cmd.value)
   },
@@ -222,6 +225,15 @@ const microcode = {
       throw new Error('bruh') // TODO: proper error handling
     }
   },
+  ListInstruction: (cmd: ListInstruction) => {
+    // Make sure that items are added to the object in the order they were specified
+    const items = []
+    for (let i = 0; i < cmd.length; i++) {
+      items.push(S.pop())
+    }
+    items.reverse()
+    push(S, { tag: 'List', length: cmd.length, items: items })
+  },
   InfixApplicationInstruction: (cmd: InfixApplicationInstruction) => {
     const right = (S.pop() as sml.Constant).value
     const left = (S.pop() as sml.Constant).value
@@ -233,32 +245,37 @@ const microcode = {
  * microcode instructions
  * **********************/
 interface PopInstruction {
-  tag: 'Pop'
+  tag: 'PopInstruction'
 }
 
 interface BindInstruction {
-  tag: 'Bind'
+  tag: 'BindInstruction'
   name: string
 }
 
 interface RecordInstruction {
-  tag: 'Record'
+  tag: 'RecordInstruction'
   length: number
 }
 
 interface SequenceInstruction {
-  tag: 'Sequence'
+  tag: 'SequenceInstruction'
   length: number
 }
 
 interface KeyvalueInstruction {
-  tag: 'Keyvalue'
+  tag: 'KeyvalueInstruction'
   key: string
 }
 
 interface RecordSelectorInstruction {
   tag: 'RecordSelectorInstruction'
   label: string
+}
+
+interface ListInstruction {
+  tag: 'ListInstruction'
+  length: number
 }
 
 interface InfixApplicationInstruction {

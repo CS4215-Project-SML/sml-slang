@@ -45,6 +45,7 @@ export interface NodeMap {
   Sequence: Sequence
   Keyvalue: Keyvalue
   RecordSelector: RecordSelector
+  List: List
   Pattern: Pattern
   Identifier: Identifier
   Constant: Constant
@@ -98,7 +99,9 @@ export interface ExpressionMap {
   PrefixApplicationExpression: PrefixApplicationExpression
   InfixApplicationExpression: InfixApplicationExpression
   Record: Record
+  Sequence: Sequence
   RecordSelector: RecordSelector
+  List: List
   Identifier: Identifier
   Constant: Constant
 }
@@ -132,6 +135,14 @@ export interface Sequence extends BaseSequence {
   tag: 'Sequence'
   length: number
   items: Object
+}
+
+export type BaseList = BaseNode
+
+export interface List extends BaseList {
+  tag: 'List'
+  length: number
+  items: Array<any>
 }
 
 export type BaseKeyvalue = BaseNode

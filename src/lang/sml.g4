@@ -35,14 +35,15 @@ pattern
  * Expressions
  */
 expression
-    : '(' inner=expression ')'                              # expressionParentheses
-    | left=expression operator=id right=expression          # expressionApplicationInfix
-    | operator=expression operand=expression                # expressionApplicationPrefix
-    | '{' (keyvalue? | (keyvalue (',' keyvalue)+)) '}'      # expressionRecord
-    | '(' expression ',' expression (',' expression)* ')'   # expressionSequence
-    | '#' label                                             # expressionRecordSelector
-    | constant                                              # expressionConstant
-    | id                                                    # expressionId
+    : '(' inner=expression ')'                                  # expressionParentheses
+    | left=expression operator=id right=expression              # expressionApplicationInfix
+    | operator=expression operand=expression                    # expressionApplicationPrefix
+    | '{' (keyvalue? | (keyvalue (',' keyvalue)+)) '}'          # expressionRecord
+    | '(' expression ',' expression (',' expression)* ')'       # expressionSequence
+    | '[' (expression? | (expression (',' expression)+)) ']'    # expressionList
+    | '#' label                                                 # expressionRecordSelector
+    | constant                                                  # expressionConstant
+    | id                                                        # expressionId
     ;
 
 keyvalue

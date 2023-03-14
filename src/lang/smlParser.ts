@@ -55,49 +55,51 @@ export class smlParser extends Parser {
 	public static readonly T__24 = 25;
 	public static readonly T__25 = 26;
 	public static readonly T__26 = 27;
-	public static readonly CHAR = 28;
-	public static readonly STR = 29;
-	public static readonly BOOL = 30;
-	public static readonly REAL = 31;
-	public static readonly INT = 32;
-	public static readonly ABSTYPE = 33;
-	public static readonly AND = 34;
-	public static readonly ANDALSO = 35;
-	public static readonly AS = 36;
-	public static readonly CASE = 37;
-	public static readonly DATATYPE = 38;
-	public static readonly DO = 39;
-	public static readonly ELSE = 40;
-	public static readonly END = 41;
-	public static readonly EXCEPTION = 42;
-	public static readonly FN = 43;
-	public static readonly FUN = 44;
-	public static readonly HANDLE = 45;
-	public static readonly IF = 46;
-	public static readonly IN = 47;
-	public static readonly INFIX = 48;
-	public static readonly INFIXR = 49;
-	public static readonly LET = 50;
-	public static readonly LOCAL = 51;
-	public static readonly NONFIX = 52;
-	public static readonly OF = 53;
-	public static readonly OP = 54;
-	public static readonly OPEN = 55;
-	public static readonly ORELSE = 56;
-	public static readonly RAISE = 57;
-	public static readonly REC = 58;
-	public static readonly THEN = 59;
-	public static readonly TYPE = 60;
-	public static readonly VAL = 61;
-	public static readonly WITH = 62;
-	public static readonly WITHTYPE = 63;
-	public static readonly WHILE = 64;
-	public static readonly TRUE = 65;
-	public static readonly FALSE = 66;
-	public static readonly DIGIT = 67;
-	public static readonly LETTER = 68;
-	public static readonly NEWLINE = 69;
-	public static readonly WHITESPACE = 70;
+	public static readonly T__27 = 28;
+	public static readonly T__28 = 29;
+	public static readonly CHAR = 30;
+	public static readonly STR = 31;
+	public static readonly BOOL = 32;
+	public static readonly REAL = 33;
+	public static readonly INT = 34;
+	public static readonly ABSTYPE = 35;
+	public static readonly AND = 36;
+	public static readonly ANDALSO = 37;
+	public static readonly AS = 38;
+	public static readonly CASE = 39;
+	public static readonly DATATYPE = 40;
+	public static readonly DO = 41;
+	public static readonly ELSE = 42;
+	public static readonly END = 43;
+	public static readonly EXCEPTION = 44;
+	public static readonly FN = 45;
+	public static readonly FUN = 46;
+	public static readonly HANDLE = 47;
+	public static readonly IF = 48;
+	public static readonly IN = 49;
+	public static readonly INFIX = 50;
+	public static readonly INFIXR = 51;
+	public static readonly LET = 52;
+	public static readonly LOCAL = 53;
+	public static readonly NONFIX = 54;
+	public static readonly OF = 55;
+	public static readonly OP = 56;
+	public static readonly OPEN = 57;
+	public static readonly ORELSE = 58;
+	public static readonly RAISE = 59;
+	public static readonly REC = 60;
+	public static readonly THEN = 61;
+	public static readonly TYPE = 62;
+	public static readonly VAL = 63;
+	public static readonly WITH = 64;
+	public static readonly WITHTYPE = 65;
+	public static readonly WHILE = 66;
+	public static readonly TRUE = 67;
+	public static readonly FALSE = 68;
+	public static readonly DIGIT = 69;
+	public static readonly LETTER = 70;
+	public static readonly NEWLINE = 71;
+	public static readonly WHITESPACE = 72;
 	public static readonly RULE_program = 0;
 	public static readonly RULE_declaration = 1;
 	public static readonly RULE_valbind = 2;
@@ -115,26 +117,27 @@ export class smlParser extends Parser {
 	];
 
 	private static readonly _LITERAL_NAMES: Array<string | undefined> = [
-		undefined, "';'", "'='", "'('", "')'", "'{'", "','", "'}'", "'#'", "'''", 
-		"'_'", "'!'", "'%'", "'&'", "'$'", "'+'", "'-'", "'/'", "':'", "'<'", 
-		"'>'", "'?'", "'@'", "'\\'", "'~'", "'^'", "'|'", "'*'", undefined, undefined, 
-		undefined, undefined, undefined, "'abstype'", "'and'", "'andalso'", "'as'", 
-		"'case'", "'datatype'", "'do'", "'else'", "'end'", "'exception'", "'fn'", 
-		"'fun'", "'handle'", "'if'", "'in'", "'infix'", "'infixr'", "'let'", "'local'", 
-		"'nonfix'", "'of'", "'op'", "'open'", "'orelse'", "'raise'", "'rec'", 
-		"'then'", "'type'", "'val'", "'with'", "'withtype'", "'while'", "'true'", 
-		"'false'",
+		undefined, "';'", "'='", "'('", "')'", "'{'", "','", "'}'", "'['", "']'", 
+		"'#'", "'''", "'_'", "'!'", "'%'", "'&'", "'$'", "'+'", "'-'", "'/'", 
+		"':'", "'<'", "'>'", "'?'", "'@'", "'\\'", "'~'", "'^'", "'|'", "'*'", 
+		undefined, undefined, undefined, undefined, undefined, "'abstype'", "'and'", 
+		"'andalso'", "'as'", "'case'", "'datatype'", "'do'", "'else'", "'end'", 
+		"'exception'", "'fn'", "'fun'", "'handle'", "'if'", "'in'", "'infix'", 
+		"'infixr'", "'let'", "'local'", "'nonfix'", "'of'", "'op'", "'open'", 
+		"'orelse'", "'raise'", "'rec'", "'then'", "'type'", "'val'", "'with'", 
+		"'withtype'", "'while'", "'true'", "'false'",
 	];
 	private static readonly _SYMBOLIC_NAMES: Array<string | undefined> = [
 		undefined, undefined, undefined, undefined, undefined, undefined, undefined, 
 		undefined, undefined, undefined, undefined, undefined, undefined, undefined, 
 		undefined, undefined, undefined, undefined, undefined, undefined, undefined, 
 		undefined, undefined, undefined, undefined, undefined, undefined, undefined, 
-		"CHAR", "STR", "BOOL", "REAL", "INT", "ABSTYPE", "AND", "ANDALSO", "AS", 
-		"CASE", "DATATYPE", "DO", "ELSE", "END", "EXCEPTION", "FN", "FUN", "HANDLE", 
-		"IF", "IN", "INFIX", "INFIXR", "LET", "LOCAL", "NONFIX", "OF", "OP", "OPEN", 
-		"ORELSE", "RAISE", "REC", "THEN", "TYPE", "VAL", "WITH", "WITHTYPE", "WHILE", 
-		"TRUE", "FALSE", "DIGIT", "LETTER", "NEWLINE", "WHITESPACE",
+		undefined, undefined, "CHAR", "STR", "BOOL", "REAL", "INT", "ABSTYPE", 
+		"AND", "ANDALSO", "AS", "CASE", "DATATYPE", "DO", "ELSE", "END", "EXCEPTION", 
+		"FN", "FUN", "HANDLE", "IF", "IN", "INFIX", "INFIXR", "LET", "LOCAL", 
+		"NONFIX", "OF", "OP", "OPEN", "ORELSE", "RAISE", "REC", "THEN", "TYPE", 
+		"VAL", "WITH", "WITHTYPE", "WHILE", "TRUE", "FALSE", "DIGIT", "LETTER", 
+		"NEWLINE", "WHITESPACE",
 	];
 	public static readonly VOCABULARY: Vocabulary = new VocabularyImpl(smlParser._LITERAL_NAMES, smlParser._SYMBOLIC_NAMES, []);
 
@@ -271,9 +274,8 @@ export class smlParser extends Parser {
 			case smlParser.T__2:
 			case smlParser.T__4:
 			case smlParser.T__7:
-			case smlParser.T__8:
+			case smlParser.T__9:
 			case smlParser.T__10:
-			case smlParser.T__11:
 			case smlParser.T__12:
 			case smlParser.T__13:
 			case smlParser.T__14:
@@ -289,6 +291,8 @@ export class smlParser extends Parser {
 			case smlParser.T__24:
 			case smlParser.T__25:
 			case smlParser.T__26:
+			case smlParser.T__27:
+			case smlParser.T__28:
 			case smlParser.CHAR:
 			case smlParser.STR:
 			case smlParser.BOOL:
@@ -370,10 +374,8 @@ export class smlParser extends Parser {
 				}
 				break;
 			case smlParser.T__1:
-			case smlParser.T__7:
-			case smlParser.T__8:
+			case smlParser.T__9:
 			case smlParser.T__10:
-			case smlParser.T__11:
 			case smlParser.T__12:
 			case smlParser.T__13:
 			case smlParser.T__14:
@@ -389,6 +391,8 @@ export class smlParser extends Parser {
 			case smlParser.T__24:
 			case smlParser.T__25:
 			case smlParser.T__26:
+			case smlParser.T__27:
+			case smlParser.T__28:
 			case smlParser.LETTER:
 				_localctx = new PatternIdContext(_localctx);
 				this.enterOuterAlt(_localctx, 2);
@@ -435,9 +439,9 @@ export class smlParser extends Parser {
 			let _alt: number;
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 82;
+			this.state = 96;
 			this._errHandler.sync(this);
-			switch ( this.interpreter.adaptivePredict(this._input, 8, this._ctx) ) {
+			switch ( this.interpreter.adaptivePredict(this._input, 11, this._ctx) ) {
 			case 1:
 				{
 				_localctx = new ExpressionParenthesesContext(_localctx);
@@ -468,7 +472,7 @@ export class smlParser extends Parser {
 					this.state = 53;
 					this._errHandler.sync(this);
 					_la = this._input.LA(1);
-					if (((((_la - 2)) & ~0x1F) === 0 && ((1 << (_la - 2)) & ((1 << (smlParser.T__1 - 2)) | (1 << (smlParser.T__7 - 2)) | (1 << (smlParser.T__8 - 2)) | (1 << (smlParser.T__10 - 2)) | (1 << (smlParser.T__11 - 2)) | (1 << (smlParser.T__12 - 2)) | (1 << (smlParser.T__13 - 2)) | (1 << (smlParser.T__14 - 2)) | (1 << (smlParser.T__15 - 2)) | (1 << (smlParser.T__16 - 2)) | (1 << (smlParser.T__17 - 2)) | (1 << (smlParser.T__18 - 2)) | (1 << (smlParser.T__19 - 2)) | (1 << (smlParser.T__20 - 2)) | (1 << (smlParser.T__21 - 2)) | (1 << (smlParser.T__22 - 2)) | (1 << (smlParser.T__23 - 2)) | (1 << (smlParser.T__24 - 2)) | (1 << (smlParser.T__25 - 2)) | (1 << (smlParser.T__26 - 2)) | (1 << (smlParser.INT - 2)))) !== 0) || _la === smlParser.LETTER) {
+					if ((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << smlParser.T__1) | (1 << smlParser.T__9) | (1 << smlParser.T__10) | (1 << smlParser.T__12) | (1 << smlParser.T__13) | (1 << smlParser.T__14) | (1 << smlParser.T__15) | (1 << smlParser.T__16) | (1 << smlParser.T__17) | (1 << smlParser.T__18) | (1 << smlParser.T__19) | (1 << smlParser.T__20) | (1 << smlParser.T__21) | (1 << smlParser.T__22) | (1 << smlParser.T__23) | (1 << smlParser.T__24) | (1 << smlParser.T__25) | (1 << smlParser.T__26) | (1 << smlParser.T__27) | (1 << smlParser.T__28))) !== 0) || _la === smlParser.INT || _la === smlParser.LETTER) {
 						{
 						this.state = 52;
 						this.keyvalue();
@@ -544,40 +548,95 @@ export class smlParser extends Parser {
 
 			case 4:
 				{
-				_localctx = new ExpressionRecordSelectorContext(_localctx);
+				_localctx = new ExpressionListContext(_localctx);
 				this._ctx = _localctx;
 				_prevctx = _localctx;
 				this.state = 78;
 				this.match(smlParser.T__7);
-				this.state = 79;
-				this.label();
+				this.state = 89;
+				this._errHandler.sync(this);
+				switch ( this.interpreter.adaptivePredict(this._input, 10, this._ctx) ) {
+				case 1:
+					{
+					this.state = 80;
+					this._errHandler.sync(this);
+					_la = this._input.LA(1);
+					if ((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << smlParser.T__1) | (1 << smlParser.T__2) | (1 << smlParser.T__4) | (1 << smlParser.T__7) | (1 << smlParser.T__9) | (1 << smlParser.T__10) | (1 << smlParser.T__12) | (1 << smlParser.T__13) | (1 << smlParser.T__14) | (1 << smlParser.T__15) | (1 << smlParser.T__16) | (1 << smlParser.T__17) | (1 << smlParser.T__18) | (1 << smlParser.T__19) | (1 << smlParser.T__20) | (1 << smlParser.T__21) | (1 << smlParser.T__22) | (1 << smlParser.T__23) | (1 << smlParser.T__24) | (1 << smlParser.T__25) | (1 << smlParser.T__26) | (1 << smlParser.T__27) | (1 << smlParser.T__28) | (1 << smlParser.CHAR) | (1 << smlParser.STR))) !== 0) || ((((_la - 32)) & ~0x1F) === 0 && ((1 << (_la - 32)) & ((1 << (smlParser.BOOL - 32)) | (1 << (smlParser.REAL - 32)) | (1 << (smlParser.INT - 32)))) !== 0) || _la === smlParser.LETTER) {
+						{
+						this.state = 79;
+						this.expression(0);
+						}
+					}
+
+					}
+					break;
+
+				case 2:
+					{
+					{
+					this.state = 82;
+					this.expression(0);
+					this.state = 85;
+					this._errHandler.sync(this);
+					_la = this._input.LA(1);
+					do {
+						{
+						{
+						this.state = 83;
+						this.match(smlParser.T__5);
+						this.state = 84;
+						this.expression(0);
+						}
+						}
+						this.state = 87;
+						this._errHandler.sync(this);
+						_la = this._input.LA(1);
+					} while (_la === smlParser.T__5);
+					}
+					}
+					break;
+				}
+				this.state = 91;
+				this.match(smlParser.T__8);
 				}
 				break;
 
 			case 5:
 				{
-				_localctx = new ExpressionConstantContext(_localctx);
+				_localctx = new ExpressionRecordSelectorContext(_localctx);
 				this._ctx = _localctx;
 				_prevctx = _localctx;
-				this.state = 80;
-				this.constant();
+				this.state = 92;
+				this.match(smlParser.T__9);
+				this.state = 93;
+				this.label();
 				}
 				break;
 
 			case 6:
 				{
+				_localctx = new ExpressionConstantContext(_localctx);
+				this._ctx = _localctx;
+				_prevctx = _localctx;
+				this.state = 94;
+				this.constant();
+				}
+				break;
+
+			case 7:
+				{
 				_localctx = new ExpressionIdContext(_localctx);
 				this._ctx = _localctx;
 				_prevctx = _localctx;
-				this.state = 81;
+				this.state = 95;
 				this.id();
 				}
 				break;
 			}
 			this._ctx._stop = this._input.tryLT(-1);
-			this.state = 92;
+			this.state = 106;
 			this._errHandler.sync(this);
-			_alt = this.interpreter.adaptivePredict(this._input, 10, this._ctx);
+			_alt = this.interpreter.adaptivePredict(this._input, 13, this._ctx);
 			while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
 				if (_alt === 1) {
 					if (this._parseListeners != null) {
@@ -585,22 +644,22 @@ export class smlParser extends Parser {
 					}
 					_prevctx = _localctx;
 					{
-					this.state = 90;
+					this.state = 104;
 					this._errHandler.sync(this);
-					switch ( this.interpreter.adaptivePredict(this._input, 9, this._ctx) ) {
+					switch ( this.interpreter.adaptivePredict(this._input, 12, this._ctx) ) {
 					case 1:
 						{
 						_localctx = new ExpressionApplicationInfixContext(new ExpressionContext(_parentctx, _parentState));
 						(_localctx as ExpressionApplicationInfixContext)._left = _prevctx;
 						this.pushNewRecursionContext(_localctx, _startState, smlParser.RULE_expression);
-						this.state = 84;
-						if (!(this.precpred(this._ctx, 7))) {
-							throw this.createFailedPredicateException("this.precpred(this._ctx, 7)");
+						this.state = 98;
+						if (!(this.precpred(this._ctx, 8))) {
+							throw this.createFailedPredicateException("this.precpred(this._ctx, 8)");
 						}
-						this.state = 85;
+						this.state = 99;
 						(_localctx as ExpressionApplicationInfixContext)._operator = this.id();
-						this.state = 86;
-						(_localctx as ExpressionApplicationInfixContext)._right = this.expression(8);
+						this.state = 100;
+						(_localctx as ExpressionApplicationInfixContext)._right = this.expression(9);
 						}
 						break;
 
@@ -609,20 +668,20 @@ export class smlParser extends Parser {
 						_localctx = new ExpressionApplicationPrefixContext(new ExpressionContext(_parentctx, _parentState));
 						(_localctx as ExpressionApplicationPrefixContext)._operator = _prevctx;
 						this.pushNewRecursionContext(_localctx, _startState, smlParser.RULE_expression);
-						this.state = 88;
-						if (!(this.precpred(this._ctx, 6))) {
-							throw this.createFailedPredicateException("this.precpred(this._ctx, 6)");
+						this.state = 102;
+						if (!(this.precpred(this._ctx, 7))) {
+							throw this.createFailedPredicateException("this.precpred(this._ctx, 7)");
 						}
-						this.state = 89;
-						(_localctx as ExpressionApplicationPrefixContext)._operand = this.expression(7);
+						this.state = 103;
+						(_localctx as ExpressionApplicationPrefixContext)._operand = this.expression(8);
 						}
 						break;
 					}
 					}
 				}
-				this.state = 94;
+				this.state = 108;
 				this._errHandler.sync(this);
-				_alt = this.interpreter.adaptivePredict(this._input, 10, this._ctx);
+				_alt = this.interpreter.adaptivePredict(this._input, 13, this._ctx);
 			}
 			}
 		}
@@ -647,11 +706,11 @@ export class smlParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 95;
+			this.state = 109;
 			_localctx._key = this.label();
-			this.state = 96;
+			this.state = 110;
 			this.match(smlParser.T__1);
-			this.state = 97;
+			this.state = 111;
 			_localctx._value = this.expression(0);
 			}
 		}
@@ -674,14 +733,12 @@ export class smlParser extends Parser {
 		let _localctx: LabelContext = new LabelContext(this._ctx, this.state);
 		this.enterRule(_localctx, 12, smlParser.RULE_label);
 		try {
-			this.state = 101;
+			this.state = 115;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
 			case smlParser.T__1:
-			case smlParser.T__7:
-			case smlParser.T__8:
+			case smlParser.T__9:
 			case smlParser.T__10:
-			case smlParser.T__11:
 			case smlParser.T__12:
 			case smlParser.T__13:
 			case smlParser.T__14:
@@ -697,11 +754,13 @@ export class smlParser extends Parser {
 			case smlParser.T__24:
 			case smlParser.T__25:
 			case smlParser.T__26:
+			case smlParser.T__27:
+			case smlParser.T__28:
 			case smlParser.LETTER:
 				_localctx = new LabelIdContext(_localctx);
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 99;
+				this.state = 113;
 				this.id();
 				}
 				break;
@@ -709,7 +768,7 @@ export class smlParser extends Parser {
 				_localctx = new LabelIntContext(_localctx);
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 100;
+				this.state = 114;
 				this.match(smlParser.INT);
 				}
 				break;
@@ -738,25 +797,25 @@ export class smlParser extends Parser {
 		let _la: number;
 		try {
 			let _alt: number;
-			this.state = 115;
+			this.state = 129;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
 			case smlParser.LETTER:
 				_localctx = new IdAlphaContext(_localctx);
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 103;
+				this.state = 117;
 				this.match(smlParser.LETTER);
-				this.state = 107;
+				this.state = 121;
 				this._errHandler.sync(this);
-				_alt = this.interpreter.adaptivePredict(this._input, 12, this._ctx);
+				_alt = this.interpreter.adaptivePredict(this._input, 15, this._ctx);
 				while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
 					if (_alt === 1) {
 						{
 						{
-						this.state = 104;
+						this.state = 118;
 						_la = this._input.LA(1);
-						if (!(_la === smlParser.T__8 || _la === smlParser.T__9 || _la === smlParser.DIGIT || _la === smlParser.LETTER)) {
+						if (!(_la === smlParser.T__10 || _la === smlParser.T__11 || _la === smlParser.DIGIT || _la === smlParser.LETTER)) {
 						this._errHandler.recoverInline(this);
 						} else {
 							if (this._input.LA(1) === Token.EOF) {
@@ -769,17 +828,15 @@ export class smlParser extends Parser {
 						}
 						}
 					}
-					this.state = 109;
+					this.state = 123;
 					this._errHandler.sync(this);
-					_alt = this.interpreter.adaptivePredict(this._input, 12, this._ctx);
+					_alt = this.interpreter.adaptivePredict(this._input, 15, this._ctx);
 				}
 				}
 				break;
 			case smlParser.T__1:
-			case smlParser.T__7:
-			case smlParser.T__8:
+			case smlParser.T__9:
 			case smlParser.T__10:
-			case smlParser.T__11:
 			case smlParser.T__12:
 			case smlParser.T__13:
 			case smlParser.T__14:
@@ -795,10 +852,12 @@ export class smlParser extends Parser {
 			case smlParser.T__24:
 			case smlParser.T__25:
 			case smlParser.T__26:
+			case smlParser.T__27:
+			case smlParser.T__28:
 				_localctx = new IdSymbolContext(_localctx);
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 111;
+				this.state = 125;
 				this._errHandler.sync(this);
 				_alt = 1;
 				do {
@@ -806,9 +865,9 @@ export class smlParser extends Parser {
 					case 1:
 						{
 						{
-						this.state = 110;
+						this.state = 124;
 						_la = this._input.LA(1);
-						if (!((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << smlParser.T__1) | (1 << smlParser.T__7) | (1 << smlParser.T__8) | (1 << smlParser.T__10) | (1 << smlParser.T__11) | (1 << smlParser.T__12) | (1 << smlParser.T__13) | (1 << smlParser.T__14) | (1 << smlParser.T__15) | (1 << smlParser.T__16) | (1 << smlParser.T__17) | (1 << smlParser.T__18) | (1 << smlParser.T__19) | (1 << smlParser.T__20) | (1 << smlParser.T__21) | (1 << smlParser.T__22) | (1 << smlParser.T__23) | (1 << smlParser.T__24) | (1 << smlParser.T__25) | (1 << smlParser.T__26))) !== 0))) {
+						if (!((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << smlParser.T__1) | (1 << smlParser.T__9) | (1 << smlParser.T__10) | (1 << smlParser.T__12) | (1 << smlParser.T__13) | (1 << smlParser.T__14) | (1 << smlParser.T__15) | (1 << smlParser.T__16) | (1 << smlParser.T__17) | (1 << smlParser.T__18) | (1 << smlParser.T__19) | (1 << smlParser.T__20) | (1 << smlParser.T__21) | (1 << smlParser.T__22) | (1 << smlParser.T__23) | (1 << smlParser.T__24) | (1 << smlParser.T__25) | (1 << smlParser.T__26) | (1 << smlParser.T__27) | (1 << smlParser.T__28))) !== 0))) {
 						this._errHandler.recoverInline(this);
 						} else {
 							if (this._input.LA(1) === Token.EOF) {
@@ -824,9 +883,9 @@ export class smlParser extends Parser {
 					default:
 						throw new NoViableAltException(this);
 					}
-					this.state = 113;
+					this.state = 127;
 					this._errHandler.sync(this);
-					_alt = this.interpreter.adaptivePredict(this._input, 13, this._ctx);
+					_alt = this.interpreter.adaptivePredict(this._input, 16, this._ctx);
 				} while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER);
 				}
 				break;
@@ -856,17 +915,17 @@ export class smlParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 117;
-			this.match(smlParser.T__8);
-			this.state = 121;
+			this.state = 131;
+			this.match(smlParser.T__10);
+			this.state = 135;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			while (_la === smlParser.T__8 || _la === smlParser.T__9 || _la === smlParser.DIGIT || _la === smlParser.LETTER) {
+			while (_la === smlParser.T__10 || _la === smlParser.T__11 || _la === smlParser.DIGIT || _la === smlParser.LETTER) {
 				{
 				{
-				this.state = 118;
+				this.state = 132;
 				_la = this._input.LA(1);
-				if (!(_la === smlParser.T__8 || _la === smlParser.T__9 || _la === smlParser.DIGIT || _la === smlParser.LETTER)) {
+				if (!(_la === smlParser.T__10 || _la === smlParser.T__11 || _la === smlParser.DIGIT || _la === smlParser.LETTER)) {
 				this._errHandler.recoverInline(this);
 				} else {
 					if (this._input.LA(1) === Token.EOF) {
@@ -878,7 +937,7 @@ export class smlParser extends Parser {
 				}
 				}
 				}
-				this.state = 123;
+				this.state = 137;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
@@ -903,14 +962,14 @@ export class smlParser extends Parser {
 		let _localctx: ConstantContext = new ConstantContext(this._ctx, this.state);
 		this.enterRule(_localctx, 18, smlParser.RULE_constant);
 		try {
-			this.state = 129;
+			this.state = 143;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
 			case smlParser.INT:
 				_localctx = new ConstantIntContext(_localctx);
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 124;
+				this.state = 138;
 				this.match(smlParser.INT);
 				}
 				break;
@@ -918,7 +977,7 @@ export class smlParser extends Parser {
 				_localctx = new ConstantRealContext(_localctx);
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 125;
+				this.state = 139;
 				this.match(smlParser.REAL);
 				}
 				break;
@@ -926,7 +985,7 @@ export class smlParser extends Parser {
 				_localctx = new ConstantBoolContext(_localctx);
 				this.enterOuterAlt(_localctx, 3);
 				{
-				this.state = 126;
+				this.state = 140;
 				this.match(smlParser.BOOL);
 				}
 				break;
@@ -934,7 +993,7 @@ export class smlParser extends Parser {
 				_localctx = new ConstantCharContext(_localctx);
 				this.enterOuterAlt(_localctx, 4);
 				{
-				this.state = 127;
+				this.state = 141;
 				this.match(smlParser.CHAR);
 				}
 				break;
@@ -942,7 +1001,7 @@ export class smlParser extends Parser {
 				_localctx = new ConstantStrContext(_localctx);
 				this.enterOuterAlt(_localctx, 5);
 				{
-				this.state = 128;
+				this.state = 142;
 				this.match(smlParser.STR);
 				}
 				break;
@@ -985,16 +1044,16 @@ export class smlParser extends Parser {
 	private expression_sempred(_localctx: ExpressionContext, predIndex: number): boolean {
 		switch (predIndex) {
 		case 1:
-			return this.precpred(this._ctx, 7);
+			return this.precpred(this._ctx, 8);
 
 		case 2:
-			return this.precpred(this._ctx, 6);
+			return this.precpred(this._ctx, 7);
 		}
 		return true;
 	}
 
 	public static readonly _serializedATN: string =
-		"\x03\uC91D\uCABA\u058D\uAFBA\u4F53\u0607\uEA8B\uC241\x03H\x86\x04\x02" +
+		"\x03\uC91D\uCABA\u058D\uAFBA\u4F53\u0607\uEA8B\uC241\x03J\x94\x04\x02" +
 		"\t\x02\x04\x03\t\x03\x04\x04\t\x04\x04\x05\t\x05\x04\x06\t\x06\x04\x07" +
 		"\t\x07\x04\b\t\b\x04\t\t\t\x04\n\t\n\x04\v\t\v\x03\x02\x03\x02\x03\x02" +
 		"\x05\x02\x1A\n\x02\x03\x02\x03\x02\x03\x02\x07\x02\x1F\n\x02\f\x02\x0E" +
@@ -1003,52 +1062,60 @@ export class smlParser extends Parser {
 		"\x06\x03\x06\x03\x06\x03\x06\x05\x068\n\x06\x03\x06\x03\x06\x03\x06\x06" +
 		"\x06=\n\x06\r\x06\x0E\x06>\x05\x06A\n\x06\x03\x06\x03\x06\x03\x06\x03" +
 		"\x06\x03\x06\x03\x06\x03\x06\x07\x06J\n\x06\f\x06\x0E\x06M\v\x06\x03\x06" +
-		"\x03\x06\x03\x06\x03\x06\x03\x06\x03\x06\x05\x06U\n\x06\x03\x06\x03\x06" +
-		"\x03\x06\x03\x06\x03\x06\x03\x06\x07\x06]\n\x06\f\x06\x0E\x06`\v\x06\x03" +
-		"\x07\x03\x07\x03\x07\x03\x07\x03\b\x03\b\x05\bh\n\b\x03\t\x03\t\x07\t" +
-		"l\n\t\f\t\x0E\to\v\t\x03\t\x06\tr\n\t\r\t\x0E\ts\x05\tv\n\t\x03\n\x03" +
-		"\n\x07\nz\n\n\f\n\x0E\n}\v\n\x03\v\x03\v\x03\v\x03\v\x03\v\x05\v\x84\n" +
-		"\v\x03\v\x02\x02\x04\x02\n\f\x02\x02\x04\x02\x06\x02\b\x02\n\x02\f\x02" +
-		"\x0E\x02\x10\x02\x12\x02\x14\x02\x02\x04\x04\x02\v\fEF\x05\x02\x04\x04" +
-		"\n\v\r\x1D\x02\x93\x02\x19\x03\x02\x02\x02\x04&\x03\x02\x02\x02\x06(\x03" +
-		"\x02\x02\x02\b.\x03\x02\x02\x02\nT\x03\x02\x02\x02\fa\x03\x02\x02\x02" +
-		"\x0Eg\x03\x02\x02\x02\x10u\x03\x02\x02\x02\x12w\x03\x02\x02\x02\x14\x83" +
-		"\x03\x02\x02\x02\x16\x17\b\x02\x01\x02\x17\x1A\x05\x04\x03\x02\x18\x1A" +
-		"\x03\x02\x02\x02\x19\x16\x03\x02\x02\x02\x19\x18\x03\x02\x02\x02\x1A " +
-		"\x03\x02\x02\x02\x1B\x1C\f\x05\x02\x02\x1C\x1D\x07\x03\x02\x02\x1D\x1F" +
-		"\x05\x02\x02\x06\x1E\x1B\x03\x02\x02\x02\x1F\"\x03\x02\x02\x02 \x1E\x03" +
-		"\x02\x02\x02 !\x03\x02\x02\x02!\x03\x03\x02\x02\x02\" \x03\x02\x02\x02" +
-		"#$\x07?\x02\x02$\'\x05\x06\x04\x02%\'\x05\n\x06\x02&#\x03\x02\x02\x02" +
-		"&%\x03\x02\x02\x02\'\x05\x03\x02\x02\x02()\x05\x10\t\x02)*\x07\x04\x02" +
-		"\x02*+\x05\n\x06\x02+\x07\x03\x02\x02\x02,/\x05\x14\v\x02-/\x05\x10\t" +
-		"\x02.,\x03\x02\x02\x02.-\x03\x02\x02\x02/\t\x03\x02\x02\x0201\b\x06\x01" +
-		"\x0212\x07\x05\x02\x0223\x05\n\x06\x0234\x07\x06\x02\x024U\x03\x02\x02" +
-		"\x025@\x07\x07\x02\x0268\x05\f\x07\x0276\x03\x02\x02\x0278\x03\x02\x02" +
-		"\x028A\x03\x02\x02\x029<\x05\f\x07\x02:;\x07\b\x02\x02;=\x05\f\x07\x02" +
-		"<:\x03\x02\x02\x02=>\x03\x02\x02\x02><\x03\x02\x02\x02>?\x03\x02\x02\x02" +
-		"?A\x03\x02\x02\x02@7\x03\x02\x02\x02@9\x03\x02\x02\x02AB\x03\x02\x02\x02" +
-		"BU\x07\t\x02\x02CD\x07\x05\x02\x02DE\x05\n\x06\x02EF\x07\b\x02\x02FK\x05" +
-		"\n\x06\x02GH\x07\b\x02\x02HJ\x05\n\x06\x02IG\x03\x02\x02\x02JM\x03\x02" +
-		"\x02\x02KI\x03\x02\x02\x02KL\x03\x02\x02\x02LN\x03\x02\x02\x02MK\x03\x02" +
-		"\x02\x02NO\x07\x06\x02\x02OU\x03\x02\x02\x02PQ\x07\n\x02\x02QU\x05\x0E" +
-		"\b\x02RU\x05\x14\v\x02SU\x05\x10\t\x02T0\x03\x02\x02\x02T5\x03\x02\x02" +
-		"\x02TC\x03\x02\x02\x02TP\x03\x02\x02\x02TR\x03\x02\x02\x02TS\x03\x02\x02" +
-		"\x02U^\x03\x02\x02\x02VW\f\t\x02\x02WX\x05\x10\t\x02XY\x05\n\x06\nY]\x03" +
-		"\x02\x02\x02Z[\f\b\x02\x02[]\x05\n\x06\t\\V\x03\x02\x02\x02\\Z\x03\x02" +
-		"\x02\x02]`\x03\x02\x02\x02^\\\x03\x02\x02\x02^_\x03\x02\x02\x02_\v\x03" +
-		"\x02\x02\x02`^\x03\x02\x02\x02ab\x05\x0E\b\x02bc\x07\x04\x02\x02cd\x05" +
-		"\n\x06\x02d\r\x03\x02\x02\x02eh\x05\x10\t\x02fh\x07\"\x02\x02ge\x03\x02" +
-		"\x02\x02gf\x03\x02\x02\x02h\x0F\x03\x02\x02\x02im\x07F\x02\x02jl\t\x02" +
-		"\x02\x02kj\x03\x02\x02\x02lo\x03\x02\x02\x02mk\x03\x02\x02\x02mn\x03\x02" +
-		"\x02\x02nv\x03\x02\x02\x02om\x03\x02\x02\x02pr\t\x03\x02\x02qp\x03\x02" +
-		"\x02\x02rs\x03\x02\x02\x02sq\x03\x02\x02\x02st\x03\x02\x02\x02tv\x03\x02" +
-		"\x02\x02ui\x03\x02\x02\x02uq\x03\x02\x02\x02v\x11\x03\x02\x02\x02w{\x07" +
-		"\v\x02\x02xz\t\x02\x02\x02yx\x03\x02\x02\x02z}\x03\x02\x02\x02{y\x03\x02" +
-		"\x02\x02{|\x03\x02\x02\x02|\x13\x03\x02\x02\x02}{\x03\x02\x02\x02~\x84" +
-		"\x07\"\x02\x02\x7F\x84\x07!\x02\x02\x80\x84\x07 \x02\x02\x81\x84\x07\x1E" +
-		"\x02\x02\x82\x84\x07\x1F\x02\x02\x83~\x03\x02\x02\x02\x83\x7F\x03\x02" +
-		"\x02\x02\x83\x80\x03\x02\x02\x02\x83\x81\x03\x02\x02\x02\x83\x82\x03\x02" +
-		"\x02\x02\x84\x15\x03\x02\x02\x02\x13\x19 &.7>@KT\\^gmsu{\x83";
+		"\x03\x06\x03\x06\x03\x06\x05\x06S\n\x06\x03\x06\x03\x06\x03\x06\x06\x06" +
+		"X\n\x06\r\x06\x0E\x06Y\x05\x06\\\n\x06\x03\x06\x03\x06\x03\x06\x03\x06" +
+		"\x03\x06\x05\x06c\n\x06\x03\x06\x03\x06\x03\x06\x03\x06\x03\x06\x03\x06" +
+		"\x07\x06k\n\x06\f\x06\x0E\x06n\v\x06\x03\x07\x03\x07\x03\x07\x03\x07\x03" +
+		"\b\x03\b\x05\bv\n\b\x03\t\x03\t\x07\tz\n\t\f\t\x0E\t}\v\t\x03\t\x06\t" +
+		"\x80\n\t\r\t\x0E\t\x81\x05\t\x84\n\t\x03\n\x03\n\x07\n\x88\n\n\f\n\x0E" +
+		"\n\x8B\v\n\x03\v\x03\v\x03\v\x03\v\x03\v\x05\v\x92\n\v\x03\v\x02\x02\x04" +
+		"\x02\n\f\x02\x02\x04\x02\x06\x02\b\x02\n\x02\f\x02\x0E\x02\x10\x02\x12" +
+		"\x02\x14\x02\x02\x04\x04\x02\r\x0EGH\x05\x02\x04\x04\f\r\x0F\x1F\x02\xA5" +
+		"\x02\x19\x03\x02\x02\x02\x04&\x03\x02\x02\x02\x06(\x03\x02\x02\x02\b." +
+		"\x03\x02\x02\x02\nb\x03\x02\x02\x02\fo\x03\x02\x02\x02\x0Eu\x03\x02\x02" +
+		"\x02\x10\x83\x03\x02\x02\x02\x12\x85\x03\x02\x02\x02\x14\x91\x03\x02\x02" +
+		"\x02\x16\x17\b\x02\x01\x02\x17\x1A\x05\x04\x03\x02\x18\x1A\x03\x02\x02" +
+		"\x02\x19\x16\x03\x02\x02\x02\x19\x18\x03\x02\x02\x02\x1A \x03\x02\x02" +
+		"\x02\x1B\x1C\f\x05\x02\x02\x1C\x1D\x07\x03\x02\x02\x1D\x1F\x05\x02\x02" +
+		"\x06\x1E\x1B\x03\x02\x02\x02\x1F\"\x03\x02\x02\x02 \x1E\x03\x02\x02\x02" +
+		" !\x03\x02\x02\x02!\x03\x03\x02\x02\x02\" \x03\x02\x02\x02#$\x07A\x02" +
+		"\x02$\'\x05\x06\x04\x02%\'\x05\n\x06\x02&#\x03\x02\x02\x02&%\x03\x02\x02" +
+		"\x02\'\x05\x03\x02\x02\x02()\x05\x10\t\x02)*\x07\x04\x02\x02*+\x05\n\x06" +
+		"\x02+\x07\x03\x02\x02\x02,/\x05\x14\v\x02-/\x05\x10\t\x02.,\x03\x02\x02" +
+		"\x02.-\x03\x02\x02\x02/\t\x03\x02\x02\x0201\b\x06\x01\x0212\x07\x05\x02" +
+		"\x0223\x05\n\x06\x0234\x07\x06\x02\x024c\x03\x02\x02\x025@\x07\x07\x02" +
+		"\x0268\x05\f\x07\x0276\x03\x02\x02\x0278\x03\x02\x02\x028A\x03\x02\x02" +
+		"\x029<\x05\f\x07\x02:;\x07\b\x02\x02;=\x05\f\x07\x02<:\x03\x02\x02\x02" +
+		"=>\x03\x02\x02\x02><\x03\x02\x02\x02>?\x03\x02\x02\x02?A\x03\x02\x02\x02" +
+		"@7\x03\x02\x02\x02@9\x03\x02\x02\x02AB\x03\x02\x02\x02Bc\x07\t\x02\x02" +
+		"CD\x07\x05\x02\x02DE\x05\n\x06\x02EF\x07\b\x02\x02FK\x05\n\x06\x02GH\x07" +
+		"\b\x02\x02HJ\x05\n\x06\x02IG\x03\x02\x02\x02JM\x03\x02\x02\x02KI\x03\x02" +
+		"\x02\x02KL\x03\x02\x02\x02LN\x03\x02\x02\x02MK\x03\x02\x02\x02NO\x07\x06" +
+		"\x02\x02Oc\x03\x02\x02\x02P[\x07\n\x02\x02QS\x05\n\x06\x02RQ\x03\x02\x02" +
+		"\x02RS\x03\x02\x02\x02S\\\x03\x02\x02\x02TW\x05\n\x06\x02UV\x07\b\x02" +
+		"\x02VX\x05\n\x06\x02WU\x03\x02\x02\x02XY\x03\x02\x02\x02YW\x03\x02\x02" +
+		"\x02YZ\x03\x02\x02\x02Z\\\x03\x02\x02\x02[R\x03\x02\x02\x02[T\x03\x02" +
+		"\x02\x02\\]\x03\x02\x02\x02]c\x07\v\x02\x02^_\x07\f\x02\x02_c\x05\x0E" +
+		"\b\x02`c\x05\x14\v\x02ac\x05\x10\t\x02b0\x03\x02\x02\x02b5\x03\x02\x02" +
+		"\x02bC\x03\x02\x02\x02bP\x03\x02\x02\x02b^\x03\x02\x02\x02b`\x03\x02\x02" +
+		"\x02ba\x03\x02\x02\x02cl\x03\x02\x02\x02de\f\n\x02\x02ef\x05\x10\t\x02" +
+		"fg\x05\n\x06\vgk\x03\x02\x02\x02hi\f\t\x02\x02ik\x05\n\x06\njd\x03\x02" +
+		"\x02\x02jh\x03\x02\x02\x02kn\x03\x02\x02\x02lj\x03\x02\x02\x02lm\x03\x02" +
+		"\x02\x02m\v\x03\x02\x02\x02nl\x03\x02\x02\x02op\x05\x0E\b\x02pq\x07\x04" +
+		"\x02\x02qr\x05\n\x06\x02r\r\x03\x02\x02\x02sv\x05\x10\t\x02tv\x07$\x02" +
+		"\x02us\x03\x02\x02\x02ut\x03\x02\x02\x02v\x0F\x03\x02\x02\x02w{\x07H\x02" +
+		"\x02xz\t\x02\x02\x02yx\x03\x02\x02\x02z}\x03\x02\x02\x02{y\x03\x02\x02" +
+		"\x02{|\x03\x02\x02\x02|\x84\x03\x02\x02\x02}{\x03\x02\x02\x02~\x80\t\x03" +
+		"\x02\x02\x7F~\x03\x02\x02\x02\x80\x81\x03\x02\x02\x02\x81\x7F\x03\x02" +
+		"\x02\x02\x81\x82\x03\x02\x02\x02\x82\x84\x03\x02\x02\x02\x83w\x03\x02" +
+		"\x02\x02\x83\x7F\x03\x02\x02\x02\x84\x11\x03\x02\x02\x02\x85\x89\x07\r" +
+		"\x02\x02\x86\x88\t\x02\x02\x02\x87\x86\x03\x02\x02\x02\x88\x8B\x03\x02" +
+		"\x02\x02\x89\x87\x03\x02\x02\x02\x89\x8A\x03\x02\x02\x02\x8A\x13\x03\x02" +
+		"\x02\x02\x8B\x89\x03\x02\x02\x02\x8C\x92\x07$\x02\x02\x8D\x92\x07#\x02" +
+		"\x02\x8E\x92\x07\"\x02\x02\x8F\x92\x07 \x02\x02\x90\x92\x07!\x02\x02\x91" +
+		"\x8C\x03\x02\x02\x02\x91\x8D\x03\x02\x02\x02\x91\x8E\x03\x02\x02\x02\x91" +
+		"\x8F\x03\x02\x02\x02\x91\x90\x03\x02\x02\x02\x92\x15\x03\x02\x02\x02\x16" +
+		"\x19 &.7>@KRY[bjlu{\x81\x83\x89\x91";
 	public static __ATN: ATN;
 	public static get _ATN(): ATN {
 		if (!smlParser.__ATN) {
@@ -1525,6 +1592,41 @@ export class ExpressionSequenceContext extends ExpressionContext {
 	public accept<Result>(visitor: smlVisitor<Result>): Result {
 		if (visitor.visitExpressionSequence) {
 			return visitor.visitExpressionSequence(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
+}
+export class ExpressionListContext extends ExpressionContext {
+	public expression(): ExpressionContext[];
+	public expression(i: number): ExpressionContext;
+	public expression(i?: number): ExpressionContext | ExpressionContext[] {
+		if (i === undefined) {
+			return this.getRuleContexts(ExpressionContext);
+		} else {
+			return this.getRuleContext(i, ExpressionContext);
+		}
+	}
+	constructor(ctx: ExpressionContext) {
+		super(ctx.parent, ctx.invokingState);
+		this.copyFrom(ctx);
+	}
+	// @Override
+	public enterRule(listener: smlListener): void {
+		if (listener.enterExpressionList) {
+			listener.enterExpressionList(this);
+		}
+	}
+	// @Override
+	public exitRule(listener: smlListener): void {
+		if (listener.exitExpressionList) {
+			listener.exitExpressionList(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: smlVisitor<Result>): Result {
+		if (visitor.visitExpressionList) {
+			return visitor.visitExpressionList(this);
 		} else {
 			return visitor.visitChildren(this);
 		}
