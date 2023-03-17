@@ -166,6 +166,9 @@ const microcode = {
   ValueDeclaration: (cmd: sml.ValueDeclaration) => {
     push(A, { tag: 'BindInstruction', name: cmd.name }, cmd.value)
   },
+  ConditionalExpression: (cmd: sml.ConditionalExpression) => {
+    push(A, { tag: 'ConditionalExpressionInstruction', cons: cmd.cons, alt: cmd.alt }, cmd.pred)
+  },
   InfixApplicationExpression: (cmd: sml.InfixApplicationExpression) => {
     push(A, { tag: 'InfixApplicationInstruction', operator: cmd.operator }, cmd.right, cmd.left)
   },
@@ -234,6 +237,9 @@ const microcode = {
     items.reverse()
     push(S, { tag: 'List', length: cmd.length, items: items })
   },
+  ConditionalExpressionInstruction: (cmd: ConditionalExpressionInstruction) => {
+    push(A, (S.pop() as sml.Constant).value ? cmd.cons : cmd.alt)
+  },
   InfixApplicationInstruction: (cmd: InfixApplicationInstruction) => {
     const right = (S.pop() as sml.Constant).value
     const left = (S.pop() as sml.Constant).value
@@ -276,6 +282,12 @@ interface RecordSelectorInstruction {
 interface ListInstruction {
   tag: 'ListInstruction'
   length: number
+}
+
+interface ConditionalExpressionInstruction {
+  tag: 'ConditionalExpressionInstruction'
+  cons: sml.Expression
+  alt: sml.Expression
 }
 
 interface InfixApplicationInstruction {

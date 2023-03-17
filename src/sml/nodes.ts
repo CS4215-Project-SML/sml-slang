@@ -39,6 +39,7 @@ export interface NodeMap {
   ExpressionDeclaration: ExpressionDeclaration
   Valbind: Valbind
   Expression: Expression
+  ConditionalExpression: ConditionalExpression
   PrefixApplicationExpression: PrefixApplicationExpression
   InfixApplicationExpression: InfixApplicationExpression
   Record: Record
@@ -96,6 +97,7 @@ export interface Valbind extends BaseNode {
 }
 
 export interface ExpressionMap {
+  ConditionalExpression: ConditionalExpression
   PrefixApplicationExpression: PrefixApplicationExpression
   InfixApplicationExpression: InfixApplicationExpression
   Record: Record
@@ -109,6 +111,13 @@ export interface ExpressionMap {
 export type Expression = ExpressionMap[keyof ExpressionMap]
 
 export type BaseExpression = BaseNode
+
+export interface ConditionalExpression extends BaseExpression {
+  tag: 'ConditionalExpression'
+  pred: Expression
+  cons: Expression
+  alt: Expression
+}
 
 export interface PrefixApplicationExpression extends BaseExpression {
   tag: 'PrefixApplicationExpression'

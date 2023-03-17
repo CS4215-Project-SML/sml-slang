@@ -18,6 +18,7 @@ import {
   DeclarationValueContext,
   ExpressionApplicationInfixContext,
   ExpressionApplicationPrefixContext,
+  ExpressionConditionalContext,
   ExpressionConstantContext,
   ExpressionContext,
   ExpressionIdContext,
@@ -172,6 +173,17 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
     this.debugVisit('Expression Parentheses', ctx)
 
     return ctx._inner.accept(this)
+  }
+
+  visitExpressionConditional(ctx: ExpressionConditionalContext): sml.Node {
+    this.debugVisit('Expression Conditional', ctx)
+
+    return {
+      tag: 'ConditionalExpression',
+      pred: ctx._pred.accept(this) as sml.Expression,
+      cons: ctx._cons.accept(this) as sml.Expression,
+      alt: ctx._alt.accept(this) as sml.Expression
+    }
   }
 
   visitExpressionApplicationInfix(ctx: ExpressionApplicationInfixContext): sml.Node {
