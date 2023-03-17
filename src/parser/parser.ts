@@ -23,11 +23,13 @@ import {
   ExpressionConstantContext,
   ExpressionContext,
   ExpressionIdContext,
+  ExpressionLambdaContext,
   ExpressionListContext,
   ExpressionParenthesesContext,
   ExpressionRecordContext,
   ExpressionRecordSelectorContext,
   ExpressionTupleContext,
+  FunbindContext,
   IdAlphaContext,
   IdContext,
   IdSymbolContext,
@@ -35,6 +37,7 @@ import {
   LabelContext,
   LabelIdContext,
   LabelIntContext,
+  MatchSmlContext,
   PatternConstantContext,
   PatternContext,
   PatternIdContext,
@@ -113,11 +116,19 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
     return ctx.getChild(0).accept(this)
   }
 
-  // visitDeclarationFunction(ctx: DeclarationFunctionContext): sml.Node {
-  //   this.debugVisit('Declaration Function', ctx)
+  visitDeclarationFunction(ctx: DeclarationFunctionContext): sml.Node {
+    this.debugVisit('Declaration Function', ctx)
 
-  //   const funbind = ctx.getChild(1).accept(this) as sml.Funbind
-  // }
+    const funbind = ctx.getChild(1).accept(this) as sml.Funbind
+
+    return {
+      tag: 'FunctionDeclaration',
+      name: funbind.name,
+      pat: funbind.pat,
+      body: funbind.body,
+      loc: contextToLocation(ctx)
+    }
+  }
 
   visitDeclarationValue(ctx: DeclarationValueContext): sml.Node {
     this.debugVisit('Declaration Value', ctx)
@@ -152,6 +163,29 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
     }
   }
 
+  visitFunbind(ctx: FunbindContext): sml.Node {
+    // TODO: extend pattern to many patterns
+    // i.e. support fun f (x) (y) = x + y; [currying]
+    this.debugVisit('Funbind', ctx)
+
+    return {
+      tag: 'Funbind',
+      name: (ctx._name.accept(this) as sml.Identifier).name,
+      pat: ctx._pat.accept(this) as sml.Pattern,
+      body: ctx._body.accept(this) as sml.Expression
+    }
+  }
+
+  visitMatchSml(ctx: MatchSmlContext): sml.Node {
+    this.debugVisit('Matchsml', ctx)
+
+    return {
+      tag: 'Match',
+      pat: ctx._pat.accept(this) as sml.Pattern,
+      exp: ctx._exp.accept(this) as sml.Expression
+    }
+  }
+
   visitPattern(ctx: PatternContext): sml.Node {
     this.debugVisit('Pattern', ctx)
 
@@ -174,6 +208,15 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
     this.debugVisit('Expression', ctx)
 
     return ctx.getChild(0).accept(this)
+  }
+
+  visitExpressionLambda(ctx: ExpressionLambdaContext): sml.Node {
+    this.debugVisit('Expression Lambda', ctx)
+
+    return {
+      tag: 'LambdaExpression',
+      match: ctx.getChild(1).accept(this) as sml.Match
+    }
   }
 
   visitExpressionParentheses(ctx: ExpressionParenthesesContext): sml.Node {

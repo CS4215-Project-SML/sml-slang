@@ -23,7 +23,7 @@ valbind
     : name=id '=' value=expression;
 
 funbind
-    : name=id pattern+ '=' body=expression;
+    : name=id pat=pattern '=' body=expression;
 
 
 /*
@@ -58,7 +58,7 @@ keyvalue
     : key=label '=' value=expression;
 
 matchSml
-    : pattern '=>' expression;
+    : pat=pattern '=>' exp=expression;
 
 /*
  * Identifiers

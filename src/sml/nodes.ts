@@ -33,21 +33,31 @@ export interface Position {
 export interface NodeMap {
   Program: Program
   Empty: Empty
+
   Declaration: Declaration
   SequenceDeclaration: SequenceDeclaration
   ValueDeclaration: ValueDeclaration
+  FunctionDeclaration: FunctionDeclaration
   ExpressionDeclaration: ExpressionDeclaration
   Valbind: Valbind
+  Funbind: Funbind
+
   Expression: Expression
+  LambdaExpression: LambdaExpression
   ConditionalExpression: ConditionalExpression
   PrefixApplicationExpression: PrefixApplicationExpression
   InfixApplicationExpression: InfixApplicationExpression
+
   Record: Record
   Tuple: Tuple
   Keyvalue: Keyvalue
   RecordSelector: RecordSelector
+
   List: List
+
   Pattern: Pattern
+  Match: Match
+
   Identifier: Identifier
   Constant: Constant
 }
@@ -64,6 +74,9 @@ export interface Empty extends BaseNode {
   tag: 'Empty'
 }
 
+/**
+ * Declarations
+ */
 export interface DeclarationMap {
   SequenceDeclaration: SequenceDeclaration
   ValueDeclaration: ValueDeclaration
@@ -85,14 +98,23 @@ export interface ValueDeclaration extends BaseDeclaration {
   value: Expression
 }
 
+export interface FunctionDeclaration extends BaseDeclaration {
+  tag: 'FunctionDeclaration'
+  name: string
+  pat: Pattern
+  body: Expression
+}
+
 export interface ExpressionDeclaration extends BaseDeclaration {
   tag: 'ExpressionDeclaration'
   value: Expression
 }
 
 export interface Funbind extends BaseNode {
-  tag: 'Functionbind'
+  tag: 'Funbind'
   name: string
+  pat: Pattern
+  body: Expression
 }
 
 export interface Valbind extends BaseNode {
@@ -101,12 +123,17 @@ export interface Valbind extends BaseNode {
   value: Expression
 }
 
+/**
+ * Expressions
+ */
+
 export interface ExpressionMap {
+  LambdaExpression: LambdaExpression
   ConditionalExpression: ConditionalExpression
   PrefixApplicationExpression: PrefixApplicationExpression
   InfixApplicationExpression: InfixApplicationExpression
   Record: Record
-  Sequence: Tuple
+  Tuple: Tuple
   RecordSelector: RecordSelector
   List: List
   Identifier: Identifier
@@ -116,6 +143,11 @@ export interface ExpressionMap {
 export type Expression = ExpressionMap[keyof ExpressionMap]
 
 export type BaseExpression = BaseNode
+
+export interface LambdaExpression extends BaseExpression {
+  tag: 'LambdaExpression'
+  match: Match
+}
 
 export interface ConditionalExpression extends BaseExpression {
   tag: 'ConditionalExpression'
@@ -135,6 +167,9 @@ export interface InfixApplicationExpression extends BaseExpression {
   right: Expression
 }
 
+/**
+ * Records & Tuples
+ */
 export type BaseRecord = BaseNode
 
 export interface Record extends BaseRecord {
@@ -143,9 +178,9 @@ export interface Record extends BaseRecord {
   items: Object
 }
 
-export type BaseSequence = BaseNode
+export type BaseTuple = BaseNode
 
-export interface Tuple extends BaseSequence {
+export interface Tuple extends BaseTuple {
   tag: 'Tuple'
   length: number
   items: Object
@@ -175,6 +210,9 @@ export interface RecordSelector extends BaseRecord {
   record?: Record | Tuple | Identifier
 }
 
+/**
+ * Pattern
+ */
 export interface PatternMap {
   Constant: Constant
   Identifier: Identifier
@@ -184,6 +222,18 @@ export type Pattern = PatternMap[keyof PatternMap]
 
 export type BasePattern = BaseNode
 
+/**
+ * Match
+ */
+export interface Match extends BaseNode {
+  tag: 'Match'
+  pat: Pattern
+  exp: Expression
+}
+
+/**
+ * Primitives (?)
+ */
 export interface Identifier extends BaseNode {
   tag: 'Identifier'
   name: string
