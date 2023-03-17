@@ -12,21 +12,19 @@ import { ExpressionSequenceContext } from "./smlParser";
 import { ExpressionListContext } from "./smlParser";
 import { ExpressionRecordSelectorContext } from "./smlParser";
 import { ExpressionConstantContext } from "./smlParser";
-import { ExpressionIdContext } from "./smlParser";
+import { ExpressionIdentifierContext } from "./smlParser";
 import { ConstantIntContext } from "./smlParser";
 import { ConstantRealContext } from "./smlParser";
 import { ConstantBoolContext } from "./smlParser";
 import { ConstantCharContext } from "./smlParser";
 import { ConstantStrContext } from "./smlParser";
 import { PatternConstantContext } from "./smlParser";
-import { PatternIdContext } from "./smlParser";
+import { PatternIdentifierContext } from "./smlParser";
 import { ProgramSequenceContext } from "./smlParser";
 import { ProgramDeclarationContext } from "./smlParser";
 import { ProgramEmptyContext } from "./smlParser";
-import { LabelIdContext } from "./smlParser";
+import { LabelIdentifierContext } from "./smlParser";
 import { LabelIntContext } from "./smlParser";
-import { IdAlphaContext } from "./smlParser";
-import { IdSymbolContext } from "./smlParser";
 import { DeclarationValueContext } from "./smlParser";
 import { DeclarationExpressionContext } from "./smlParser";
 import { ProgramContext } from "./smlParser";
@@ -36,8 +34,7 @@ import { PatternContext } from "./smlParser";
 import { ExpressionContext } from "./smlParser";
 import { KeyvalueContext } from "./smlParser";
 import { LabelContext } from "./smlParser";
-import { IdContext } from "./smlParser";
-import { VariableContext } from "./smlParser";
+import { IdentifierContext } from "./smlParser";
 import { ConstantContext } from "./smlParser";
 
 
@@ -122,12 +119,12 @@ export interface smlVisitor<Result> extends ParseTreeVisitor<Result> {
 	visitExpressionConstant?: (ctx: ExpressionConstantContext) => Result;
 
 	/**
-	 * Visit a parse tree produced by the `expressionId`
+	 * Visit a parse tree produced by the `expressionIdentifier`
 	 * labeled alternative in `smlParser.expression`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitExpressionId?: (ctx: ExpressionIdContext) => Result;
+	visitExpressionIdentifier?: (ctx: ExpressionIdentifierContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by the `constantInt`
@@ -178,12 +175,12 @@ export interface smlVisitor<Result> extends ParseTreeVisitor<Result> {
 	visitPatternConstant?: (ctx: PatternConstantContext) => Result;
 
 	/**
-	 * Visit a parse tree produced by the `patternId`
+	 * Visit a parse tree produced by the `patternIdentifier`
 	 * labeled alternative in `smlParser.pattern`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitPatternId?: (ctx: PatternIdContext) => Result;
+	visitPatternIdentifier?: (ctx: PatternIdentifierContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by the `programSequence`
@@ -210,12 +207,12 @@ export interface smlVisitor<Result> extends ParseTreeVisitor<Result> {
 	visitProgramEmpty?: (ctx: ProgramEmptyContext) => Result;
 
 	/**
-	 * Visit a parse tree produced by the `labelId`
+	 * Visit a parse tree produced by the `labelIdentifier`
 	 * labeled alternative in `smlParser.label`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitLabelId?: (ctx: LabelIdContext) => Result;
+	visitLabelIdentifier?: (ctx: LabelIdentifierContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by the `labelInt`
@@ -224,22 +221,6 @@ export interface smlVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitLabelInt?: (ctx: LabelIntContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by the `idAlpha`
-	 * labeled alternative in `smlParser.id`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitIdAlpha?: (ctx: IdAlphaContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by the `idSymbol`
-	 * labeled alternative in `smlParser.id`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitIdSymbol?: (ctx: IdSymbolContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by the `declarationValue`
@@ -307,18 +288,11 @@ export interface smlVisitor<Result> extends ParseTreeVisitor<Result> {
 	visitLabel?: (ctx: LabelContext) => Result;
 
 	/**
-	 * Visit a parse tree produced by `smlParser.id`.
+	 * Visit a parse tree produced by `smlParser.identifier`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitId?: (ctx: IdContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by `smlParser.variable`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitVariable?: (ctx: VariableContext) => Result;
+	visitIdentifier?: (ctx: IdentifierContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `smlParser.constant`.

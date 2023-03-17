@@ -1,5 +1,5 @@
 /* tslint:disable:max-classes-per-file */
-import { CharStreams, CommonTokenStream } from 'antlr4ts'
+import { CharStreams, CommonTokenStream, ConsoleErrorListener } from 'antlr4ts'
 import { ErrorNode } from 'antlr4ts/tree/ErrorNode'
 import { ParseTree } from 'antlr4ts/tree/ParseTree'
 import { RuleNode } from 'antlr4ts/tree/RuleNode'
@@ -21,29 +21,26 @@ import {
   ExpressionConditionalContext,
   ExpressionConstantContext,
   ExpressionContext,
-  ExpressionIdContext,
+  ExpressionIdentifierContext,
   ExpressionListContext,
   ExpressionParenthesesContext,
   ExpressionRecordContext,
   ExpressionRecordSelectorContext,
   ExpressionSequenceContext,
-  IdAlphaContext,
-  IdContext,
-  IdSymbolContext,
+  IdentifierContext,
   KeyvalueContext,
   LabelContext,
-  LabelIdContext,
+  LabelIdentifierContext,
   LabelIntContext,
   PatternConstantContext,
   PatternContext,
-  PatternIdContext,
+  PatternIdentifierContext,
   ProgramContext,
   ProgramDeclarationContext,
   ProgramEmptyContext,
   ProgramSequenceContext,
   smlParser,
-  ValbindContext,
-  VariableContext
+  ValbindContext
 } from '../lang/smlParser'
 import { smlVisitor } from '../lang/smlVisitor'
 import * as sml from '../sml/nodes'
@@ -157,7 +154,7 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
     return ctx.getChild(0).accept(this)
   }
 
-  visitPatternId(ctx: PatternIdContext): sml.Node {
+  visitPatternIdentifier(ctx: PatternIdentifierContext): sml.Node {
     this.debugVisit('Pattern Id', ctx)
 
     return ctx.getChild(0).accept(this)
@@ -300,8 +297,8 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
     return ctx.getChild(0).accept(this)
   }
 
-  visitExpressionId(ctx: ExpressionIdContext): sml.Node {
-    this.debugVisit('Expression Id', ctx)
+  visitExpressionIdentifier(ctx: ExpressionIdentifierContext): sml.Node {
+    this.debugVisit('Expression Identifier', ctx)
 
     return ctx.getChild(0).accept(this)
   }
@@ -309,9 +306,19 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
   visitKeyvalue(ctx: KeyvalueContext): sml.Node {
     this.debugVisit('Keyvalue', ctx)
 
+    let keyvalue: string
+    const child = ctx._key.accept(this) as sml.Constant | sml.Identifier
+    if (child.tag === 'Constant') {
+      keyvalue = child.value.toString()
+    } else if (child.tag === 'Identifier') {
+      keyvalue = child.name.toString()
+    } else {
+      throw new Error(`not supported yet: ${ctx}`)
+    }
+
     return {
       tag: 'Keyvalue',
-      key: (ctx._key.accept(this) as sml.Constant).value.toString(),
+      key: keyvalue,
       value: ctx._value.accept(this) as sml.Expression
     }
   }
@@ -322,14 +329,14 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
     return ctx.getChild(0).accept(this)
   }
 
-  visitLabelId(ctx: LabelIdContext): sml.Node {
+  visitLabelIdentifier(ctx: LabelIdentifierContext): sml.Node {
     this.debugVisit('Label Id', ctx)
 
     const label = ctx.getChild(0).accept(this) as sml.Identifier
 
     return {
-      tag: 'Constant',
-      value: label.name
+      tag: 'Identifier',
+      name: label.name
     }
   }
 
@@ -342,36 +349,14 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
     }
   }
 
-  visitId(ctx: IdContext): sml.Node {
+  visitIdentifier(ctx: IdentifierContext): sml.Node {
     this.debugVisit('Identifier', ctx)
 
-    return ctx.getChild(0).accept(this)
-  }
-
-  visitIdAlpha(ctx: IdAlphaContext): sml.Node {
-    this.debugVisit('Identifier Alpha', ctx)
-
     return {
       tag: 'Identifier',
       name: ctx.text,
       loc: contextToLocation(ctx)
     }
-  }
-
-  visitIdSymbol(ctx: IdSymbolContext): sml.Node {
-    this.debugVisit('Identifier Symbol', ctx)
-
-    return {
-      tag: 'Identifier',
-      name: ctx.text,
-      loc: contextToLocation(ctx)
-    }
-  }
-
-  visitVariable(ctx: VariableContext): sml.Node {
-    this.debugVisit('Variable', ctx)
-
-    throw new Error(`not supported yet: ${ctx}`)
   }
 
   visitConstant(ctx: ConstantContext): sml.Node {

@@ -19,15 +19,15 @@ declaration
     ;
 
 valbind
-    : name=id '=' value=expression;
+    : name=identifier '=' value=expression;
 
 
 /*
  * Patterns
  */
 pattern
-    : constant      # patternConstant
-    | id            # patternId
+    : constant          # patternConstant
+    | identifier        # patternIdentifier
     ;
 
 
@@ -35,34 +35,31 @@ pattern
  * Expressions
  */
 expression
-    : '(' inner=expression ')'                                      # expressionParentheses
-    | IF pred=expression THEN cons=expression ELSE alt=expression   # expressionConditional
-    | left=expression operator=id right=expression                  # expressionApplicationInfix
-    | operator=expression operand=expression                        # expressionApplicationPrefix
-    | '{' (keyvalue? | (keyvalue (',' keyvalue)+)) '}'              # expressionRecord
-    | '(' expression ',' expression (',' expression)* ')'           # expressionSequence
-    | '[' (expression? | (expression (',' expression)+)) ']'        # expressionList
-    | '#' label                                                     # expressionRecordSelector
-    | constant                                                      # expressionConstant
-    | id                                                            # expressionId
+    : '(' inner=expression ')'                                          # expressionParentheses
+    | IF pred=expression THEN cons=expression ELSE alt=expression       # expressionConditional
+    | left=expression operator=identifier right=expression              # expressionApplicationInfix
+    | operator=expression operand=expression                            # expressionApplicationPrefix
+    | '{' (keyvalue? | (keyvalue (',' keyvalue)+)) '}'                  # expressionRecord
+    | '(' expression ',' expression (',' expression)* ')'               # expressionSequence
+    | '[' (expression? | (expression (',' expression)+)) ']'            # expressionList
+    | '#' label                                                         # expressionRecordSelector
+    | constant                                                          # expressionConstant
+    | identifier                                                        # expressionIdentifier
     ;
 
 keyvalue
     : key=label '=' value=expression;
 
+
 /*
  * Identifiers
  */
 label
-    :       id      # labelId
-    |       INT     # labelInt;
-
-id
-    :       LETTER (LETTER | DIGIT | '\'' | '_')*                                                                                           # idAlpha
-    |       ('!' | '%' | '&' | '$' | '#' | '+' | '-' | '/' | ':' | '<' | '=' | '>' | '?' | '@' | '\\' | '~' | '\'' | '^' | '|' | '*')+      # idSymbol
+    :           identifier      # labelIdentifier
+    |           INT             # labelInt
     ;
 
-variable:   '\'' (LETTER | DIGIT | '\'' | '_' )*;
+identifier:     ID;
 
 
 /*
@@ -73,7 +70,8 @@ constant
     | REAL          # constantReal
     | BOOL          # constantBool
     | CHAR          # constantChar
-    | STR           # constantStr;
+    | STR           # constantStr
+    ;
 
 
 /*
@@ -119,6 +117,11 @@ WITHTYPE:       'withtype';
 WHILE:          'while';
 TRUE:           'true';
 FALSE:          'false';
+
+ID
+    :           (LETTER (LETTER | DIGIT | '\'' | '_')*)
+    |           ('!' | '%' | '&' | '$' | '#' | '+' | '-' | '/' | ':' | '<' | '=' | '>' | '?' | '@' | '\\' | '~' | '\'' | '^' | '|' | '*')+
+    ;
 
 DIGIT:          [0-9];
 LETTER:         [A-Za-z];
