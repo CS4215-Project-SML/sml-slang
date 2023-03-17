@@ -15,6 +15,7 @@ import {
   ConstantStrContext,
   DeclarationContext,
   DeclarationExpressionContext,
+  DeclarationFunctionContext,
   DeclarationValueContext,
   ExpressionApplicationInfixContext,
   ExpressionApplicationPrefixContext,
@@ -26,7 +27,7 @@ import {
   ExpressionParenthesesContext,
   ExpressionRecordContext,
   ExpressionRecordSelectorContext,
-  ExpressionSequenceContext,
+  ExpressionTupleContext,
   IdAlphaContext,
   IdContext,
   IdSymbolContext,
@@ -111,6 +112,12 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
 
     return ctx.getChild(0).accept(this)
   }
+
+  // visitDeclarationFunction(ctx: DeclarationFunctionContext): sml.Node {
+  //   this.debugVisit('Declaration Function', ctx)
+
+  //   const funbind = ctx.getChild(1).accept(this) as sml.Funbind
+  // }
 
   visitDeclarationValue(ctx: DeclarationValueContext): sml.Node {
     this.debugVisit('Declaration Value', ctx)
@@ -206,7 +213,7 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
 
     if (
       operator.tag === 'RecordSelector' &&
-      (operand.tag === 'Record' || operand.tag === 'Sequence' || operand.tag === 'Identifier')
+      (operand.tag === 'Record' || operand.tag === 'Tuple' || operand.tag === 'Identifier')
     ) {
       return {
         tag: 'RecordSelector',
@@ -238,8 +245,8 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
     }
   }
 
-  visitExpressionSequence(ctx: ExpressionSequenceContext): sml.Node {
-    this.debugVisit('Expression Sequence', ctx)
+  visitExpressionTuple(ctx: ExpressionTupleContext): sml.Node {
+    this.debugVisit('Expression Tuple', ctx)
 
     const items = {}
     let count = 0
@@ -249,7 +256,7 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
     }
 
     return {
-      tag: 'Sequence',
+      tag: 'Tuple',
       length: count,
       items: items,
       loc: contextToLocation(ctx)

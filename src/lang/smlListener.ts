@@ -4,11 +4,12 @@
 import { ParseTreeListener } from "antlr4ts/tree/ParseTreeListener";
 
 import { ExpressionParenthesesContext } from "./smlParser";
+import { ExpressionLambdaContext } from "./smlParser";
 import { ExpressionConditionalContext } from "./smlParser";
 import { ExpressionApplicationInfixContext } from "./smlParser";
 import { ExpressionApplicationPrefixContext } from "./smlParser";
 import { ExpressionRecordContext } from "./smlParser";
-import { ExpressionSequenceContext } from "./smlParser";
+import { ExpressionTupleContext } from "./smlParser";
 import { ExpressionListContext } from "./smlParser";
 import { ExpressionRecordSelectorContext } from "./smlParser";
 import { ExpressionConstantContext } from "./smlParser";
@@ -18,6 +19,9 @@ import { ConstantRealContext } from "./smlParser";
 import { ConstantBoolContext } from "./smlParser";
 import { ConstantCharContext } from "./smlParser";
 import { ConstantStrContext } from "./smlParser";
+import { PatternInfixContext } from "./smlParser";
+import { PatternTupleContext } from "./smlParser";
+import { PatternListContext } from "./smlParser";
 import { PatternConstantContext } from "./smlParser";
 import { PatternIdContext } from "./smlParser";
 import { ProgramSequenceContext } from "./smlParser";
@@ -27,14 +31,17 @@ import { LabelIdContext } from "./smlParser";
 import { LabelIntContext } from "./smlParser";
 import { IdAlphaContext } from "./smlParser";
 import { IdSymbolContext } from "./smlParser";
+import { DeclarationFunctionContext } from "./smlParser";
 import { DeclarationValueContext } from "./smlParser";
 import { DeclarationExpressionContext } from "./smlParser";
 import { ProgramContext } from "./smlParser";
 import { DeclarationContext } from "./smlParser";
 import { ValbindContext } from "./smlParser";
+import { FunbindContext } from "./smlParser";
 import { PatternContext } from "./smlParser";
 import { ExpressionContext } from "./smlParser";
 import { KeyvalueContext } from "./smlParser";
+import { MatchSmlContext } from "./smlParser";
 import { LabelContext } from "./smlParser";
 import { IdContext } from "./smlParser";
 import { VariableContext } from "./smlParser";
@@ -58,6 +65,19 @@ export interface smlListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitExpressionParentheses?: (ctx: ExpressionParenthesesContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `expressionLambda`
+	 * labeled alternative in `smlParser.expression`.
+	 * @param ctx the parse tree
+	 */
+	enterExpressionLambda?: (ctx: ExpressionLambdaContext) => void;
+	/**
+	 * Exit a parse tree produced by the `expressionLambda`
+	 * labeled alternative in `smlParser.expression`.
+	 * @param ctx the parse tree
+	 */
+	exitExpressionLambda?: (ctx: ExpressionLambdaContext) => void;
 
 	/**
 	 * Enter a parse tree produced by the `expressionConditional`
@@ -112,17 +132,17 @@ export interface smlListener extends ParseTreeListener {
 	exitExpressionRecord?: (ctx: ExpressionRecordContext) => void;
 
 	/**
-	 * Enter a parse tree produced by the `expressionSequence`
+	 * Enter a parse tree produced by the `expressionTuple`
 	 * labeled alternative in `smlParser.expression`.
 	 * @param ctx the parse tree
 	 */
-	enterExpressionSequence?: (ctx: ExpressionSequenceContext) => void;
+	enterExpressionTuple?: (ctx: ExpressionTupleContext) => void;
 	/**
-	 * Exit a parse tree produced by the `expressionSequence`
+	 * Exit a parse tree produced by the `expressionTuple`
 	 * labeled alternative in `smlParser.expression`.
 	 * @param ctx the parse tree
 	 */
-	exitExpressionSequence?: (ctx: ExpressionSequenceContext) => void;
+	exitExpressionTuple?: (ctx: ExpressionTupleContext) => void;
 
 	/**
 	 * Enter a parse tree produced by the `expressionList`
@@ -242,6 +262,45 @@ export interface smlListener extends ParseTreeListener {
 	exitConstantStr?: (ctx: ConstantStrContext) => void;
 
 	/**
+	 * Enter a parse tree produced by the `patternInfix`
+	 * labeled alternative in `smlParser.pattern`.
+	 * @param ctx the parse tree
+	 */
+	enterPatternInfix?: (ctx: PatternInfixContext) => void;
+	/**
+	 * Exit a parse tree produced by the `patternInfix`
+	 * labeled alternative in `smlParser.pattern`.
+	 * @param ctx the parse tree
+	 */
+	exitPatternInfix?: (ctx: PatternInfixContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `patternTuple`
+	 * labeled alternative in `smlParser.pattern`.
+	 * @param ctx the parse tree
+	 */
+	enterPatternTuple?: (ctx: PatternTupleContext) => void;
+	/**
+	 * Exit a parse tree produced by the `patternTuple`
+	 * labeled alternative in `smlParser.pattern`.
+	 * @param ctx the parse tree
+	 */
+	exitPatternTuple?: (ctx: PatternTupleContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `patternList`
+	 * labeled alternative in `smlParser.pattern`.
+	 * @param ctx the parse tree
+	 */
+	enterPatternList?: (ctx: PatternListContext) => void;
+	/**
+	 * Exit a parse tree produced by the `patternList`
+	 * labeled alternative in `smlParser.pattern`.
+	 * @param ctx the parse tree
+	 */
+	exitPatternList?: (ctx: PatternListContext) => void;
+
+	/**
 	 * Enter a parse tree produced by the `patternConstant`
 	 * labeled alternative in `smlParser.pattern`.
 	 * @param ctx the parse tree
@@ -359,6 +418,19 @@ export interface smlListener extends ParseTreeListener {
 	exitIdSymbol?: (ctx: IdSymbolContext) => void;
 
 	/**
+	 * Enter a parse tree produced by the `declarationFunction`
+	 * labeled alternative in `smlParser.declaration`.
+	 * @param ctx the parse tree
+	 */
+	enterDeclarationFunction?: (ctx: DeclarationFunctionContext) => void;
+	/**
+	 * Exit a parse tree produced by the `declarationFunction`
+	 * labeled alternative in `smlParser.declaration`.
+	 * @param ctx the parse tree
+	 */
+	exitDeclarationFunction?: (ctx: DeclarationFunctionContext) => void;
+
+	/**
 	 * Enter a parse tree produced by the `declarationValue`
 	 * labeled alternative in `smlParser.declaration`.
 	 * @param ctx the parse tree
@@ -418,6 +490,17 @@ export interface smlListener extends ParseTreeListener {
 	exitValbind?: (ctx: ValbindContext) => void;
 
 	/**
+	 * Enter a parse tree produced by `smlParser.funbind`.
+	 * @param ctx the parse tree
+	 */
+	enterFunbind?: (ctx: FunbindContext) => void;
+	/**
+	 * Exit a parse tree produced by `smlParser.funbind`.
+	 * @param ctx the parse tree
+	 */
+	exitFunbind?: (ctx: FunbindContext) => void;
+
+	/**
 	 * Enter a parse tree produced by `smlParser.pattern`.
 	 * @param ctx the parse tree
 	 */
@@ -449,6 +532,17 @@ export interface smlListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitKeyvalue?: (ctx: KeyvalueContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `smlParser.matchSml`.
+	 * @param ctx the parse tree
+	 */
+	enterMatchSml?: (ctx: MatchSmlContext) => void;
+	/**
+	 * Exit a parse tree produced by `smlParser.matchSml`.
+	 * @param ctx the parse tree
+	 */
+	exitMatchSml?: (ctx: MatchSmlContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `smlParser.label`.

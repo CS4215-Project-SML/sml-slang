@@ -4,11 +4,12 @@
 import { ParseTreeVisitor } from "antlr4ts/tree/ParseTreeVisitor";
 
 import { ExpressionParenthesesContext } from "./smlParser";
+import { ExpressionLambdaContext } from "./smlParser";
 import { ExpressionConditionalContext } from "./smlParser";
 import { ExpressionApplicationInfixContext } from "./smlParser";
 import { ExpressionApplicationPrefixContext } from "./smlParser";
 import { ExpressionRecordContext } from "./smlParser";
-import { ExpressionSequenceContext } from "./smlParser";
+import { ExpressionTupleContext } from "./smlParser";
 import { ExpressionListContext } from "./smlParser";
 import { ExpressionRecordSelectorContext } from "./smlParser";
 import { ExpressionConstantContext } from "./smlParser";
@@ -18,6 +19,9 @@ import { ConstantRealContext } from "./smlParser";
 import { ConstantBoolContext } from "./smlParser";
 import { ConstantCharContext } from "./smlParser";
 import { ConstantStrContext } from "./smlParser";
+import { PatternInfixContext } from "./smlParser";
+import { PatternTupleContext } from "./smlParser";
+import { PatternListContext } from "./smlParser";
 import { PatternConstantContext } from "./smlParser";
 import { PatternIdContext } from "./smlParser";
 import { ProgramSequenceContext } from "./smlParser";
@@ -27,14 +31,17 @@ import { LabelIdContext } from "./smlParser";
 import { LabelIntContext } from "./smlParser";
 import { IdAlphaContext } from "./smlParser";
 import { IdSymbolContext } from "./smlParser";
+import { DeclarationFunctionContext } from "./smlParser";
 import { DeclarationValueContext } from "./smlParser";
 import { DeclarationExpressionContext } from "./smlParser";
 import { ProgramContext } from "./smlParser";
 import { DeclarationContext } from "./smlParser";
 import { ValbindContext } from "./smlParser";
+import { FunbindContext } from "./smlParser";
 import { PatternContext } from "./smlParser";
 import { ExpressionContext } from "./smlParser";
 import { KeyvalueContext } from "./smlParser";
+import { MatchSmlContext } from "./smlParser";
 import { LabelContext } from "./smlParser";
 import { IdContext } from "./smlParser";
 import { VariableContext } from "./smlParser";
@@ -56,6 +63,14 @@ export interface smlVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitExpressionParentheses?: (ctx: ExpressionParenthesesContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `expressionLambda`
+	 * labeled alternative in `smlParser.expression`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitExpressionLambda?: (ctx: ExpressionLambdaContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by the `expressionConditional`
@@ -90,12 +105,12 @@ export interface smlVisitor<Result> extends ParseTreeVisitor<Result> {
 	visitExpressionRecord?: (ctx: ExpressionRecordContext) => Result;
 
 	/**
-	 * Visit a parse tree produced by the `expressionSequence`
+	 * Visit a parse tree produced by the `expressionTuple`
 	 * labeled alternative in `smlParser.expression`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitExpressionSequence?: (ctx: ExpressionSequenceContext) => Result;
+	visitExpressionTuple?: (ctx: ExpressionTupleContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by the `expressionList`
@@ -170,6 +185,30 @@ export interface smlVisitor<Result> extends ParseTreeVisitor<Result> {
 	visitConstantStr?: (ctx: ConstantStrContext) => Result;
 
 	/**
+	 * Visit a parse tree produced by the `patternInfix`
+	 * labeled alternative in `smlParser.pattern`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitPatternInfix?: (ctx: PatternInfixContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `patternTuple`
+	 * labeled alternative in `smlParser.pattern`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitPatternTuple?: (ctx: PatternTupleContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `patternList`
+	 * labeled alternative in `smlParser.pattern`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitPatternList?: (ctx: PatternListContext) => Result;
+
+	/**
 	 * Visit a parse tree produced by the `patternConstant`
 	 * labeled alternative in `smlParser.pattern`.
 	 * @param ctx the parse tree
@@ -242,6 +281,14 @@ export interface smlVisitor<Result> extends ParseTreeVisitor<Result> {
 	visitIdSymbol?: (ctx: IdSymbolContext) => Result;
 
 	/**
+	 * Visit a parse tree produced by the `declarationFunction`
+	 * labeled alternative in `smlParser.declaration`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitDeclarationFunction?: (ctx: DeclarationFunctionContext) => Result;
+
+	/**
 	 * Visit a parse tree produced by the `declarationValue`
 	 * labeled alternative in `smlParser.declaration`.
 	 * @param ctx the parse tree
@@ -279,6 +326,13 @@ export interface smlVisitor<Result> extends ParseTreeVisitor<Result> {
 	visitValbind?: (ctx: ValbindContext) => Result;
 
 	/**
+	 * Visit a parse tree produced by `smlParser.funbind`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitFunbind?: (ctx: FunbindContext) => Result;
+
+	/**
 	 * Visit a parse tree produced by `smlParser.pattern`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -298,6 +352,13 @@ export interface smlVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitKeyvalue?: (ctx: KeyvalueContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `smlParser.matchSml`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitMatchSml?: (ctx: MatchSmlContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `smlParser.label`.

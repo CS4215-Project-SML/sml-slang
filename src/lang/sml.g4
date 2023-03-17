@@ -14,33 +14,40 @@ program
  * Declarations
  */
 declaration
-    : VAL valbind       # declarationValue
+    : FUN funbind       # declarationFunction
+    | VAL valbind       # declarationValue
     | expression        # declarationExpression
     ;
 
 valbind
     : name=id '=' value=expression;
 
+funbind
+    : name=id pattern+ '=' body=expression;
+
 
 /*
  * Patterns
  */
 pattern
-    : constant      # patternConstant
-    | id            # patternId
+    : pattern id pattern                    # patternInfix
+    | '(' pattern (',' pattern)* ')'        # patternTuple
+    | '[' pattern (',' pattern)* ']'        # patternList
+    | constant                              # patternConstant
+    | id                                    # patternId
     ;
-
 
 /*
  * Expressions
  */
 expression
     : '(' inner=expression ')'                                      # expressionParentheses
+    | FN matchSml                                                   # expressionLambda
     | IF pred=expression THEN cons=expression ELSE alt=expression   # expressionConditional
     | left=expression operator=id right=expression                  # expressionApplicationInfix
     | operator=expression operand=expression                        # expressionApplicationPrefix
     | '{' (keyvalue? | (keyvalue (',' keyvalue)+)) '}'              # expressionRecord
-    | '(' expression ',' expression (',' expression)* ')'           # expressionSequence
+    | '(' expression ',' expression (',' expression)* ')'           # expressionTuple
     | '[' (expression? | (expression (',' expression)+)) ']'        # expressionList
     | '#' label                                                     # expressionRecordSelector
     | constant                                                      # expressionConstant
@@ -49,6 +56,9 @@ expression
 
 keyvalue
     : key=label '=' value=expression;
+
+matchSml
+    : pattern '=>' expression;
 
 /*
  * Identifiers

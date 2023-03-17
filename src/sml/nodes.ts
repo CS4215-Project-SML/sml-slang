@@ -43,7 +43,7 @@ export interface NodeMap {
   PrefixApplicationExpression: PrefixApplicationExpression
   InfixApplicationExpression: InfixApplicationExpression
   Record: Record
-  Sequence: Sequence
+  Tuple: Tuple
   Keyvalue: Keyvalue
   RecordSelector: RecordSelector
   List: List
@@ -90,6 +90,11 @@ export interface ExpressionDeclaration extends BaseDeclaration {
   value: Expression
 }
 
+export interface Funbind extends BaseNode {
+  tag: 'Functionbind'
+  name: string
+}
+
 export interface Valbind extends BaseNode {
   tag: 'Valbind'
   name: string
@@ -101,7 +106,7 @@ export interface ExpressionMap {
   PrefixApplicationExpression: PrefixApplicationExpression
   InfixApplicationExpression: InfixApplicationExpression
   Record: Record
-  Sequence: Sequence
+  Sequence: Tuple
   RecordSelector: RecordSelector
   List: List
   Identifier: Identifier
@@ -140,8 +145,8 @@ export interface Record extends BaseRecord {
 
 export type BaseSequence = BaseNode
 
-export interface Sequence extends BaseSequence {
-  tag: 'Sequence'
+export interface Tuple extends BaseSequence {
+  tag: 'Tuple'
   length: number
   items: Object
 }
@@ -167,7 +172,7 @@ export type BaseRecordSelector = BaseNode
 export interface RecordSelector extends BaseRecord {
   tag: 'RecordSelector'
   label: string
-  record?: Record | Sequence | Identifier
+  record?: Record | Tuple | Identifier
 }
 
 export interface PatternMap {

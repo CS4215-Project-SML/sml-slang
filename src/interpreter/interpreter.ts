@@ -143,12 +143,12 @@ const microcode = {
     }
     push(A, { tag: 'RecordInstruction', length: cmd.length }, ...items.reverse())
   },
-  Sequence: (cmd: sml.Sequence) => {
+  Tuple: (cmd: sml.Tuple) => {
     const items = []
     for (const [key, value] of Object.entries(cmd.items)) {
       items.push({ tag: 'Keyvalue', key: key, value: value })
     }
-    push(A, { tag: 'SequenceInstruction', length: cmd.length }, ...items.reverse())
+    push(A, { tag: 'TupleInstruction', length: cmd.length }, ...items.reverse())
   },
   Keyvalue: (cmd: sml.Keyvalue) => {
     push(A, { tag: 'KeyvalueInstruction', key: cmd.key }, cmd.value)
@@ -202,7 +202,7 @@ const microcode = {
     }
     push(S, { tag: 'Record', length: cmd.length, items: items })
   },
-  SequenceInstruction: (cmd: SequenceInstruction) => {
+  TupleInstruction: (cmd: TupleInstruction) => {
     // Make sure that items are added to the object in the order they were specified
     const entries = []
     for (let i = 0; i < cmd.length; i++) {
@@ -215,13 +215,13 @@ const microcode = {
       const keyvalue = entries[i] as sml.Keyvalue
       items[keyvalue.key] = keyvalue.value
     }
-    push(S, { tag: 'Sequence', length: cmd.length, items: items })
+    push(S, { tag: 'Tuple', length: cmd.length, items: items })
   },
   KeyvalueInstruction: (cmd: KeyvalueInstruction) => {
     push(S, { tag: 'Keyvalue', key: cmd.key, value: S.pop() as sml.Constant })
   },
   RecordSelectorInstruction: (cmd: RecordSelectorInstruction) => {
-    const items = (S.pop() as sml.Record | sml.Sequence).items
+    const items = (S.pop() as sml.Record | sml.Tuple).items
     if (items.hasOwnProperty(cmd.label)) {
       push(S, items[cmd.label])
     } else {
@@ -264,8 +264,8 @@ interface RecordInstruction {
   length: number
 }
 
-interface SequenceInstruction {
-  tag: 'SequenceInstruction'
+interface TupleInstruction {
+  tag: 'TupleInstruction'
   length: number
 }
 
