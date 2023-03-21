@@ -1,8 +1,87 @@
+// Types
+export interface TypeMap {
+  Int: Int
+  Real: Real
+  Bool: Bool
+  Char: Char
+  Str: Str
+  Rec: Rec
+  Tup: Tup
+  Kv: Kv
+  Lis: Lis
+  Fun: Fun
+  Poly: Poly
+  Und: Und
+}
+
+export type Type = TypeMap[keyof TypeMap]
+
+export interface BaseType {
+  name: string
+}
+
+export interface Int extends BaseType {
+  name: 'int'
+}
+
+export interface Real extends BaseType {
+  name: 'real'
+}
+
+export interface Bool extends BaseType {
+  name: 'bool'
+}
+
+export interface Char extends BaseType {
+  name: 'char'
+}
+
+export interface Str extends BaseType {
+  name: 'string'
+}
+
+export interface Rec extends BaseType {
+  name: 'record'
+  body: Array<Kv>
+}
+
+export interface Tup extends BaseType {
+  name: 'tuple'
+  body: Array<Kv>
+}
+
+export interface Kv {
+  name: 'keyvalue'
+  key: string
+  value: Int | Real | Bool | Char | Str | Rec | Tup | Lis | Fun | Poly
+}
+
+export interface Lis extends BaseType {
+  name: 'list'
+  body: Int | Real | Bool | Char | Str | Str | Rec | Tup | Lis | Fun | Poly
+}
+
+export interface Fun extends BaseType {
+  name: 'function'
+  par: Array<Int | Real | Bool | Char | Str | Rec | Tup | Lis | Fun | Poly>
+  ret: Array<Int | Real | Bool | Char | Str | Rec | Tup | Lis | Fun | Poly>
+}
+
+export interface Poly extends BaseType {
+  name: string
+}
+
+export interface Und extends BaseType {
+  name: 'undefined'
+}
+
+// Nodes
 export interface BaseNodeWithoutComments {
   // Every leaf interface that extends BaseNode must specify a type property.
   // The type property should be a string literal. For example, Identifier
   // has: `type: "Identifier"`
   tag: string
+  type: Type
   loc?: SourceLocation | null | undefined
   range?: [number, number] | undefined
 }

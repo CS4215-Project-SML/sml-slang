@@ -87,6 +87,7 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
 
     return {
       tag: 'SequenceDeclaration',
+      type: { name: 'undefined' },
       declarations: declarations
     }
   }
@@ -100,7 +101,7 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
   visitProgramEmpty(ctx: ProgramEmptyContext): sml.Node {
     this.debugVisit('Program Empty', ctx)
 
-    return { tag: 'Empty' }
+    return { tag: 'Empty', type: { name: 'undefined' } }
   }
 
   visitDeclaration(ctx: DeclarationContext): sml.Node {
@@ -116,6 +117,7 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
 
     return {
       tag: 'ValueDeclaration',
+      type: { name: 'undefined' },
       name: valbind.name,
       value: valbind.value,
       loc: contextToLocation(ctx)
@@ -127,6 +129,7 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
 
     return {
       tag: 'ExpressionDeclaration',
+      type: { name: 'undefined' },
       value: ctx.getChild(0).accept(this) as sml.Expression,
       loc: contextToLocation(ctx)
     }
@@ -137,6 +140,7 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
 
     return {
       tag: 'Valbind',
+      type: { name: 'undefined' },
       name: (ctx._name.accept(this) as sml.Identifier).name,
       value: ctx._value.accept(this) as sml.Expression
     }
@@ -177,6 +181,7 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
 
     return {
       tag: 'ConditionalExpression',
+      type: { name: 'undefined' },
       pred: ctx._pred.accept(this) as sml.Expression,
       cons: ctx._cons.accept(this) as sml.Expression,
       alt: ctx._alt.accept(this) as sml.Expression
@@ -188,6 +193,7 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
 
     return {
       tag: 'InfixApplicationExpression',
+      type: { name: 'undefined' },
       operator: ctx._operator.text as sml.InfixOperator,
       left: ctx._left.accept(this) as sml.Expression,
       right: ctx._right.accept(this) as sml.Expression,
@@ -207,6 +213,7 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
     ) {
       return {
         tag: 'RecordSelector',
+        type: { name: 'undefined' },
         label: operator.label,
         record: operand,
         loc: contextToLocation(ctx)
@@ -229,6 +236,7 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
 
     return {
       tag: 'Record',
+      type: { name: 'undefined' },
       length: count,
       items: items,
       loc: contextToLocation(ctx)
@@ -247,6 +255,7 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
 
     return {
       tag: 'Sequence',
+      type: { name: 'undefined' },
       length: count,
       items: items,
       loc: contextToLocation(ctx)
@@ -269,6 +278,7 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
 
     return {
       tag: 'RecordSelector',
+      type: { name: 'undefined' },
       label: name,
       loc: contextToLocation(ctx)
     }
@@ -285,6 +295,7 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
 
     return {
       tag: 'List',
+      type: { name: 'undefined' },
       length: items.length,
       items: items,
       loc: contextToLocation(ctx)
@@ -318,6 +329,7 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
 
     return {
       tag: 'Keyvalue',
+      type: { name: 'undefined' },
       key: keyvalue,
       value: ctx._value.accept(this) as sml.Expression
     }
@@ -336,6 +348,7 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
 
     return {
       tag: 'Identifier',
+      type: { name: 'undefined' },
       name: label.name
     }
   }
@@ -345,6 +358,7 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
 
     return {
       tag: 'Constant',
+      type: { name: 'int' },
       value: parseInt(ctx.text)
     }
   }
@@ -354,6 +368,7 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
 
     return {
       tag: 'Identifier',
+      type: { name: 'undefined' },
       name: ctx.text,
       loc: contextToLocation(ctx)
     }
@@ -370,6 +385,7 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
 
     return {
       tag: 'Constant',
+      type: { name: 'int' },
       value: parseInt(ctx.text),
       loc: contextToLocation(ctx)
     }
@@ -380,6 +396,7 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
 
     return {
       tag: 'Constant',
+      type: { name: 'real' },
       value: parseFloat(ctx.text),
       loc: contextToLocation(ctx)
     }
@@ -390,6 +407,7 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
 
     return {
       tag: 'Constant',
+      type: { name: 'bool' },
       value: JSON.parse(ctx.text) as boolean,
       loc: contextToLocation(ctx)
     }
@@ -400,6 +418,7 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
 
     return {
       tag: 'Constant',
+      type: { name: 'char' },
       value: ctx.text.slice(2, ctx.text.length - 1),
       loc: contextToLocation(ctx)
     }
@@ -410,6 +429,7 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
 
     return {
       tag: 'Constant',
+      type: { name: 'string' },
       value: ctx.text.slice(1, ctx.text.length - 1),
       loc: contextToLocation(ctx)
     }
@@ -442,6 +462,7 @@ function convertSml(program: ProgramContext): sml.Program {
   const generator = new ProgramGenerator()
   return {
     tag: 'Program',
+    type: { name: 'undefined' },
     body: program.accept(generator) as sml.Declaration
   }
 }

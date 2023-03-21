@@ -2,17 +2,25 @@ import { Result } from '..'
 import { evaluate } from '../interpreter/interpreter'
 import { parse } from '../parser/parser'
 import * as sml from '../sml/nodes'
+import { typechecker } from '../sml/typechecker'
 import { Context } from '../types'
 import { resolvedErrorPromise } from './utils'
+
+function runTypechecker(program: sml.Program, context: Context): sml.Program {
+  return typechecker(program, context)
+}
 
 function runEvaluator(program: sml.Program, context: Context): string {
   return evaluate(program, context)
 }
 
 function runInterpreter(program: sml.Program, context: Context): Promise<Result> {
+  console.log('Type-checker is running...')
+
+  runTypechecker(program, context)
+
   console.log('Interpreter is running...')
 
-  // runTypeChecker(program, context)
   const evaluation = runEvaluator(program, context)
   console.log(evaluation)
 
