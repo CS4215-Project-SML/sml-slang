@@ -6,8 +6,6 @@ export interface TypeMap {
   Char: Char
   Str: Str
   Rec: Rec
-  Tup: Tup
-  Kv: Kv
   Lis: Lis
   Fun: Fun
   Poly: Poly
@@ -42,29 +40,18 @@ export interface Str extends BaseType {
 
 export interface Rec extends BaseType {
   name: 'record'
-  body: Array<Kv>
-}
-
-export interface Tup extends BaseType {
-  name: 'tuple'
-  body: Array<Kv>
-}
-
-export interface Kv {
-  name: 'keyvalue'
-  key: string
-  value: Int | Real | Bool | Char | Str | Rec | Tup | Lis | Fun | Poly
+  body: Object
 }
 
 export interface Lis extends BaseType {
   name: 'list'
-  body: Int | Real | Bool | Char | Str | Str | Rec | Tup | Lis | Fun | Poly
+  body: Int | Real | Bool | Char | Str | Str | Rec | Lis | Fun | Poly
 }
 
 export interface Fun extends BaseType {
   name: 'function'
-  par: Array<Int | Real | Bool | Char | Str | Rec | Tup | Lis | Fun | Poly>
-  ret: Array<Int | Real | Bool | Char | Str | Rec | Tup | Lis | Fun | Poly>
+  par: Array<Int | Real | Bool | Char | Str | Rec | Lis | Fun | Poly>
+  ret: Array<Int | Real | Bool | Char | Str | Rec | Lis | Fun | Poly>
 }
 
 export interface Poly extends BaseType {

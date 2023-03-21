@@ -1,113 +1,114 @@
 import * as lodash from 'lodash'
-import * as sml from './nodes'
+
 import { Context } from '../types'
+import * as sml from './nodes'
 
 const typeOfInfixOperator = {
   '+': {
     name: 'function',
     par: [
-      { name: 'tuple', body: [{ name: 'int' }, { name: 'int' }] },
-      { name: 'tuple', body: [{ name: 'real' }, { name: 'real' }] }
+      { name: 'record', body: { 1: { name: 'int' }, 2: { name: 'int' } } },
+      { name: 'record', body: { 1: { name: 'real' }, 2: { name: 'real' } } }
     ],
     ret: [{ name: 'int' }, { name: 'real' }]
   },
   '-': {
     name: 'function',
     par: [
-      { name: 'tuple', body: [{ name: 'int' }, { name: 'int' }] },
-      { name: 'tuple', body: [{ name: 'real' }, { name: 'real' }] }
+      { name: 'record', body: { 1: { name: 'int' }, 2: { name: 'int' } } },
+      { name: 'record', body: { 1: { name: 'real' }, 2: { name: 'real' } } }
     ],
     ret: [{ name: 'int' }, { name: 'real' }]
   },
   '*': {
     name: 'function',
     par: [
-      { name: 'tuple', body: [{ name: 'int' }, { name: 'int' }] },
-      { name: 'tuple', body: [{ name: 'real' }, { name: 'real' }] }
+      { name: 'record', body: { 1: { name: 'int' }, 2: { name: 'int' } } },
+      { name: 'record', body: { 1: { name: 'real' }, 2: { name: 'real' } } }
     ],
     ret: [{ name: 'int' }, { name: 'real' }]
   },
   '/': {
     name: 'function',
     par: [
-      { name: 'tuple', body: [{ name: 'int' }, { name: 'int' }] },
-      { name: 'tuple', body: [{ name: 'real' }, { name: 'real' }] }
+      { name: 'record', body: { 1: { name: 'int' }, 2: { name: 'int' } } },
+      { name: 'record', body: { 1: { name: 'real' }, 2: { name: 'real' } } }
     ],
     ret: [{ name: 'int' }, { name: 'real' }]
   },
   '<': {
     name: 'function',
     par: [
-      { name: 'tuple', body: [{ name: 'int' }, { name: 'int' }] },
-      { name: 'tuple', body: [{ name: 'real' }, { name: 'real' }] },
-      { name: 'tuple', body: [{ name: 'char' }, { name: 'char' }] },
-      { name: 'tuple', body: [{ name: 'string' }, { name: 'string' }] }
+      { name: 'record', body: { 1: { name: 'int' }, 2: { name: 'int' } } },
+      { name: 'record', body: { 1: { name: 'real' }, 2: { name: 'real' } } },
+      { name: 'record', body: { 1: { name: 'char' }, 2: { name: 'char' } } },
+      { name: 'record', body: { 1: { name: 'string' }, 2: { name: 'string' } } }
     ],
     ret: [{ name: 'bool' }, { name: 'bool' }, { name: 'bool' }, { name: 'bool' }]
   },
   '>': {
     name: 'function',
     par: [
-      { name: 'tuple', body: [{ name: 'int' }, { name: 'int' }] },
-      { name: 'tuple', body: [{ name: 'real' }, { name: 'real' }] },
-      { name: 'tuple', body: [{ name: 'char' }, { name: 'char' }] },
-      { name: 'tuple', body: [{ name: 'string' }, { name: 'string' }] }
+      { name: 'record', body: { 1: { name: 'int' }, 2: { name: 'int' } } },
+      { name: 'record', body: { 1: { name: 'real' }, 2: { name: 'real' } } },
+      { name: 'record', body: { 1: { name: 'char' }, 2: { name: 'char' } } },
+      { name: 'record', body: { 1: { name: 'string' }, 2: { name: 'string' } } }
     ],
     ret: [{ name: 'bool' }, { name: 'bool' }, { name: 'bool' }, { name: 'bool' }]
   },
   '=': {
     name: 'function',
     par: [
-      { name: 'tuple', body: [{ name: 'int' }, { name: 'int' }] },
-      { name: 'tuple', body: [{ name: 'real' }, { name: 'real' }] },
-      { name: 'tuple', body: [{ name: 'char' }, { name: 'char' }] },
-      { name: 'tuple', body: [{ name: 'string' }, { name: 'string' }] }
+      { name: 'record', body: { 1: { name: 'int' }, 2: { name: 'int' } } },
+      { name: 'record', body: { 1: { name: 'real' }, 2: { name: 'real' } } },
+      { name: 'record', body: { 1: { name: 'char' }, 2: { name: 'char' } } },
+      { name: 'record', body: { 1: { name: 'string' }, 2: { name: 'string' } } }
     ],
     ret: [{ name: 'bool' }, { name: 'bool' }, { name: 'bool' }, { name: 'bool' }]
   },
   '<=': {
     name: 'function',
     par: [
-      { name: 'tuple', body: [{ name: 'int' }, { name: 'int' }] },
-      { name: 'tuple', body: [{ name: 'real' }, { name: 'real' }] },
-      { name: 'tuple', body: [{ name: 'char' }, { name: 'char' }] },
-      { name: 'tuple', body: [{ name: 'string' }, { name: 'string' }] }
+      { name: 'record', body: { 1: { name: 'int' }, 2: { name: 'int' } } },
+      { name: 'record', body: { 1: { name: 'real' }, 2: { name: 'real' } } },
+      { name: 'record', body: { 1: { name: 'char' }, 2: { name: 'char' } } },
+      { name: 'record', body: { 1: { name: 'string' }, 2: { name: 'string' } } }
     ],
     ret: [{ name: 'bool' }, { name: 'bool' }, { name: 'bool' }, { name: 'bool' }]
   },
   '>=': {
     name: 'function',
     par: [
-      { name: 'tuple', body: [{ name: 'int' }, { name: 'int' }] },
-      { name: 'tuple', body: [{ name: 'real' }, { name: 'real' }] },
-      { name: 'tuple', body: [{ name: 'char' }, { name: 'char' }] },
-      { name: 'tuple', body: [{ name: 'string' }, { name: 'string' }] }
+      { name: 'record', body: { 1: { name: 'int' }, 2: { name: 'int' } } },
+      { name: 'record', body: { 1: { name: 'real' }, 2: { name: 'real' } } },
+      { name: 'record', body: { 1: { name: 'char' }, 2: { name: 'char' } } },
+      { name: 'record', body: { 1: { name: 'string' }, 2: { name: 'string' } } }
     ],
     ret: [{ name: 'bool' }, { name: 'bool' }, { name: 'bool' }, { name: 'bool' }]
   },
   '<>': {
     name: 'function',
     par: [
-      { name: 'tuple', body: [{ name: 'int' }, { name: 'int' }] },
-      { name: 'tuple', body: [{ name: 'real' }, { name: 'real' }] },
-      { name: 'tuple', body: [{ name: 'char' }, { name: 'char' }] },
-      { name: 'tuple', body: [{ name: 'string' }, { name: 'string' }] }
+      { name: 'record', body: { 1: { name: 'int' }, 2: { name: 'int' } } },
+      { name: 'record', body: { 1: { name: 'real' }, 2: { name: 'real' } } },
+      { name: 'record', body: { 1: { name: 'char' }, 2: { name: 'char' } } },
+      { name: 'record', body: { 1: { name: 'string' }, 2: { name: 'string' } } }
     ],
     ret: [{ name: 'bool' }, { name: 'bool' }, { name: 'bool' }, { name: 'bool' }]
   },
   '^': {
     name: 'function',
-    par: [{ name: 'tuple', body: [{ name: 'string' }, { name: 'string' }] }],
+    par: [{ name: 'record', body: { 1: { name: 'string' }, 2: { name: 'string' } } }],
     ret: [{ name: 'string' }]
   },
   andalso: {
     name: 'function',
-    par: [{ name: 'tuple', body: [{ name: 'bool' }, { name: 'bool' }] }],
+    par: [{ name: 'record', body: { 1: { name: 'bool' }, 2: { name: 'bool' } } }],
     ret: [{ name: 'bool' }]
   },
   orelse: {
     name: 'function',
-    par: [{ name: 'tuple', body: [{ name: 'bool' }, { name: 'bool' }] }],
+    par: [{ name: 'record', body: { 1: { name: 'bool' }, 2: { name: 'bool' } } }],
     ret: [{ name: 'bool' }]
   }
 }
@@ -167,7 +168,7 @@ function infer(node: sml.Node): sml.Type {
     throw new Error('not supported yet')
   } else if (node.tag === 'InfixApplicationExpression') {
     const funType = lookup(node.operator, E) as sml.Fun
-    const operandType = { name: 'tuple', body: [infer(node.left), infer(node.right)] }
+    const operandType = { name: 'record', body: { 1: infer(node.left), 2: infer(node.right) } }
     for (let i = 0; i < funType.par.length; i++) {
       if (lodash.isEqual(funType.par[i], operandType)) {
         node.type = funType.ret[i]
@@ -175,37 +176,26 @@ function infer(node: sml.Node): sml.Type {
       }
     }
     throw new Error('operator and operand do not agree [type mismatch]')
-  } else if (node.tag === 'PrefixApplicationExpression') {
-    throw new Error('not supported yet')
   } else if (node.tag === 'Record') {
-    const recordType: Array<sml.Kv> = []
+    const recordType = {}
     for (const [key, value] of Object.entries(node.items)) {
-      const valueType = infer(value) as
-        | sml.Int
-        | sml.Real
-        | sml.Bool
-        | sml.Char
-        | sml.Str
-        | sml.Rec
-        | sml.Tup
-        | sml.Lis
-        | sml.Fun
-        | sml.Poly
-      recordType.push({ name: 'keyvalue', key: key, value: valueType })
+      recordType[key] = infer(value)
     }
     node.type = { name: 'record', body: recordType }
     return node.type
   } else if (node.tag === 'RecordSelector') {
-    throw new Error('not supported yet')
+    node.type = (infer(node.record!) as sml.Rec).body[node.label]
+    return node.type
   } else if (node.tag === 'List') {
-    let itemsType = { name: 'a' } as sml.Poly
+    let listType = { name: "'a" } as sml.Poly
     for (let i = 0; i < node.items.length; i++) {
-      if (i > 0 && !lodash.isEqual(itemsType, node.items[i].type)) {
+      const itemType = infer(node.items[i])
+      if (i > 0 && !lodash.isEqual(listType, itemType)) {
         throw new Error('operator and operand do not agree [type mismatch]')
       }
-      itemsType = node.items[i].type
+      listType = itemType
     }
-    node.type = { name: 'list', body: itemsType }
+    node.type = { name: 'list', body: listType }
     return node.type
   } else if (node.tag === 'Identifier') {
     return lookup(node.name, E)
@@ -217,8 +207,6 @@ function infer(node: sml.Node): sml.Type {
 }
 
 export function typechecker(program: sml.Program, context: Context): sml.Program {
-  console.log(program)
-  console.log('xxxxxxxxxxxxxxxxxxxxxxxx')
   program.type = infer(program.body)
   console.log(program)
   return program

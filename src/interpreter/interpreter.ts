@@ -155,7 +155,7 @@ const microcode = {
   },
   RecordSelector: (cmd: sml.RecordSelector) => {
     if (cmd.record === undefined) throw new Error('bruh') // TODO: this shouldn't happen
-    push(A, { tag: 'RecordSelectorInstruction', label: cmd.label }, cmd.record)
+    push(A, { tag: 'RecordSelectorInstruction', type: cmd.type, label: cmd.label }, cmd.record)
   },
   List: (cmd: sml.List) => {
     push(A, { tag: 'ListInstruction', type: cmd.type, length: cmd.length }, ...cmd.items.reverse())
@@ -287,6 +287,7 @@ interface KeyvalueInstruction {
 
 interface RecordSelectorInstruction {
   tag: 'RecordSelectorInstruction'
+  type: sml.Type
   label: string
 }
 
