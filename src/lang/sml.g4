@@ -35,16 +35,22 @@ pattern
  * Expressions
  */
 expression
-    : '(' inner=expression ')'                                          # expressionParentheses
-    | IF pred=expression THEN cons=expression ELSE alt=expression       # expressionConditional
-    | left=expression operator=identifier right=expression              # expressionApplicationInfix
-    | operator=expression operand=expression                            # expressionApplicationPrefix
-    | '{' (keyvalue? | (keyvalue (',' keyvalue)+)) '}'                  # expressionRecord
-    | '(' expression ',' expression (',' expression)* ')'               # expressionSequence
-    | '[' (expression? | (expression (',' expression)+)) ']'            # expressionList
-    | '#' label                                                         # expressionRecordSelector
-    | constant                                                          # expressionConstant
-    | identifier                                                        # expressionIdentifier
+    : IF pred=expression THEN cons=expression ELSE alt=expression                           # expressionConditional
+
+    // Operator precedence is captured here
+    | '(' inner=expression ')'                                                              # expressionParentheses
+    | operator=expression operand=expression                                                # expressionApplicationPrefix
+    | left=expression operator=('*' | '/') right=expression                                 # expressionApplicationInfix
+    | left=expression operator=('+' | '-' | '^') right=expression                           # expressionApplicationInfix
+    | left=expression operator=('=' | '<>' | '<' | '<=' | '>' | '>=') right=expression      # expressionApplicationInfix
+    | left=expression operator=(ANDALSO | ORELSE) right=expression                          # expressionApplicationInfix
+
+    | '{' (keyvalue? | (keyvalue (',' keyvalue)+)) '}'                                      # expressionRecord
+    | '(' expression ',' expression (',' expression)* ')'                                   # expressionSequence
+    | '[' (expression? | (expression (',' expression)+)) ']'                                # expressionList
+    | '#' label                                                                             # expressionRecordSelector
+    | constant                                                                              # expressionConstant
+    | identifier                                                                            # expressionIdentifier
     ;
 
 keyvalue
@@ -79,9 +85,9 @@ constant
  */
 CHAR:           '#"' (WHITESPACE | DIGIT | LETTER) '"';
 STR:            '"' (WHITESPACE | DIGIT | LETTER)* '"';
-BOOL:           TRUE | FALSE;
 REAL:           DIGIT+ '.' DIGIT+;
 INT:            DIGIT+;
+BOOL:           TRUE | FALSE;
 
 ABSTYPE:        'abstype';
 AND:            'and';
@@ -119,7 +125,7 @@ TRUE:           'true';
 FALSE:          'false';
 
 ID
-    :           (LETTER (LETTER | DIGIT | '\'' | '_')*)
+    :           LETTER (LETTER | DIGIT | '\'' | '_')*
     |           ('!' | '%' | '&' | '$' | '#' | '+' | '-' | '/' | ':' | '<' | '=' | '>' | '?' | '@' | '\\' | '~' | '\'' | '^' | '|' | '*')+
     ;
 
