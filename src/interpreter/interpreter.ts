@@ -386,7 +386,13 @@ function prettierValue(val: sml.Constant | sml.Record | sml.List) {
 function prettierType(val: sml.Type) {
   let ptyp = ''
 
-  if (val.name === 'int' || val.name === 'real' || val.name === 'bool' || val.name === 'char' || val.name === 'string') {
+  if (
+    val.name === 'int' ||
+    val.name === 'real' ||
+    val.name === 'bool' ||
+    val.name === 'char' ||
+    val.name === 'string'
+  ) {
     ptyp = val.name
   } else if (val.name === 'record') {
     const bodyLength = Object.keys((val as sml.Rec).body).length
