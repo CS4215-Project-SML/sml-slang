@@ -25,7 +25,7 @@
     "astring": "^1.4.3",
     "eslint-plugin-simple-import-sort": "^7.0.0",
     "gpu.js": "^2.10.4",
-    "lodash": "^4.17.20",
+    "lodash": "^4.17.21",
     "node-getopt": "^0.3.2",
     "source-map": "0.7.3",
     "xmlhttprequest-ts": "^1.0.1"
@@ -39,6 +39,7 @@
     "sml-slang": "dist/repl/repl.js"
   },
   "scripts": {
+    "repl": "node ./dist/repl/repl.js",
     "antlr4ts": "antlr4ts -visitor ./src/lang/sml.g4",
     "autocomplete": "node ./scripts/updateAutocompleteDocs.js",
     "benchmark": "jest --runInBand --testPathPattern='.*benchmark.*' --testPathIgnorePatterns='/dist/'",
