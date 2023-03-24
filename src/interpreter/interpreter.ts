@@ -354,36 +354,59 @@ function prettier(evaluation: sml.Identifier): string {
   const id = evaluation.name
   const val = lookup(id, E) as sml.Constant | sml.Record | sml.List
 
-  let pval: any = undefined
-  let ptyp: any = undefined
+  return `val ${id} = ${prettierValue(val)} : ${prettierType(val.type)}`
+}
+
+function prettierValue(val: sml.Constant | sml.Record | sml.List) {
+  let pval = ''
 
   if (val.tag === 'Constant') {
-    pval = val.value
-    ptyp = val.type.name
+    pval = val.value.toString()
   } else if (val.tag === 'Record') {
     let i = 0
     pval = '{'
-    ptyp = '{'
     for (const [key, value] of Object.entries(val.items)) {
-      pval += key.toString() + '=' + (value as sml.Constant).value.toString()
-      pval += i < val.length - 1 ? ',' : ''
-      ptyp += key.toString() + ':' + (value as sml.Constant).type.name
-      ptyp += i < val.length - 1 ? ',' : ''
-      i++
+      pval += key.toString() + '=' + prettierValue(value)
+      pval += i++ < val.length - 1 ? ',' : ''
     }
     pval += '}'
-    ptyp += '}'
   } else if (val.tag === 'List') {
     let i = 0
     pval = '['
-    ptyp = (val.type as sml.Lis).body.name + ' ' + val.type.name
     for (let j = 0; j < val.items.length; j++) {
-      pval += val.items[j].value.toString()
-      pval += i < val.length - 1 ? ',' : ''
-      i++
+      pval += prettierValue(val.items[j])
+      pval += i++ < val.length - 1 ? ',' : ''
     }
     pval += ']'
   }
 
-  return `val ${id} = ${pval} : ${ptyp}`
+  return pval
+}
+
+function prettierType(val: sml.Type) {
+  let ptyp = ''
+
+  if (val.name === 'int' || val.name === 'real' || val.name === 'bool' || val.name === 'char' || val.name === 'string') {
+    ptyp = val.name
+  } else if (val.name === 'record') {
+    const bodyLength = Object.keys((val as sml.Rec).body).length
+    let i = 0
+    ptyp = '{'
+    for (const [key, value] of Object.entries((val as sml.Rec).body)) {
+      ptyp += key.toString() + ':' + prettierType(value)
+      ptyp += i++ < bodyLength - 1 ? ',' : ''
+    }
+    ptyp += '}'
+  } else if (val.name === 'list') {
+    ptyp = prettierType((val as sml.Lis).body) + ' ' + val.name
+  } else if (val.name === 'function') {
+    throw new Error(`not supported yet ${val}`)
+  } else if (val.name === 'undefined') {
+    throw new Error(`not supported yet ${val}`)
+  } else {
+    // This is polymorphic type
+    ptyp = val.name
+  }
+
+  return ptyp
 }
