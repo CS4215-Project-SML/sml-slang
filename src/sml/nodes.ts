@@ -55,8 +55,9 @@ export interface NodeMap {
 
   List: List
 
-  Pattern: Pattern
   Match: Match
+  Mrule: Mrule
+  Pattern: Pattern
 
   Identifier: Identifier
   Constant: Constant
@@ -158,6 +159,8 @@ export interface ConditionalExpression extends BaseExpression {
 
 export interface PrefixApplicationExpression extends BaseExpression {
   tag: 'PrefixApplicationExpression'
+  operator: Expression
+  operand: Expression
 }
 
 export interface InfixApplicationExpression extends BaseExpression {
@@ -214,19 +217,41 @@ export interface RecordSelector extends BaseRecord {
  * Pattern
  */
 export interface PatternMap {
-  Constant: Constant
-  Identifier: Identifier
+  Constant: PatternConstant
+  Identifier: PatternIdentifier
+  Record: PatternRecord
 }
 
 export type Pattern = PatternMap[keyof PatternMap]
 
 export type BasePattern = BaseNode
 
+export interface PatternConstant extends BasePattern {
+  tag: 'PatternConstant'
+  value: number | boolean | string
+}
+
+export interface PatternIdentifier extends BasePattern {
+  tag: 'PatternIdentifier'
+  name: string
+}
+
+export interface PatternRecord extends BasePattern {
+  tag: 'PatternRecord'
+  length: number
+  aliases: Object // TODO: change to Record<string, Pattern>
+}
+
 /**
  * Match
  */
 export interface Match extends BaseNode {
   tag: 'Match'
+  rules: Array<Mrule>
+}
+
+export interface Mrule extends BaseNode {
+  tag: 'Mrule'
   pat: Pattern
   exp: Expression
 }

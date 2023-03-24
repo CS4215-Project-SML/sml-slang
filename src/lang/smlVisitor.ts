@@ -21,6 +21,7 @@ import { ConstantCharContext } from "./smlParser";
 import { ConstantStrContext } from "./smlParser";
 import { PatternInfixContext } from "./smlParser";
 import { PatternTupleContext } from "./smlParser";
+import { PatternRecordContext } from "./smlParser";
 import { PatternListContext } from "./smlParser";
 import { PatternConstantContext } from "./smlParser";
 import { PatternIdContext } from "./smlParser";
@@ -29,11 +30,11 @@ import { ProgramDeclarationContext } from "./smlParser";
 import { ProgramEmptyContext } from "./smlParser";
 import { LabelIdContext } from "./smlParser";
 import { LabelIntContext } from "./smlParser";
-import { IdAlphaContext } from "./smlParser";
-import { IdSymbolContext } from "./smlParser";
 import { DeclarationFunctionContext } from "./smlParser";
 import { DeclarationValueContext } from "./smlParser";
 import { DeclarationExpressionContext } from "./smlParser";
+import { IdAlphaContext } from "./smlParser";
+import { IdSymbolContext } from "./smlParser";
 import { ProgramContext } from "./smlParser";
 import { DeclarationContext } from "./smlParser";
 import { ValbindContext } from "./smlParser";
@@ -42,6 +43,7 @@ import { PatternContext } from "./smlParser";
 import { ExpressionContext } from "./smlParser";
 import { KeyvalueContext } from "./smlParser";
 import { MatchSmlContext } from "./smlParser";
+import { MruleContext } from "./smlParser";
 import { LabelContext } from "./smlParser";
 import { IdContext } from "./smlParser";
 import { VariableContext } from "./smlParser";
@@ -201,6 +203,14 @@ export interface smlVisitor<Result> extends ParseTreeVisitor<Result> {
 	visitPatternTuple?: (ctx: PatternTupleContext) => Result;
 
 	/**
+	 * Visit a parse tree produced by the `patternRecord`
+	 * labeled alternative in `smlParser.pattern`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitPatternRecord?: (ctx: PatternRecordContext) => Result;
+
+	/**
 	 * Visit a parse tree produced by the `patternList`
 	 * labeled alternative in `smlParser.pattern`.
 	 * @param ctx the parse tree
@@ -265,22 +275,6 @@ export interface smlVisitor<Result> extends ParseTreeVisitor<Result> {
 	visitLabelInt?: (ctx: LabelIntContext) => Result;
 
 	/**
-	 * Visit a parse tree produced by the `idAlpha`
-	 * labeled alternative in `smlParser.id`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitIdAlpha?: (ctx: IdAlphaContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by the `idSymbol`
-	 * labeled alternative in `smlParser.id`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitIdSymbol?: (ctx: IdSymbolContext) => Result;
-
-	/**
 	 * Visit a parse tree produced by the `declarationFunction`
 	 * labeled alternative in `smlParser.declaration`.
 	 * @param ctx the parse tree
@@ -303,6 +297,22 @@ export interface smlVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitDeclarationExpression?: (ctx: DeclarationExpressionContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `idAlpha`
+	 * labeled alternative in `smlParser.id`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitIdAlpha?: (ctx: IdAlphaContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `idSymbol`
+	 * labeled alternative in `smlParser.id`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitIdSymbol?: (ctx: IdSymbolContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `smlParser.program`.
@@ -359,6 +369,13 @@ export interface smlVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitMatchSml?: (ctx: MatchSmlContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `smlParser.mrule`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitMrule?: (ctx: MruleContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `smlParser.label`.
