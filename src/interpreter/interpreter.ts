@@ -1,5 +1,135 @@
+import * as lodash from 'lodash'
+
 import * as sml from '../sml/nodes'
-import { Context } from '../types'
+import { Context, Environment, Frame } from '../types'
+
+/* **********************
+ * find free variables
+ * **********************/
+
+// TODO:
+function getFreeVariables() {}
+
+/* **********************
+ * pattern matching
+ * **********************/
+
+type MatchableValue = sml.Constant | sml.Record | sml.List
+
+function evaluateMatch(match: sml.Match, value: MatchableValue): [sml.Expression, Frame] | null {
+  for (const mrule of match.rules) {
+    console.log(`Matching mrule ${JSON.stringify(mrule)}`)
+    const [isMatch, frame] = evaluatePattern(mrule.pat, value)
+
+    if (isMatch) {
+      return [mrule.exp, frame]
+    }
+  }
+
+  // If match fails, return null
+  return null
+}
+
+function evaluatePatternConstant(
+  pattern: sml.PatternConstant,
+  value: MatchableValue
+): [boolean, Frame] {
+  if (value.tag !== 'Constant') {
+    return [false, {}]
+  }
+
+  const val = value as sml.Constant
+
+  if (val.value === pattern.value) {
+    return [true, {}]
+  }
+
+  return [false, {}]
+}
+
+function evaluatePatternRecord(
+  pattern: sml.PatternRecord,
+  value: MatchableValue
+): [boolean, Frame] {
+  if (value.tag !== 'Record') {
+    return [false, {}]
+  }
+
+  console.log('Evaluating pattern record')
+
+  const record = value as sml.Record
+  const items = record.items
+  const frame: Frame = {}
+
+  // Check whether they have the same keys
+  // 1) They have same length
+  // 2) Keys of `aliases` is in keys of `items`
+  const aliasKeys = Object.keys(pattern.aliases)
+  const itemKeys = Object.keys(items)
+
+  if (aliasKeys.length !== itemKeys.length) {
+    return [false, {}]
+  }
+
+  // Need to check that the type is exactly the same
+  for (const [key, alias] of Object.entries(pattern.aliases) as Array<[string, sml.Pattern]>) {
+    if (!(key in items)) {
+      console.log(`${key} is not in items ${JSON.stringify(items)}`)
+      return [false, {}]
+    }
+
+    // Gets the value
+    const [isMatch, patFrame] = evaluatePattern(alias, items[key])
+
+    if (!isMatch) {
+      console.log(`Pattern record failed to match key ${key}`)
+      return [false, {}]
+    }
+
+    for (const [key, value] of Object.entries(patFrame)) {
+      if (key in frame) {
+        throw new Error(`Variable ${key} is defined multiple times`)
+      }
+
+      console.log(`Putting key ${key} into frame with value ${value}`)
+
+      frame[key] = value
+    }
+  }
+
+  console.log(`The frame: ${JSON.stringify(frame)}`)
+
+  return [true, frame]
+}
+
+function evaluatePatternIdentifier(
+  pattern: sml.PatternIdentifier,
+  value: MatchableValue
+): [boolean, Frame] {
+  console.log('Evaluating pattern identifier...')
+  return [
+    true,
+    {
+      [pattern.name]: value
+    }
+  ]
+}
+
+function evaluatePattern(pattern: sml.Pattern, value: MatchableValue): [boolean, Frame] {
+  console.log(`Pattern: ${JSON.stringify(pattern)}`)
+  console.log(`Value: ${JSON.stringify(value)}`)
+
+  switch (pattern.tag) {
+    case 'PatternConstant':
+      return evaluatePatternConstant(pattern as sml.PatternConstant, value)
+    case 'PatternRecord':
+      return evaluatePatternRecord(pattern as sml.PatternRecord, value)
+    case 'PatternIdentifier':
+      return evaluatePatternIdentifier(pattern as sml.PatternIdentifier, value)
+    default:
+      return [false, {}]
+  }
+}
 
 /* **********************
  * operators and builtins
@@ -49,7 +179,7 @@ function lookup(name: string, env: Array<Object>): sml.Constant | sml.Record {
   throw new Error()
 }
 
-function bind(name: string, value: sml.Constant, env: Array<Object>) {
+function bind(name: string, value: sml.Constant | sml.Record | Closure, env: Array<Object>) {
   const frame = env[env.length - 1]
   frame[name] = value
 }
@@ -107,7 +237,7 @@ let A: Array<Object>
 
 // Execution initializes stash S as an empty array.
 
-let S: Array<sml.Constant | sml.Identifier | sml.Record | sml.Keyvalue>
+let S: Array<sml.Constant | sml.Identifier | sml.Record | sml.Keyvalue | sml.List | Closure>
 
 // environment E
 
@@ -166,8 +296,24 @@ const microcode = {
   ValueDeclaration: (cmd: sml.ValueDeclaration) => {
     push(A, { tag: 'BindInstruction', name: cmd.name }, cmd.value)
   },
+  FunctionDeclaration: (cmd: sml.FunctionDeclaration) => {
+    const lambda = cmd.lambda
+    const instr: BindFunctionInstruction = {
+      tag: 'BindFunctionInstruction',
+      name: cmd.name
+    }
+
+    push(A, instr, lambda)
+  },
+  LambdaExpression: (cmd: sml.LambdaExpression) => {
+    // TODO: identify free variables
+    push(S, { tag: 'LambdaInstruction', env: lodash.cloneDeep(E), match: cmd.match })
+  },
   ConditionalExpression: (cmd: sml.ConditionalExpression) => {
     push(A, { tag: 'ConditionalExpressionInstruction', cons: cmd.cons, alt: cmd.alt }, cmd.pred)
+  },
+  PrefixApplicationExpression: (cmd: sml.PrefixApplicationExpression) => {
+    push(A, { tag: 'PrefixApplicationInstruction' }, cmd.operator, cmd.operand)
   },
   InfixApplicationExpression: (cmd: sml.InfixApplicationExpression) => {
     push(A, { tag: 'InfixApplicationInstruction', operator: cmd.operator }, cmd.right, cmd.left)
@@ -186,6 +332,14 @@ const microcode = {
     const value = S.pop() as sml.Constant
     bind(cmd.name, value, E)
     push(S, { tag: 'Identifier', name: cmd.name })
+  },
+  BindFunctionInstruction: (cmd: BindFunctionInstruction) => {
+    const value = S.pop() as Closure
+    bind(cmd.name, value, E)
+    push(S, { tag: 'Identifier', name: cmd.name })
+
+    // To support recursive call
+    value.env = lodash.cloneDeep(E)
   },
   RecordInstruction: (cmd: RecordInstruction) => {
     // Make sure that items are added to the object in the order they were specified
@@ -240,10 +394,40 @@ const microcode = {
   ConditionalExpressionInstruction: (cmd: ConditionalExpressionInstruction) => {
     push(A, (S.pop() as sml.Constant).value ? cmd.cons : cmd.alt)
   },
+  PrefixApplicationInstruction: (cmd: PrefixApplicationInstruction) => {
+    const operator = S.pop() as Closure
+    const operand = S.pop()
+
+    if (operator.tag !== 'LambdaInstruction') {
+      throw new Error('Prefix application operator must be a lambda value!')
+    }
+
+    // Maybe we can find another way to not typecast?
+    const res = evaluateMatch(operator.match, operand as MatchableValue)
+
+    if (!res) {
+      throw new Error(`Failed to evaluate matching ${operand} on match rules ${operator.match}`)
+    }
+
+    const [exp, frame] = res
+
+    const envInstr: EnvironmentInstruction = {
+      tag: 'EnvironmentInstruction',
+      env: E
+    }
+
+    E = operator.env
+    E.push(frame)
+
+    push(A, envInstr, exp)
+  },
   InfixApplicationInstruction: (cmd: InfixApplicationInstruction) => {
     const right = (S.pop() as sml.Constant).value
     const left = (S.pop() as sml.Constant).value
     push(S, { tag: 'Constant', value: applyInfixOperator(cmd.operator, left, right) })
+  },
+  EnvironmentInstruction: (cmd: EnvironmentInstruction) => {
+    E = cmd.env
   }
 }
 
@@ -256,6 +440,11 @@ interface PopInstruction {
 
 interface BindInstruction {
   tag: 'BindInstruction'
+  name: string
+}
+
+interface BindFunctionInstruction {
+  tag: 'BindFunctionInstruction'
   name: string
 }
 
@@ -284,15 +473,30 @@ interface ListInstruction {
   length: number
 }
 
+interface Closure {
+  tag: 'LambdaInstruction'
+  match: sml.Match
+  env: Array<Object>
+}
+
 interface ConditionalExpressionInstruction {
   tag: 'ConditionalExpressionInstruction'
   cons: sml.Expression
   alt: sml.Expression
 }
 
+interface PrefixApplicationInstruction {
+  tag: 'PrefixApplicationInstruction'
+}
+
 interface InfixApplicationInstruction {
   tag: 'InfixApplicationInstruction'
   operator: sml.InfixOperator
+}
+
+interface EnvironmentInstruction {
+  tag: 'EnvironmentInstruction'
+  env: Array<Object> // TODO: change this when merge
 }
 
 /* ****************

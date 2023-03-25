@@ -59,6 +59,8 @@ export interface NodeMap {
   Mrule: Mrule
   Pattern: Pattern
 
+  KeyPattern: KeyPattern
+
   Identifier: Identifier
   Constant: Constant
 }
@@ -102,8 +104,7 @@ export interface ValueDeclaration extends BaseDeclaration {
 export interface FunctionDeclaration extends BaseDeclaration {
   tag: 'FunctionDeclaration'
   name: string
-  pat: Pattern
-  body: Expression
+  lambda: LambdaExpression
 }
 
 export interface ExpressionDeclaration extends BaseDeclaration {
@@ -240,6 +241,12 @@ export interface PatternRecord extends BasePattern {
   tag: 'PatternRecord'
   length: number
   aliases: Object // TODO: change to Record<string, Pattern>
+}
+
+export interface KeyPattern extends BaseNode {
+  tag: 'KeyPattern'
+  key: string
+  pat: Pattern
 }
 
 /**

@@ -30,13 +30,24 @@ funbind
  * Patterns
  */
 pattern
-    : pattern '::' pattern                                  # patternInfix
-    | '(' pattern (',' pattern)* ')'                        # patternTuple
-    | '{' (keyvalue? | (keyvalue (',' keyvalue)+)) '}'      # patternRecord
-    | '[' pattern (',' pattern)* ']'                        # patternList
-    | constant                                              # patternConstant
-    | id                                                    # patternId
+    : pattern '::' pattern                                      # patternInfix
+    | '(' pattern (',' pattern)* ')'                            # patternTuple
+    | '{' (keypattern? | (keypattern (',' keypattern)+)) '}'    # patternRecord
+    | '[' pattern (',' pattern)* ']'                            # patternList
+    | constant                                                  # patternConstant
+    | id                                                        # patternId
     ;
+
+matchSml
+    : matchRule=mrule '|' rest=matchSml         # matchSequence
+    | matchRule=mrule                           # matchAtomic
+    ;
+
+mrule
+    : pat=pattern '=>' exp=expression;
+
+keypattern
+    : key=label '=' pat=pattern;
 
 /*
  * Expressions
@@ -57,12 +68,6 @@ expression
 
 keyvalue
     : key=label '=' value=expression;
-
-matchSml
-    : matchRule=mrule ('|' rest=matchSml)?;
-
-mrule
-    : pat=pattern '=>' exp=expression;
 
 /*
  * Identifiers

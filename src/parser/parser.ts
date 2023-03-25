@@ -33,10 +33,13 @@ import {
   IdAlphaContext,
   IdContext,
   IdSymbolContext,
+  KeypatternContext,
   KeyvalueContext,
   LabelContext,
   LabelIdContext,
   LabelIntContext,
+  MatchAtomicContext,
+  MatchSequenceContext,
   MatchSmlContext,
   MruleContext,
   PatternConstantContext,
@@ -143,9 +146,9 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
     }
 
     return {
-      tag: 'ValueDeclaration',
+      tag: 'FunctionDeclaration',
       name: funbind.name,
-      value: value,
+      lambda: value,
       loc: contextToLocation(ctx)
     }
   }
@@ -194,12 +197,17 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
     }
   }
 
-  visitMatchSml(ctx: MatchSmlContext): sml.Node {
-    this.debugVisit('Matchsml', ctx)
+  visitMatchAtomic(ctx: MatchAtomicContext): sml.Node {
+    return {
+      tag: 'Match',
+      rules: [ctx._matchRule.accept(this) as sml.Mrule]
+    }
+  }
 
+  visitMatchSequence(ctx: MatchSequenceContext): sml.Node {
     const rule = ctx._matchRule.accept(this) as sml.Mrule
     console.log('Rule: ', rule)
-    const rest = ctx._rest?.accept(this)
+    const rest = ctx._rest.accept(this)
     console.log('Rest: ', rest)
 
     const rules = rest ? [rule, ...(rest as sml.Match).rules] : [rule]
@@ -209,6 +217,22 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
       rules
     }
   }
+
+  // visitMatchSml(ctx: MatchSmlContext): sml.Node {
+  //   this.debugVisit('Matchsml', ctx)
+
+  //   const rule = ctx._matchRule.accept(this) as sml.Mrule
+  //   console.log('Rule: ', rule)
+  //   const rest = ctx._rest?.accept(this)
+  //   console.log('Rest: ', rest)
+
+  //   const rules = rest ? [rule, ...(rest as sml.Match).rules] : [rule]
+
+  //   return {
+  //     tag: 'Match',
+  //     rules
+  //   }
+  // }
 
   visitMrule(ctx: MruleContext): sml.Node {
     this.debugVisit('Mrule', ctx)
@@ -258,7 +282,7 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
     const aliases = {}
     let count = 0
     for (let i = 1; ctx.childCount > 2 && i < ctx.childCount; i += 2) {
-      const expr = ctx.getChild(i).accept(this) as sml.Expression
+      const expr = ctx.getChild(i).accept(this) as sml.Pattern
       aliases[++count] = expr
     }
 
@@ -276,8 +300,8 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
     const aliases = {}
     let count = 0
     for (let i = 1; ctx.childCount > 2 && i < ctx.childCount; i += 2) {
-      const keyvalue = ctx.getChild(i).accept(this) as sml.Keyvalue
-      aliases[keyvalue.key] = keyvalue.value
+      const keyvalue = ctx.getChild(i).accept(this) as sml.KeyPattern
+      aliases[keyvalue.key] = keyvalue.pat
       count++
     }
 
@@ -286,6 +310,16 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
       length: count,
       aliases: aliases,
       loc: contextToLocation(ctx)
+    }
+  }
+
+  visitKeypattern(ctx: KeypatternContext): sml.Node {
+    this.debugVisit('KeyPattern', ctx)
+
+    return {
+      tag: 'KeyPattern',
+      key: (ctx._key.accept(this) as sml.Constant).value.toString(),
+      pat: ctx._pat.accept(this) as sml.Pattern
     }
   }
 
