@@ -272,9 +272,19 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
     }
   }
 
-  // visitPatternInfix(ctx: PatternInfixContext): sml.Node {
-  //   this.debugVisit('Pattern infix', ctx)
-  // }
+  visitPatternInfix(ctx: PatternInfixContext): sml.Node {
+    this.debugVisit('Pattern infix', ctx)
+
+    const left = ctx._left.accept(this) as sml.Pattern
+    const right = ctx._right.accept(this) as sml.Pattern
+
+    return {
+      tag: 'PatternInfix',
+      operator: '::',
+      left,
+      right
+    }
+  }
 
   visitPatternTuple(ctx: PatternTupleContext): sml.Node {
     this.debugVisit('Pattern tuple', ctx)

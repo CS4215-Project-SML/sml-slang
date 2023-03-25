@@ -221,6 +221,7 @@ export interface PatternMap {
   Constant: PatternConstant
   Identifier: PatternIdentifier
   Record: PatternRecord
+  Infix: PatternInfix
 }
 
 export type Pattern = PatternMap[keyof PatternMap]
@@ -230,6 +231,13 @@ export type BasePattern = BaseNode
 export interface PatternConstant extends BasePattern {
   tag: 'PatternConstant'
   value: number | boolean | string
+}
+
+export interface PatternInfix extends BasePattern {
+  tag: 'PatternInfix'
+  left: Pattern
+  operator: '::'
+  right: Pattern
 }
 
 export interface PatternIdentifier extends BasePattern {

@@ -30,6 +30,24 @@ function evaluateMatch(match: sml.Match, value: MatchableValue): [sml.Expression
   return null
 }
 
+function evaluatePattern(pattern: sml.Pattern, value: MatchableValue): [boolean, Frame] {
+  console.log(`Pattern: ${JSON.stringify(pattern)}`)
+  console.log(`Value: ${JSON.stringify(value)}`)
+
+  switch (pattern.tag) {
+    case 'PatternConstant':
+      return evaluatePatternConstant(pattern as sml.PatternConstant, value)
+    case 'PatternRecord':
+      return evaluatePatternRecord(pattern as sml.PatternRecord, value)
+    case 'PatternIdentifier':
+      return evaluatePatternIdentifier(pattern as sml.PatternIdentifier, value)
+    case 'PatternInfix':
+      return evaluatePatternInfix(pattern as sml.PatternInfix, value)
+    default:
+      return [false, {}]
+  }
+}
+
 function evaluatePatternConstant(
   pattern: sml.PatternConstant,
   value: MatchableValue
@@ -45,6 +63,19 @@ function evaluatePatternConstant(
   }
 
   return [false, {}]
+}
+
+function evaluatePatternIdentifier(
+  pattern: sml.PatternIdentifier,
+  value: MatchableValue
+): [boolean, Frame] {
+  console.log('Evaluating pattern identifier...')
+  return [
+    true,
+    {
+      [pattern.name]: value
+    }
+  ]
 }
 
 function evaluatePatternRecord(
@@ -102,33 +133,17 @@ function evaluatePatternRecord(
   return [true, frame]
 }
 
-function evaluatePatternIdentifier(
-  pattern: sml.PatternIdentifier,
-  value: MatchableValue
-): [boolean, Frame] {
-  console.log('Evaluating pattern identifier...')
-  return [
-    true,
-    {
-      [pattern.name]: value
-    }
-  ]
-}
+function evaluatePatternInfix(pattern: sml.PatternInfix, value: MatchableValue): [boolean, Frame] {
+  // For now, we only support infix pattern matching for list type.
+  // Hence, pattern.operator === '::' is always true
 
-function evaluatePattern(pattern: sml.Pattern, value: MatchableValue): [boolean, Frame] {
-  console.log(`Pattern: ${JSON.stringify(pattern)}`)
-  console.log(`Value: ${JSON.stringify(value)}`)
-
-  switch (pattern.tag) {
-    case 'PatternConstant':
-      return evaluatePatternConstant(pattern as sml.PatternConstant, value)
-    case 'PatternRecord':
-      return evaluatePatternRecord(pattern as sml.PatternRecord, value)
-    case 'PatternIdentifier':
-      return evaluatePatternIdentifier(pattern as sml.PatternIdentifier, value)
-    default:
-      return [false, {}]
+  if (pattern.operator !== '::' || value.tag !== 'List') {
+    return [false, {}]
   }
+
+  // x::xs -> x: a', xs: a' list
+
+  return [false, {}]
 }
 
 /* **********************

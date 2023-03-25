@@ -30,7 +30,7 @@ funbind
  * Patterns
  */
 pattern
-    : pattern '::' pattern                                      # patternInfix
+    : left=pattern '::' right=pattern                                      # patternInfix
     | '(' pattern (',' pattern)* ')'                            # patternTuple
     | '{' (keypattern? | (keypattern (',' keypattern)+)) '}'    # patternRecord
     | '[' pattern (',' pattern)* ']'                            # patternList
