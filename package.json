@@ -39,6 +39,7 @@
     "sml-slang": "dist/repl/repl.js"
   },
   "scripts": {
+    "repl": "node ./dist/repl/repl.js",
     "antlr4ts": "antlr4ts -visitor ./src/lang/sml.g4",
     "autocomplete": "node ./scripts/updateAutocompleteDocs.js",
     "benchmark": "jest --runInBand --testPathPattern='.*benchmark.*' --testPathIgnorePatterns='/dist/'",

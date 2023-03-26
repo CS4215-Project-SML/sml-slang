@@ -15,6 +15,7 @@ import {
   ConstantStrContext,
   DeclarationContext,
   DeclarationExpressionContext,
+  DeclarationFunctionContext,
   DeclarationValueContext,
   ExpressionApplicationInfixContext,
   ExpressionApplicationPrefixContext,
@@ -22,19 +23,30 @@ import {
   ExpressionConstantContext,
   ExpressionContext,
   ExpressionIdentifierContext,
+  ExpressionLambdaContext,
   ExpressionListContext,
   ExpressionParenthesesContext,
   ExpressionRecordContext,
   ExpressionRecordSelectorContext,
   ExpressionTupleContext,
   IdentifierContext,
+  FunbindContext,
+  KeypatternContext,
   KeyvalueContext,
   LabelContext,
   LabelIdentifierContext,
   LabelIntContext,
+  MatchingContext,
+  MatchingAtomicContext,
+  MatchingSequenceContext,
+  MatchingruleContext,
   PatternConstantContext,
-  PatternContext,
   PatternIdentifierContext,
+  PatternInfixContext,
+  PatternListContext,
+  PatternRecordContext,
+  PatternTupleContext,
+  PatternContext,
   ProgramContext,
   ProgramDeclarationContext,
   ProgramEmptyContext,
@@ -110,6 +122,39 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
     return ctx.getChild(0).accept(this)
   }
 
+  visitDeclarationFunction(ctx: DeclarationFunctionContext): sml.Node {
+    // TODO: extend pattern to many patterns
+    // i.e. support fun f (x) (y) = x + y; [currying]
+
+    this.debugVisit('Declaration Function', ctx)
+
+    const funbind = ctx.getChild(1).accept(this) as sml.Funbind
+    const value: sml.LambdaExpression = {
+      tag: 'LambdaExpression',
+      type: { name: 'undefined' },
+      matching: {
+        tag: 'Matching',
+        type: { name: 'undefined' },
+        rules: [
+          {
+            tag: 'Matchingrule',
+            type: { name: 'undefined' },
+            pat: funbind.pat,
+            exp: funbind.body
+          }
+        ]
+      }
+    }
+
+    return {
+      tag: 'FunctionDeclaration',
+      type: { name: 'undefined' },
+      name: funbind.name,
+      lambda: value,
+      loc: contextToLocation(ctx)
+    }
+  }
+
   visitDeclarationValue(ctx: DeclarationValueContext): sml.Node {
     this.debugVisit('Declaration Value', ctx)
 
@@ -146,6 +191,52 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
     }
   }
 
+  visitFunbind(ctx: FunbindContext): sml.Node {
+    this.debugVisit('Funbind', ctx)
+
+    return {
+      tag: 'Funbind',
+      type: { name: 'undefined' },
+      name: (ctx._name.accept(this) as sml.Identifier).name,
+      pat: ctx._pat.accept(this) as sml.Pattern,
+      body: ctx._body.accept(this) as sml.Expression
+    }
+  }
+
+  visitMatchingAtomic(ctx: MatchingAtomicContext): sml.Node {
+    return {
+      tag: 'Matching',
+      type: { name: 'undefined' },
+      rules: [ctx._matchrule.accept(this) as sml.Matchingrule]
+    }
+  }
+
+  visitMatchingSequence(ctx: MatchingSequenceContext): sml.Node {
+    const rule = ctx._matchrule.accept(this) as sml.Matchingrule
+    console.log('Rule: ', rule)
+    const rest = ctx._rest.accept(this)
+    console.log('Rest: ', rest)
+
+    const rules = rest ? [rule, ...(rest as sml.Matching).rules] : [rule]
+
+    return {
+      tag: 'Matching',
+      type: { name: 'undefined' },
+      rules
+    }
+  }
+
+  visitMatchingrule(ctx: MatchingruleContext): sml.Node {
+    this.debugVisit('Mrule', ctx)
+
+    return {
+      tag: 'Matchingrule',
+      type: { name: 'undefined' },
+      pat: ctx._pat.accept(this) as sml.Pattern,
+      exp: ctx._exp.accept(this) as sml.Expression
+    }
+  }
+
   visitPattern(ctx: PatternContext): sml.Node {
     this.debugVisit('Pattern', ctx)
 
@@ -155,19 +246,110 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
   visitPatternConstant(ctx: PatternConstantContext): sml.Node {
     this.debugVisit('Pattern Constant', ctx)
 
-    return ctx.getChild(0).accept(this)
+    const value = (ctx.getChild(0).accept(this) as sml.Constant).value
+
+    return {
+      tag: 'PatternConstant',
+      type: { name: 'undefined' },
+      value
+    }
   }
 
   visitPatternIdentifier(ctx: PatternIdentifierContext): sml.Node {
     this.debugVisit('Pattern Id', ctx)
 
-    return ctx.getChild(0).accept(this)
+    const name = (ctx.getChild(0).accept(this) as sml.Identifier).name
+
+    return {
+      tag: 'PatternIdentifier',
+      type: { name: 'undefined' },
+      name
+    }
   }
+
+  visitPatternInfix(ctx: PatternInfixContext): sml.Node {
+    this.debugVisit('Pattern infix', ctx)
+
+    const left = ctx._left.accept(this) as sml.Pattern
+    const right = ctx._right.accept(this) as sml.Pattern
+
+    return {
+      tag: 'PatternInfix',
+      type: { name: 'undefined' },
+      operator: '::',
+      left,
+      right
+    }
+  }
+
+  visitPatternTuple(ctx: PatternTupleContext): sml.Node {
+    this.debugVisit('Pattern tuple', ctx)
+
+    const aliases = {}
+    let count = 0
+    for (let i = 1; ctx.childCount > 2 && i < ctx.childCount; i += 2) {
+      const expr = ctx.getChild(i).accept(this) as sml.Pattern
+      aliases[++count] = expr
+    }
+
+    return {
+      tag: 'PatternRecord',
+      type: { name: 'undefined' },
+      length: count,
+      aliases: aliases,
+      loc: contextToLocation(ctx)
+    }
+  }
+
+  visitPatternRecord(ctx: PatternRecordContext): sml.Node {
+    this.debugVisit('Pattern record', ctx)
+
+    const aliases = {}
+    let count = 0
+    for (let i = 1; ctx.childCount > 2 && i < ctx.childCount; i += 2) {
+      const keyvalue = ctx.getChild(i).accept(this) as sml.KeyPattern
+      aliases[keyvalue.key] = keyvalue.pat
+      count++
+    }
+
+    return {
+      tag: 'PatternRecord',
+      type: { name: 'undefined' },
+      length: count,
+      aliases: aliases,
+      loc: contextToLocation(ctx)
+    }
+  }
+
+  visitKeypattern(ctx: KeypatternContext): sml.Node {
+    this.debugVisit('KeyPattern', ctx)
+
+    return {
+      tag: 'KeyPattern',
+      type: { name: 'undefined' },
+      key: (ctx._key.accept(this) as sml.Constant).value.toString(),
+      pat: ctx._pat.accept(this) as sml.Pattern
+    }
+  }
+
+  // visitPatternList(ctx: PatternListContext): sml.Node {
+  //   this.debugVisit('Pattern list', ctx)
+  // }
 
   visitExpression(ctx: ExpressionContext): sml.Node {
     this.debugVisit('Expression', ctx)
 
     return ctx.getChild(0).accept(this)
+  }
+
+  visitExpressionLambda(ctx: ExpressionLambdaContext): sml.Node {
+    this.debugVisit('Expression Lambda', ctx)
+
+    return {
+      tag: 'LambdaExpression',
+      type: { name: 'undefined' },
+      matching: ctx.getChild(1).accept(this) as sml.Matching
+    }
   }
 
   visitExpressionParentheses(ctx: ExpressionParenthesesContext): sml.Node {
@@ -219,7 +401,12 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
         loc: contextToLocation(ctx)
       }
     } else {
-      throw new Error(`not supported yet: ${ctx}`)
+      return {
+        tag: 'PrefixApplicationExpression',
+        type: { name: 'undefined' },
+        operator: operator as sml.Expression,
+        operand: operand as sml.Expression
+      }
     }
   }
 
@@ -244,7 +431,7 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
   }
 
   visitExpressionTuple(ctx: ExpressionTupleContext): sml.Node {
-    this.debugVisit('Expression Sequence', ctx)
+    this.debugVisit('Expression Tuple', ctx)
 
     const items = {}
     let count = 0

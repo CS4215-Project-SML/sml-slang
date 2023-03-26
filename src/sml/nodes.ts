@@ -105,21 +105,34 @@ export interface Position {
 export interface NodeMap {
   Program: Program
   Empty: Empty
+
   Declaration: Declaration
   SequenceDeclaration: SequenceDeclaration
   ValueDeclaration: ValueDeclaration
+  FunctionDeclaration: FunctionDeclaration
   ExpressionDeclaration: ExpressionDeclaration
   Valbind: Valbind
+  Funbind: Funbind
+
   Expression: Expression
+  LambdaExpression: LambdaExpression
   ConditionalExpression: ConditionalExpression
   PrefixApplicationExpression: PrefixApplicationExpression
   InfixApplicationExpression: InfixApplicationExpression
+
   Record: Record
   Tuple: Tuple
   Keyvalue: Keyvalue
   RecordSelector: RecordSelector
+
   List: List
+
+  Matching: Matching
+  Matchingrule: Matchingrule
   Pattern: Pattern
+
+  KeyPattern: KeyPattern
+
   Identifier: Identifier
   Constant: Constant
 }
@@ -136,6 +149,9 @@ export interface Empty extends BaseNode {
   tag: 'Empty'
 }
 
+/**
+ * Declarations
+ */
 export interface DeclarationMap {
   SequenceDeclaration: SequenceDeclaration
   ValueDeclaration: ValueDeclaration
@@ -157,9 +173,22 @@ export interface ValueDeclaration extends BaseDeclaration {
   value: Expression
 }
 
+export interface FunctionDeclaration extends BaseDeclaration {
+  tag: 'FunctionDeclaration'
+  name: string
+  lambda: LambdaExpression
+}
+
 export interface ExpressionDeclaration extends BaseDeclaration {
   tag: 'ExpressionDeclaration'
   value: Expression
+}
+
+export interface Funbind extends BaseNode {
+  tag: 'Funbind'
+  name: string
+  pat: Pattern
+  body: Expression
 }
 
 export interface Valbind extends BaseNode {
@@ -168,7 +197,12 @@ export interface Valbind extends BaseNode {
   value: Expression
 }
 
+/**
+ * Expressions
+ */
+
 export interface ExpressionMap {
+  LambdaExpression: LambdaExpression
   ConditionalExpression: ConditionalExpression
   PrefixApplicationExpression: PrefixApplicationExpression
   InfixApplicationExpression: InfixApplicationExpression
@@ -184,6 +218,11 @@ export type Expression = ExpressionMap[keyof ExpressionMap]
 
 export type BaseExpression = BaseNode
 
+export interface LambdaExpression extends BaseExpression {
+  tag: 'LambdaExpression'
+  matching: Matching
+}
+
 export interface ConditionalExpression extends BaseExpression {
   tag: 'ConditionalExpression'
   pred: Expression
@@ -193,6 +232,8 @@ export interface ConditionalExpression extends BaseExpression {
 
 export interface PrefixApplicationExpression extends BaseExpression {
   tag: 'PrefixApplicationExpression'
+  operator: Expression
+  operand: Expression
 }
 
 export interface InfixApplicationExpression extends BaseExpression {
@@ -202,6 +243,9 @@ export interface InfixApplicationExpression extends BaseExpression {
   right: Expression
 }
 
+/**
+ * Records & Tuples
+ */
 export type BaseRecord = BaseNode
 
 export interface Record extends BaseRecord {
@@ -242,15 +286,66 @@ export interface RecordSelector extends BaseRecord {
   record?: Record | Tuple | Identifier
 }
 
+/**
+ * Pattern
+ */
 export interface PatternMap {
-  Constant: Constant
-  Identifier: Identifier
+  Constant: PatternConstant
+  Identifier: PatternIdentifier
+  Record: PatternRecord
+  Infix: PatternInfix
 }
 
 export type Pattern = PatternMap[keyof PatternMap]
 
 export type BasePattern = BaseNode
 
+export interface PatternConstant extends BasePattern {
+  tag: 'PatternConstant'
+  value: number | boolean | string
+}
+
+export interface PatternInfix extends BasePattern {
+  tag: 'PatternInfix'
+  left: Pattern
+  operator: '::'
+  right: Pattern
+}
+
+export interface PatternIdentifier extends BasePattern {
+  tag: 'PatternIdentifier'
+  name: string
+}
+
+export interface PatternRecord extends BasePattern {
+  tag: 'PatternRecord'
+  length: number
+  aliases: Object // TODO: change to Record<string, Pattern>
+}
+
+export interface KeyPattern extends BaseNode {
+  tag: 'KeyPattern'
+  key: string
+  pat: Pattern
+}
+
+/**
+ * Match
+ */
+export interface Matching extends BaseNode {
+  tag: 'Matching'
+  rules: Array<Matchingrule>
+}
+
+export interface Matchingrule extends BaseNode {
+  tag: 'Matchingrule'
+  pat: Pattern
+  exp: Expression
+}
+
+/**
+ * Primitives (?)
+ */
 export interface Identifier extends BaseNode {
   tag: 'Identifier'
   name: string

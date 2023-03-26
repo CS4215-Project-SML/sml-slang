@@ -14,28 +14,47 @@ program
  * Declarations
  */
 declaration
-    : VAL valbind       # declarationValue
+    : FUN funbind       # declarationFunction
+    | VAL valbind       # declarationValue
     | expression        # declarationExpression
     ;
 
 valbind
     : name=identifier '=' value=expression;
 
+funbind
+    : name=identifier pat=pattern '=' body=expression;
+
 
 /*
  * Patterns
  */
 pattern
-    : constant          # patternConstant
-    | identifier        # patternIdentifier
+    : left=pattern '::' right=pattern                           # patternInfix
+    | '(' pattern (',' pattern)* ')'                            # patternTuple
+    | '{' (keypattern? | (keypattern (',' keypattern)+)) '}'    # patternRecord
+    | '[' pattern (',' pattern)* ']'                            # patternList
+    | constant                                                  # patternConstant
+    | identifier                                                # patternIdentifier
     ;
 
+matching
+    : matchrule=matchingrule '|' rest=matching      # matchingSequence
+    | matchrule=matchingrule                        # matchingAtomic
+    ;
+
+matchingrule
+    : pat=pattern '=>' exp=expression;
+
+keypattern
+    : key=label '=' pat=pattern;
 
 /*
  * Expressions
  */
 expression
     : IF pred=expression THEN cons=expression ELSE alt=expression                           # expressionConditional
+    | FN matching                                                                           # expressionLambda
 
     // Operator precedence is captured here
     | '(' inner=expression ')'                                                              # expressionParentheses
