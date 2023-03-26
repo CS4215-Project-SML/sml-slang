@@ -21,6 +21,7 @@ To build,
 $ git clone https://github.com/CS4215-Project-SML/sml-slang.git
 $ cd sml-slang
 $ yarn
+$ yarn docs
 $ yarn build
 ```
 
@@ -42,6 +43,7 @@ First, build and link `sml-slang`:
 
 ```shell
 $ cd sml-slang
+$ yarn docs
 $ yarn build
 $ yarn link
 ```
