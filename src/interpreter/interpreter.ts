@@ -143,13 +143,6 @@ const microcode = {
     }
     push(A, { tag: 'RecordInstruction', type: cmd.type, length: cmd.length }, ...items.reverse())
   },
-  Sequence: (cmd: sml.Sequence) => {
-    const items = []
-    for (const [key, value] of Object.entries(cmd.items)) {
-      items.push({ tag: 'Keyvalue', key: key, value: value })
-    }
-    push(A, { tag: 'SequenceInstruction', length: cmd.length }, ...items.reverse())
-  },
   Keyvalue: (cmd: sml.Keyvalue) => {
     push(A, { tag: 'KeyvalueInstruction', key: cmd.key }, cmd.value)
   },
@@ -207,26 +200,11 @@ const microcode = {
     }
     push(S, { tag: 'Record', type: cmd.type, length: cmd.length, items: items })
   },
-  SequenceInstruction: (cmd: SequenceInstruction) => {
-    // Make sure that items are added to the object in the order they were specified
-    const entries = []
-    for (let i = 0; i < cmd.length; i++) {
-      entries.push(S.pop())
-    }
-    entries.reverse()
-
-    const items = {}
-    for (let i = 0; i < cmd.length; i++) {
-      const keyvalue = entries[i] as sml.Keyvalue
-      items[keyvalue.key] = keyvalue.value
-    }
-    push(S, { tag: 'Sequence', length: cmd.length, items: items })
-  },
   KeyvalueInstruction: (cmd: KeyvalueInstruction) => {
     push(S, { tag: 'Keyvalue', key: cmd.key, value: S.pop() as sml.Constant })
   },
   RecordSelectorInstruction: (cmd: RecordSelectorInstruction) => {
-    const items = (S.pop() as sml.Record | sml.Sequence).items
+    const items = (S.pop() as sml.Record).items
     if (items.hasOwnProperty(cmd.label)) {
       push(S, items[cmd.label])
     } else {
@@ -272,11 +250,6 @@ interface BindInstruction {
 interface RecordInstruction {
   tag: 'RecordInstruction'
   type: sml.Type
-  length: number
-}
-
-interface SequenceInstruction {
-  tag: 'SequenceInstruction'
   length: number
 }
 
@@ -352,13 +325,15 @@ export function evaluate(program: sml.Program, context: Context): string {
 
 function prettier(evaluation: sml.Identifier): string {
   const id = evaluation.name
-  const val = lookup(id, E) as sml.Constant | sml.Record | sml.List
+  const val = lookup(id, E) as sml.Constant | sml.Record | sml.Tuple | sml.List
 
   return `val ${id} = ${prettierValue(val)} : ${prettierType(val.type)}`
 }
 
-function prettierValue(val: sml.Constant | sml.Record | sml.List) {
+function prettierValue(val: sml.Constant | sml.Record | sml.Tuple | sml.List) {
   let pval = ''
+
+  val = val.tag === 'Record' ? tupleValueIfPossible(val) : val
 
   if (val.tag === 'Constant') {
     pval = val.value.toString()
@@ -370,6 +345,14 @@ function prettierValue(val: sml.Constant | sml.Record | sml.List) {
       pval += i++ < val.length - 1 ? ',' : ''
     }
     pval += '}'
+  } else if (val.tag === 'Tuple') {
+    let i = 0
+    pval = '('
+    for (const [key, value] of Object.entries(val.items)) {
+      pval += prettierValue(value)
+      pval += i++ < val.length - 1 ? ',' : ''
+    }
+    pval += ')'
   } else if (val.tag === 'List') {
     let i = 0
     pval = '['
@@ -385,6 +368,8 @@ function prettierValue(val: sml.Constant | sml.Record | sml.List) {
 
 function prettierType(val: sml.Type) {
   let ptyp = ''
+
+  val = val.name === 'record' ? tupleTypeIfPossible(val as sml.Rec) : val
 
   if (
     val.name === 'int' ||
@@ -403,6 +388,15 @@ function prettierType(val: sml.Type) {
       ptyp += i++ < bodyLength - 1 ? ',' : ''
     }
     ptyp += '}'
+  } else if (val.name === 'tuple') {
+    const bodyLength = Object.keys((val as sml.Tup).body).length
+    let i = 0
+    for (let [key, value] of Object.entries((val as sml.Tup).body)) {
+      value = value.name === 'record' ? tupleTypeIfPossible(value) : value
+      const valtyp = prettierType(value)
+      ptyp += value.name === 'tuple' ? '(' + valtyp + ')' : valtyp
+      ptyp += i++ < bodyLength - 1 ? ' * ' : ''
+    }
   } else if (val.name === 'list') {
     ptyp = prettierType((val as sml.Lis).body) + ' ' + val.name
   } else if (val.name === 'function') {
@@ -415,4 +409,65 @@ function prettierType(val: sml.Type) {
   }
 
   return ptyp
+}
+
+function tupleValueIfPossible(val: sml.Record): sml.Record | sml.Tuple {
+  const sorted = Object.keys(val.items)
+    .sort()
+    .reduce((obj, key) => {
+      obj[key] = val.items[key]
+      return obj
+    }, {})
+
+  let isTuple = true
+
+  let i = 1
+  for (const key in sorted) {
+    if (key !== (i++).toString()) {
+      isTuple = false
+      break
+    }
+  }
+
+  if (isTuple) {
+    return {
+      tag: 'Tuple',
+      type: {
+        name: 'tuple',
+        body: tupleTypeIfPossible(val.type as sml.Rec)
+      },
+      length: Object.keys(sorted).length,
+      items: sorted
+    }
+  }
+
+  return val
+}
+
+function tupleTypeIfPossible(val: sml.Rec): sml.Rec | sml.Tup {
+  const sorted = Object.keys((val as sml.Rec).body)
+    .sort()
+    .reduce((obj, key) => {
+      obj[key] = val.body[key]
+      return obj
+    }, {})
+
+  let isTuple = true
+
+  let i = 1
+  for (const key in sorted) {
+    if (key !== (i++).toString()) {
+      isTuple = false
+      break
+    }
+  }
+
+  if (isTuple) {
+    return {
+      name: 'tuple',
+      body: sorted
+    }
+  }
+
+  return val
 }

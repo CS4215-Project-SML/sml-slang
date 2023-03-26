@@ -6,6 +6,7 @@ export interface TypeMap {
   Char: Char
   Str: Str
   Rec: Rec
+  Tup: Tup
   Lis: Lis
   Fun: Fun
   Poly: Poly
@@ -43,15 +44,20 @@ export interface Rec extends BaseType {
   body: Object
 }
 
+export interface Tup extends BaseType {
+  name: 'tuple'
+  body: Object
+}
+
 export interface Lis extends BaseType {
   name: 'list'
-  body: Int | Real | Bool | Char | Str | Str | Rec | Lis | Fun | Poly
+  body: Int | Real | Bool | Char | Str | Str | Rec | Tup | Lis | Fun | Poly
 }
 
 export interface Fun extends BaseType {
   name: 'function'
-  par: Array<Int | Real | Bool | Char | Str | Rec | Lis | Fun | Poly>
-  ret: Array<Int | Real | Bool | Char | Str | Rec | Lis | Fun | Poly>
+  par: Array<Int | Real | Bool | Char | Str | Rec | Tup | Lis | Fun | Poly>
+  ret: Array<Int | Real | Bool | Char | Str | Rec | Tup | Lis | Fun | Poly>
 }
 
 export interface Poly extends BaseType {
@@ -109,7 +115,7 @@ export interface NodeMap {
   PrefixApplicationExpression: PrefixApplicationExpression
   InfixApplicationExpression: InfixApplicationExpression
   Record: Record
-  Sequence: Sequence
+  Tuple: Tuple
   Keyvalue: Keyvalue
   RecordSelector: RecordSelector
   List: List
@@ -167,7 +173,7 @@ export interface ExpressionMap {
   PrefixApplicationExpression: PrefixApplicationExpression
   InfixApplicationExpression: InfixApplicationExpression
   Record: Record
-  Sequence: Sequence
+  Tuple: Tuple
   RecordSelector: RecordSelector
   List: List
   Identifier: Identifier
@@ -204,10 +210,10 @@ export interface Record extends BaseRecord {
   items: Object
 }
 
-export type BaseSequence = BaseNode
+export type BaseTuple = BaseNode
 
-export interface Sequence extends BaseSequence {
-  tag: 'Sequence'
+export interface Tuple extends BaseTuple {
+  tag: 'Tuple'
   length: number
   items: Object
 }
@@ -233,7 +239,7 @@ export type BaseRecordSelector = BaseNode
 export interface RecordSelector extends BaseRecord {
   tag: 'RecordSelector'
   label: string
-  record?: Record | Sequence | Identifier
+  record?: Record | Tuple | Identifier
 }
 
 export interface PatternMap {
@@ -267,5 +273,6 @@ export type InfixOperator =
   | '<='
   | '>='
   | '<>'
+  | '::'
   | 'andalso'
   | 'orelse'

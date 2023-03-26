@@ -44,6 +44,7 @@
     "@typescript-eslint/restrict-template-expressions": "off",
     "@typescript-eslint/unbound-method": "off",
     "prefer-rest-params": "off",
-    "simple-import-sort/imports": "warn"
+    "simple-import-sort/imports": "warn",
+    "prefer-const": "off"
   }
 }

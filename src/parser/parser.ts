@@ -26,7 +26,7 @@ import {
   ExpressionParenthesesContext,
   ExpressionRecordContext,
   ExpressionRecordSelectorContext,
-  ExpressionSequenceContext,
+  ExpressionTupleContext,
   IdentifierContext,
   KeyvalueContext,
   LabelContext,
@@ -209,7 +209,7 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
 
     if (
       operator.tag === 'RecordSelector' &&
-      (operand.tag === 'Record' || operand.tag === 'Sequence' || operand.tag === 'Identifier')
+      (operand.tag === 'Record' || operand.tag === 'Identifier')
     ) {
       return {
         tag: 'RecordSelector',
@@ -243,7 +243,7 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
     }
   }
 
-  visitExpressionSequence(ctx: ExpressionSequenceContext): sml.Node {
+  visitExpressionTuple(ctx: ExpressionTupleContext): sml.Node {
     this.debugVisit('Expression Sequence', ctx)
 
     const items = {}
@@ -254,7 +254,7 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
     }
 
     return {
-      tag: 'Sequence',
+      tag: 'Record',
       type: { name: 'undefined' },
       length: count,
       items: items,

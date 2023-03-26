@@ -101,6 +101,13 @@ const typeOfInfixOperator = {
     par: [{ name: 'record', body: { 1: { name: 'string' }, 2: { name: 'string' } } }],
     ret: [{ name: 'string' }]
   },
+  '::': {
+    name: 'function',
+    par: [
+      { name: 'record', body: { 1: { name: "'a" }, 2: { name: 'list', body: { name: "'a" } } } }
+    ],
+    ret: [{ name: 'list', body: { name: "'a" } }]
+  },
   andalso: {
     name: 'function',
     par: [{ name: 'record', body: { 1: { name: 'bool' }, 2: { name: 'bool' } } }],

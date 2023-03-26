@@ -42,11 +42,12 @@ expression
     | operator=expression operand=expression                                                # expressionApplicationPrefix
     | left=expression operator=('*' | '/') right=expression                                 # expressionApplicationInfix
     | left=expression operator=('+' | '-' | '^') right=expression                           # expressionApplicationInfix
+    | left=expression operator='::' right=expression                                        # expressionApplicationInfix
     | left=expression operator=('=' | '<>' | '<' | '<=' | '>' | '>=') right=expression      # expressionApplicationInfix
     | left=expression operator=(ANDALSO | ORELSE) right=expression                          # expressionApplicationInfix
 
     | '{' (keyvalue? | (keyvalue (',' keyvalue)+)) '}'                                      # expressionRecord
-    | '(' expression ',' expression (',' expression)* ')'                                   # expressionSequence
+    | '(' expression ',' expression (',' expression)* ')'                                   # expressionTuple
     | '[' (expression? | (expression (',' expression)+)) ']'                                # expressionList
     | '#' label                                                                             # expressionRecordSelector
     | constant                                                                              # expressionConstant
