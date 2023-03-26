@@ -135,6 +135,8 @@ export interface NodeMap {
 
   Identifier: Identifier
   Constant: Constant
+
+  Closure: Closure
 }
 
 export type Node = NodeMap[keyof NodeMap]
@@ -220,6 +222,12 @@ export type BaseExpression = BaseNode
 
 export interface LambdaExpression extends BaseExpression {
   tag: 'LambdaExpression'
+  matching: Matching
+}
+
+export interface Closure extends BaseNode {
+  tag: 'Closure'
+  env: Array<Object>
   matching: Matching
 }
 
