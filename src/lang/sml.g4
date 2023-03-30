@@ -14,9 +14,10 @@ program
  * Declarations
  */
 declaration
-    : FUN funbind       # declarationFunction
-    | VAL valbind       # declarationValue
-    | expression        # declarationExpression
+    : left=declaration (';')? right=declaration     # declarationSequence
+    | FUN funbind                                   # declarationFunction
+    | VAL valbind                                   # declarationValue
+    | expression                                    # declarationExpression
     ;
 
 valbind
@@ -55,6 +56,7 @@ keypattern
 expression
     : IF pred=expression THEN cons=expression ELSE alt=expression                           # expressionConditional
     | FN matching                                                                           # expressionLambda
+    | LET dec=declaration IN exp=expression END                                             # expressionLet
 
     // Operator precedence is captured here
     | '(' inner=expression ')'                                                              # expressionParentheses

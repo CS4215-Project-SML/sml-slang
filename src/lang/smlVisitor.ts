@@ -5,6 +5,7 @@ import { ParseTreeVisitor } from "antlr4ts/tree/ParseTreeVisitor";
 
 import { ExpressionConditionalContext } from "./smlParser";
 import { ExpressionLambdaContext } from "./smlParser";
+import { ExpressionLetContext } from "./smlParser";
 import { ExpressionParenthesesContext } from "./smlParser";
 import { ExpressionApplicationPrefixContext } from "./smlParser";
 import { ExpressionApplicationInfixContext } from "./smlParser";
@@ -30,6 +31,7 @@ import { ProgramDeclarationContext } from "./smlParser";
 import { ProgramEmptyContext } from "./smlParser";
 import { LabelIdentifierContext } from "./smlParser";
 import { LabelIntContext } from "./smlParser";
+import { DeclarationSequenceContext } from "./smlParser";
 import { DeclarationFunctionContext } from "./smlParser";
 import { DeclarationValueContext } from "./smlParser";
 import { DeclarationExpressionContext } from "./smlParser";
@@ -73,6 +75,14 @@ export interface smlVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitExpressionLambda?: (ctx: ExpressionLambdaContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `expressionLet`
+	 * labeled alternative in `smlParser.expression`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitExpressionLet?: (ctx: ExpressionLetContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by the `expressionParentheses`
@@ -273,6 +283,14 @@ export interface smlVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitLabelInt?: (ctx: LabelIntContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `declarationSequence`
+	 * labeled alternative in `smlParser.declaration`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitDeclarationSequence?: (ctx: DeclarationSequenceContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by the `declarationFunction`

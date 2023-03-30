@@ -313,6 +313,15 @@ const microcode = {
 
     push(A, instr, lambda)
   },
+  LetExpression: (cmd: sml.LetExpression) => {
+    const envInstr: EnvironmentInstruction = {
+      tag: 'EnvironmentInstruction',
+      env: lodash.cloneDeep(E)
+    }
+
+    extend(E)
+    push(A, envInstr, cmd.exp, { tag: 'PopInstruction' }, cmd.dec)
+  },
   LambdaExpression: (cmd: sml.LambdaExpression) => {
     // TODO: identify free variables
     push(S, { tag: 'Closure', env: lodash.cloneDeep(E), matching: cmd.matching })

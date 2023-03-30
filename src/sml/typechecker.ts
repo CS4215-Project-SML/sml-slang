@@ -211,6 +211,7 @@ function infer(node: sml.Node): sml.Type {
   }
 
   throw new Error('bruh')
+  // return node.type
 }
 
 export function typechecker(program: sml.Program, context: Context): sml.Program {

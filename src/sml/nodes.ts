@@ -115,6 +115,7 @@ export interface NodeMap {
   Funbind: Funbind
 
   Expression: Expression
+  LetExpression: LetExpression
   LambdaExpression: LambdaExpression
   ConditionalExpression: ConditionalExpression
   PrefixApplicationExpression: PrefixApplicationExpression
@@ -204,6 +205,7 @@ export interface Valbind extends BaseNode {
  */
 
 export interface ExpressionMap {
+  LetExpression: LetExpression
   LambdaExpression: LambdaExpression
   ConditionalExpression: ConditionalExpression
   PrefixApplicationExpression: PrefixApplicationExpression
@@ -219,6 +221,12 @@ export interface ExpressionMap {
 export type Expression = ExpressionMap[keyof ExpressionMap]
 
 export type BaseExpression = BaseNode
+
+export interface LetExpression extends BaseExpression {
+  tag: 'LetExpression'
+  dec: Declaration
+  exp: Expression
+}
 
 export interface LambdaExpression extends BaseExpression {
   tag: 'LambdaExpression'

@@ -52,7 +52,9 @@ import {
   ProgramEmptyContext,
   ProgramSequenceContext,
   smlParser,
-  ValbindContext
+  ValbindContext,
+  DeclarationSequenceContext,
+  ExpressionLetContext
 } from '../lang/smlParser'
 import { smlVisitor } from '../lang/smlVisitor'
 import * as sml from '../sml/nodes'
@@ -120,6 +122,27 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
     this.debugVisit('Declaration', ctx)
 
     return ctx.getChild(0).accept(this)
+  }
+
+  visitDeclarationSequence(ctx: DeclarationSequenceContext): sml.Node {
+    this.debugVisit('Declaration Sequence', ctx)
+
+    const declaration = ctx._left.accept(this) as sml.Declaration
+    const rest = ctx._right.accept(this) as sml.Declaration
+
+    const declarations = [declaration]
+
+    if (rest.tag === 'SequenceDeclaration') {
+      declarations.push(...rest.declarations)
+    } else {
+      declarations.push(rest)
+    }
+
+    return {
+      tag: 'SequenceDeclaration',
+      type: { name: 'undefined' },
+      declarations
+    }
   }
 
   visitDeclarationFunction(ctx: DeclarationFunctionContext): sml.Node {
@@ -340,6 +363,17 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
     this.debugVisit('Expression', ctx)
 
     return ctx.getChild(0).accept(this)
+  }
+
+  visitExpressionLet(ctx: ExpressionLetContext): sml.Node {
+    this.debugVisit('Expression Let', ctx)
+
+    return {
+      tag: 'LetExpression',
+      type: { name: 'undefined' },
+      dec: ctx._dec.accept(this) as sml.Declaration,
+      exp: ctx._exp.accept(this) as sml.Expression
+    }
   }
 
   visitExpressionLambda(ctx: ExpressionLambdaContext): sml.Node {
