@@ -22,6 +22,7 @@ import { ConstantCharContext } from "./smlParser";
 import { ConstantStrContext } from "./smlParser";
 import { PatternInfixContext } from "./smlParser";
 import { PatternTupleContext } from "./smlParser";
+import { PatternParanthesesContext } from "./smlParser";
 import { PatternRecordContext } from "./smlParser";
 import { PatternListContext } from "./smlParser";
 import { PatternConstantContext } from "./smlParser";
@@ -211,6 +212,14 @@ export interface smlVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitPatternTuple?: (ctx: PatternTupleContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `patternParantheses`
+	 * labeled alternative in `smlParser.pattern`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitPatternParantheses?: (ctx: PatternParanthesesContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by the `patternRecord`

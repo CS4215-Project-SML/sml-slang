@@ -31,8 +31,9 @@ funbind
  * Patterns
  */
 pattern
-    : left=pattern '::' right=pattern                           # patternInfix
-    | '(' pattern (',' pattern)* ')'                            # patternTuple
+    : <assoc=right> left=pattern '::' right=pattern             # patternInfix
+    | '(' pattern ',' pattern (',' pattern)* ')'                # patternTuple
+    | '(' pattern ')'                                           # patternParantheses
     | '{' (keypattern? | (keypattern (',' keypattern)+)) '}'    # patternRecord
     | '[' pattern (',' pattern)* ']'                            # patternList
     | constant                                                  # patternConstant

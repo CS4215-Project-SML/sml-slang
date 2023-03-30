@@ -54,7 +54,8 @@ import {
   smlParser,
   ValbindContext,
   DeclarationSequenceContext,
-  ExpressionLetContext
+  ExpressionLetContext,
+  PatternParanthesesContext
 } from '../lang/smlParser'
 import { smlVisitor } from '../lang/smlVisitor'
 import * as sml from '../sml/nodes'
@@ -264,6 +265,12 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
     this.debugVisit('Pattern', ctx)
 
     return ctx.getChild(0).accept(this)
+  }
+
+  visitPatternParantheses(ctx: PatternParanthesesContext): sml.Node {
+    this.debugVisit('Pattern Parantheses', ctx)
+
+    return ctx.getChild(1).accept(this)
   }
 
   visitPatternConstant(ctx: PatternConstantContext): sml.Node {

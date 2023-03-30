@@ -18,7 +18,6 @@ type MatchableValue = sml.Constant | sml.Record | sml.List
 
 function evaluateMatch(match: sml.Matching, value: MatchableValue): [sml.Expression, Frame] | null {
   for (const mrule of match.rules) {
-    console.log(`Matching mrule ${JSON.stringify(mrule)}`)
     const [isMatch, frame] = evaluatePattern(mrule.pat, value)
 
     if (isMatch) {
@@ -31,9 +30,6 @@ function evaluateMatch(match: sml.Matching, value: MatchableValue): [sml.Express
 }
 
 function evaluatePattern(pattern: sml.Pattern, value: MatchableValue): [boolean, Frame] {
-  console.log(`Pattern: ${JSON.stringify(pattern)}`)
-  console.log(`Value: ${JSON.stringify(value)}`)
-
   switch (pattern.tag) {
     case 'PatternConstant':
       return evaluatePatternConstant(pattern as sml.PatternConstant, value)
@@ -69,7 +65,6 @@ function evaluatePatternIdentifier(
   pattern: sml.PatternIdentifier,
   value: MatchableValue
 ): [boolean, Frame] {
-  console.log('Evaluating pattern identifier...')
   return [
     true,
     {
@@ -105,7 +100,6 @@ function evaluatePatternRecord(
   // Need to check that the type is exactly the same
   for (const [key, alias] of Object.entries(pattern.aliases) as Array<[string, sml.Pattern]>) {
     if (!(key in items)) {
-      console.log(`${key} is not in items ${JSON.stringify(items)}`)
       return [false, {}]
     }
 
@@ -113,7 +107,6 @@ function evaluatePatternRecord(
     const [isMatch, patFrame] = evaluatePattern(alias, items[key])
 
     if (!isMatch) {
-      console.log(`Pattern record failed to match key ${key}`)
       return [false, {}]
     }
 
@@ -122,13 +115,9 @@ function evaluatePatternRecord(
         throw new Error(`Variable ${key} is defined multiple times`)
       }
 
-      console.log(`Putting key ${key} into frame with value ${value}`)
-
       frame[key] = value
     }
   }
-
-  console.log(`The frame: ${JSON.stringify(frame)}`)
 
   return [true, frame]
 }
@@ -141,9 +130,27 @@ function evaluatePatternInfix(pattern: sml.PatternInfix, value: MatchableValue):
     return [false, {}]
   }
 
-  // x::xs -> x: a', xs: a' list
+  if (value.length < 1) {
+    return [false, {}]
+  }
 
-  return [false, {}]
+  // x::xs -> x: a', xs: a' list
+  const leftValue = value.items[0]
+  const rightValue: sml.List = {
+    tag: 'List',
+    type: value.type,
+    length: value.length - 1,
+    items: value.items.slice(1)
+  }
+
+  const [isLeftMatch, leftFrame] = evaluatePattern(pattern.left, leftValue)
+  const [isRightMatch, rightFrame] = evaluatePattern(pattern.right, rightValue)
+
+  if (!isLeftMatch || !isRightMatch) {
+    return [false, {}]
+  }
+
+  return [true, { ...leftFrame, ...rightFrame }]
 }
 
 /* **********************
@@ -628,9 +635,9 @@ function prettierType(val: sml.Type) {
   } else if (val.name === 'list') {
     ptyp = prettierType((val as sml.Lis).body) + ' ' + val.name
   } else if (val.name === 'function') {
-    throw new Error(`not supported yet ${val}`)
+    // throw new Error(`not supported yet ${val}`)
   } else if (val.name === 'undefined') {
-    throw new Error(`not supported yet ${val}`)
+    // throw new Error(`not supported yet ${val}`)
   } else {
     // This is polymorphic type
     ptyp = val.name
