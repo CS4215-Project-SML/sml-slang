@@ -327,7 +327,7 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
     return {
       tag: 'KeyPattern',
       type: { name: 'undefined' },
-      key: (ctx._key.accept(this) as sml.Constant).value.toString(),
+      key: (ctx._key.accept(this) as sml.Identifier).name,
       pat: ctx._pat.accept(this) as sml.Pattern
     }
   }
