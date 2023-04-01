@@ -160,17 +160,39 @@ const infixOperatorMicrocode = {
   '>=': (x: number, y: number): boolean => x >= y,
   '<>': (x: number, y: number): boolean => x !== y,
   '^': (x: string, y: string): string => x + y,
+  '::': <T>(x: T, y: Array<T>): Array<T> => [x, ...y],
   andalso: (x: boolean, y: boolean): boolean => x && y,
   orelse: (x: boolean, y: boolean): boolean => x || y
 }
 
+// hacky implementation
 // right is popped before left
-function applyInfixOperator(
-  op: string,
-  left: number | boolean | string,
-  right: number | boolean | string
-) {
-  return infixOperatorMicrocode[op](left, right)
+function applyInfixOperator(op: string, ret: sml.Type, left: sml.Constant | sml.Record | sml.List, right: sml.Constant | sml.Record | sml.List) {
+  if (op === '::') {
+    const items = infixOperatorMicrocode[op](getJSRepresentation(left), getJSRepresentation(right))
+    return { tag: 'List', type: ret, length: items.length, items: items }
+  } else {
+    return { tag: 'Constant', type: ret, value: infixOperatorMicrocode[op](getJSRepresentation(left), getJSRepresentation(right)) }
+  }
+}
+
+function getJSRepresentation(node: sml.Constant | sml.Record | sml.List) {
+  let value: any
+
+  if (node.tag === 'Constant') {
+    value = node.value
+    return value
+  } else if (node.tag === 'Record') {
+    throw new Error('not supported yet')
+  } else if (node.tag === 'List') {
+    value = []
+    for (const item of node.items) {
+      value.push(getJSRepresentation(item))
+    }
+    return value
+  }
+
+  throw new Error('not supported yet')
 }
 
 /* ************
@@ -438,13 +460,14 @@ const microcode = {
     push(A, envInstr, exp)
   },
   InfixApplicationInstruction: (cmd: InfixApplicationInstruction) => {
-    const right = (S.pop() as sml.Constant).value
-    const left = (S.pop() as sml.Constant).value
-    push(S, {
-      tag: 'Constant',
-      type: cmd.type,
-      value: applyInfixOperator(cmd.operator, left, right)
-    })
+    const rightNode = S.pop() as sml.Constant | sml.Record | sml.List
+    const leftNode = S.pop() as sml.Constant | sml.Record | sml.List
+
+    if (!rightNode || !leftNode) {
+      throw new Error('bruh')
+    }
+
+    push(S, applyInfixOperator(cmd.operator, cmd.type, leftNode, rightNode))
   },
   EnvironmentInstruction: (cmd: EnvironmentInstruction) => {
     E.pop()
@@ -593,7 +616,7 @@ function prettierValue(val: sml.Constant | sml.Record | sml.Tuple | sml.List) {
     let i = 0
     pval = '['
     for (let j = 0; j < val.items.length; j++) {
-      pval += prettierValue(val.items[j])
+      pval += val.items[j]
       pval += i++ < val.length - 1 ? ',' : ''
     }
     pval += ']'
