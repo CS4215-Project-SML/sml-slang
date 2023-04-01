@@ -4,19 +4,13 @@ import * as sml from '../sml/nodes'
 import { Context, Environment, Frame } from '../types'
 
 /* **********************
- * find free variables
- * **********************/
-
-// TODO:
-function getFreeVariables() {}
-
-/* **********************
  * pattern matching
  * **********************/
 
 type MatchableValue = sml.Constant | sml.Record | sml.List
 
 function evaluateMatch(match: sml.Matching, value: MatchableValue): [sml.Expression, Frame] | null {
+  console.log(`Matching: ${JSON.stringify(match)}`)
   for (const mrule of match.rules) {
     const [isMatch, frame] = evaluatePattern(mrule.pat, value)
 
@@ -201,7 +195,11 @@ function lookup(name: string, env: Array<Object>): sml.Constant | sml.Record | s
   throw new Error()
 }
 
-function bind(name: string, value: sml.Constant | sml.Record | sml.Closure, env: Array<Object>) {
+function bind(
+  name: string,
+  value: sml.Constant | sml.Record | sml.LambdaExpression | sml.Closure,
+  env: Array<Object>
+) {
   const frame = env[env.length - 1]
   frame[name] = value
 }
@@ -318,12 +316,13 @@ const microcode = {
       name: cmd.name
     }
 
+    bind(cmd.name, lambda, E)
+
     push(A, instr, lambda)
   },
   LetExpression: (cmd: sml.LetExpression) => {
     const envInstr: EnvironmentInstruction = {
-      tag: 'EnvironmentInstruction',
-      env: lodash.cloneDeep(E)
+      tag: 'EnvironmentInstruction'
     }
 
     extend(E)
@@ -331,7 +330,13 @@ const microcode = {
   },
   LambdaExpression: (cmd: sml.LambdaExpression) => {
     // TODO: identify free variables
-    push(S, { tag: 'Closure', env: lodash.cloneDeep(E), matching: cmd.matching })
+    const capture: Record<string, sml.Node> = {}
+
+    for (const name of cmd.fv) {
+      capture[name] = lookup(name, E)
+    }
+
+    push(S, { tag: 'Closure', capture: capture, matching: cmd.matching })
   },
   ConditionalExpression: (cmd: sml.ConditionalExpression) => {
     push(A, { tag: 'ConditionalExpressionInstruction', cons: cmd.cons, alt: cmd.alt }, cmd.pred)
@@ -364,11 +369,13 @@ const microcode = {
   },
   BindFunctionInstruction: (cmd: BindFunctionInstruction) => {
     const value = S.pop() as sml.Closure
-    bind(cmd.name, value, E)
-    push(S, { tag: 'Identifier', name: cmd.name })
 
-    // To support recursive call
-    value.env = lodash.cloneDeep(E)
+    bind(cmd.name, value, E)
+
+    // Update capture value, as we bind with garbage lambda expression previously
+    value.capture[cmd.name] = value
+
+    push(S, { tag: 'Identifier', name: cmd.name })
   },
   RecordInstruction: (cmd: RecordInstruction) => {
     // Make sure that items are added to the object in the order they were specified
@@ -426,12 +433,10 @@ const microcode = {
     const [exp, frame] = res
 
     const envInstr: EnvironmentInstruction = {
-      tag: 'EnvironmentInstruction',
-      env: E
+      tag: 'EnvironmentInstruction'
     }
 
-    E = operator.env
-    E.push(frame)
+    E.push({ ...frame, ...operator.capture })
 
     push(A, envInstr, exp)
   },
@@ -445,7 +450,7 @@ const microcode = {
     })
   },
   EnvironmentInstruction: (cmd: EnvironmentInstruction) => {
-    E = cmd.env
+    E.pop()
   }
 }
 
@@ -514,7 +519,6 @@ interface InfixApplicationInstruction {
 
 interface EnvironmentInstruction {
   tag: 'EnvironmentInstruction'
-  env: Array<Object> // TODO: change this when merge
 }
 
 /* ****************

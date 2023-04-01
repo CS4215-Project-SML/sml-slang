@@ -158,6 +158,7 @@ export interface Empty extends BaseNode {
 export interface DeclarationMap {
   SequenceDeclaration: SequenceDeclaration
   ValueDeclaration: ValueDeclaration
+  FunctionDeclaration: FunctionDeclaration
   ExpressionDeclaration: ExpressionDeclaration
 }
 
@@ -190,8 +191,7 @@ export interface ExpressionDeclaration extends BaseDeclaration {
 export interface Funbind extends BaseNode {
   tag: 'Funbind'
   name: string
-  pat: Pattern
-  body: Expression
+  matching: Matching
 }
 
 export interface Valbind extends BaseNode {
@@ -230,12 +230,13 @@ export interface LetExpression extends BaseExpression {
 
 export interface LambdaExpression extends BaseExpression {
   tag: 'LambdaExpression'
+  fv: Array<string>
   matching: Matching
 }
 
 export interface Closure extends BaseNode {
   tag: 'Closure'
-  env: Array<Object>
+  capture: Object
   matching: Matching
 }
 

@@ -24,7 +24,7 @@ valbind
     : name=identifier '=' value=expression;
 
 funbind
-    : name=identifier pat=pattern '=' body=expression;
+    : name=identifier pat=pattern '=' body=expression ('|' rest=funbind)*;
 
 
 /*

@@ -27,6 +27,7 @@
     "gpu.js": "^2.10.4",
     "lodash": "^4.17.21",
     "node-getopt": "^0.3.2",
+    "pretty-print-json": "^1.4.1",
     "source-map": "0.7.3",
     "xmlhttprequest-ts": "^1.0.1"
   },

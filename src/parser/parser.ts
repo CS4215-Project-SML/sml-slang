@@ -156,18 +156,8 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
     const value: sml.LambdaExpression = {
       tag: 'LambdaExpression',
       type: { name: 'undefined' },
-      matching: {
-        tag: 'Matching',
-        type: { name: 'undefined' },
-        rules: [
-          {
-            tag: 'Matchingrule',
-            type: { name: 'undefined' },
-            pat: funbind.pat,
-            exp: funbind.body
-          }
-        ]
-      }
+      matching: funbind.matching,
+      fv: []
     }
 
     return {
@@ -218,12 +208,38 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
   visitFunbind(ctx: FunbindContext): sml.Node {
     this.debugVisit('Funbind', ctx)
 
+    const rest = ctx._rest?.accept(this) as sml.Funbind | null
+
+    const matchingRule: sml.Matchingrule = {
+      tag: 'Matchingrule',
+      pat: ctx._pat.accept(this) as sml.Pattern,
+      exp: ctx._body.accept(this) as sml.Expression,
+      type: { name: 'undefined' }
+    }
+
+    const matching: sml.Matching = {
+      tag: 'Matching',
+      rules: [matchingRule],
+      type: { name: 'undefined' }
+    }
+
+    const name = (ctx._name.accept(this) as sml.Identifier).name
+
+    if (rest) {
+      if (rest.name !== name) {
+        throw new Error(
+          'Parse error: function declaration matching rules need to have the same identifier'
+        )
+      }
+
+      matching.rules.push(...rest.matching.rules)
+    }
+
     return {
       tag: 'Funbind',
       type: { name: 'undefined' },
       name: (ctx._name.accept(this) as sml.Identifier).name,
-      pat: ctx._pat.accept(this) as sml.Pattern,
-      body: ctx._body.accept(this) as sml.Expression
+      matching: matching
     }
   }
 
@@ -389,7 +405,8 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
     return {
       tag: 'LambdaExpression',
       type: { name: 'undefined' },
-      matching: ctx.getChild(1).accept(this) as sml.Matching
+      matching: ctx.getChild(1).accept(this) as sml.Matching,
+      fv: []
     }
   }
 

@@ -1,6 +1,7 @@
 import { Result } from '..'
 import { evaluate } from '../interpreter/interpreter'
 import { parse } from '../parser/parser'
+import { analyzeProgram } from '../sml/fv'
 import * as sml from '../sml/nodes'
 import { typechecker } from '../sml/typechecker'
 import { Context } from '../types'
@@ -8,6 +9,10 @@ import { resolvedErrorPromise } from './utils'
 
 function runTypechecker(program: sml.Program, context: Context): sml.Program {
   return typechecker(program, context)
+}
+
+function runFreeVariableAnalyzer(program: sml.Program, context: Context) {
+  return analyzeProgram(program, context)
 }
 
 function runEvaluator(program: sml.Program, context: Context): string {
@@ -18,6 +23,9 @@ function runInterpreter(program: sml.Program, context: Context): Promise<Result>
   console.log('Type-checker is running...')
 
   runTypechecker(program, context)
+
+  console.log('Free variable analyzer is running...')
+  runFreeVariableAnalyzer(program, context)
 
   console.log('Interpreter is running...')
 

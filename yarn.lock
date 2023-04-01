@@ -3805,11 +3805,6 @@ lodash@^4.17.14, lodash@^4.17.15, lodash@^4.17.21:
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
   integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
 
-lodash@^4.17.21:
-  version "4.17.21"
-  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
-  integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
-
 log-driver@^1.2.7:
   version "1.2.7"
   resolved "https://registry.npmjs.org/log-driver/-/log-driver-1.2.7.tgz"
@@ -4278,6 +4273,11 @@ pretty-format@^29.0.0, pretty-format@^29.0.3:
     "@jest/schemas" "^29.0.0"
     ansi-styles "^5.0.0"
     react-is "^18.0.0"
+
+pretty-print-json@^1.4.1:
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/pretty-print-json/-/pretty-print-json-1.4.1.tgz#32ad244264d304d94d66b3389d8ceed5c5fbcb99"
+  integrity sha512-t86WZtFApCJ56qtkXqZDt1T0ngUxpF0bR+DD7oXOuzteFjJE4dgJz2xPNvRilLHu7xs/Cz2HREw9Zt7dsAGy4A==
 
 process-nextick-args@~2.0.0:
   version "2.0.1"
