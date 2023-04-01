@@ -10,7 +10,6 @@ import { Context, Environment, Frame } from '../types'
 type MatchableValue = sml.Constant | sml.Record | sml.List
 
 function evaluateMatch(match: sml.Matching, value: MatchableValue): [sml.Expression, Frame] | null {
-  console.log(`Matching: ${JSON.stringify(match)}`)
   for (const mrule of match.rules) {
     const [isMatch, frame] = evaluatePattern(mrule.pat, value)
 
@@ -74,8 +73,6 @@ function evaluatePatternRecord(
   if (value.tag !== 'Record') {
     return [false, {}]
   }
-
-  console.log('Evaluating pattern record')
 
   const record = value as sml.Record
   const items = record.items

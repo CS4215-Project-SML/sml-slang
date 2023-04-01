@@ -90,8 +90,10 @@ function analyzeFreeVariables(node: sml.Node, E: Environment, fv: Set<string>) {
       }
       break
     case 'Matchingrule':
+      extend(E)
       analyzeFreeVariables(node.pat, E, fv)
       analyzeFreeVariables(node.exp, E, fv)
+      restore(E)
       break
     case 'List':
       for (const element of node.items) {
