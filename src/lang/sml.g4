@@ -55,8 +55,7 @@ keypattern
  * Expressions
  */
 expression
-    : IF pred=expression THEN cons=expression ELSE alt=expression                           # expressionConditional
-    | FN matching                                                                           # expressionLambda
+    : FN matching                                                                           # expressionLambda
     | LET dec=declaration IN exp=expression END                                             # expressionLet
 
     // Operator precedence is captured here
@@ -67,6 +66,7 @@ expression
     | left=expression operator='::' right=expression                                        # expressionApplicationInfix
     | left=expression operator=('=' | '<>' | '<' | '<=' | '>' | '>=') right=expression      # expressionApplicationInfix
     | left=expression operator=(ANDALSO | ORELSE) right=expression                          # expressionApplicationInfix
+    | IF pred=expression THEN cons=expression ELSE alt=expression                           # expressionConditional
 
     | '{' (keyvalue? | (keyvalue (',' keyvalue)+)) '}'                                      # expressionRecord
     | '(' expression ',' expression (',' expression)* ')'                                   # expressionTuple

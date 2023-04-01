@@ -3,12 +3,12 @@
 
 import { ParseTreeVisitor } from "antlr4ts/tree/ParseTreeVisitor";
 
-import { ExpressionConditionalContext } from "./smlParser";
 import { ExpressionLambdaContext } from "./smlParser";
 import { ExpressionLetContext } from "./smlParser";
 import { ExpressionParenthesesContext } from "./smlParser";
 import { ExpressionApplicationPrefixContext } from "./smlParser";
 import { ExpressionApplicationInfixContext } from "./smlParser";
+import { ExpressionConditionalContext } from "./smlParser";
 import { ExpressionRecordContext } from "./smlParser";
 import { ExpressionTupleContext } from "./smlParser";
 import { ExpressionListContext } from "./smlParser";
@@ -62,14 +62,6 @@ import { ConstantContext } from "./smlParser";
  */
 export interface smlVisitor<Result> extends ParseTreeVisitor<Result> {
 	/**
-	 * Visit a parse tree produced by the `expressionConditional`
-	 * labeled alternative in `smlParser.expression`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitExpressionConditional?: (ctx: ExpressionConditionalContext) => Result;
-
-	/**
 	 * Visit a parse tree produced by the `expressionLambda`
 	 * labeled alternative in `smlParser.expression`.
 	 * @param ctx the parse tree
@@ -108,6 +100,14 @@ export interface smlVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitExpressionApplicationInfix?: (ctx: ExpressionApplicationInfixContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `expressionConditional`
+	 * labeled alternative in `smlParser.expression`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitExpressionConditional?: (ctx: ExpressionConditionalContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by the `expressionRecord`

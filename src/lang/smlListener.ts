@@ -3,12 +3,12 @@
 
 import { ParseTreeListener } from "antlr4ts/tree/ParseTreeListener";
 
-import { ExpressionConditionalContext } from "./smlParser";
 import { ExpressionLambdaContext } from "./smlParser";
 import { ExpressionLetContext } from "./smlParser";
 import { ExpressionParenthesesContext } from "./smlParser";
 import { ExpressionApplicationPrefixContext } from "./smlParser";
 import { ExpressionApplicationInfixContext } from "./smlParser";
+import { ExpressionConditionalContext } from "./smlParser";
 import { ExpressionRecordContext } from "./smlParser";
 import { ExpressionTupleContext } from "./smlParser";
 import { ExpressionListContext } from "./smlParser";
@@ -58,19 +58,6 @@ import { ConstantContext } from "./smlParser";
  * `smlParser`.
  */
 export interface smlListener extends ParseTreeListener {
-	/**
-	 * Enter a parse tree produced by the `expressionConditional`
-	 * labeled alternative in `smlParser.expression`.
-	 * @param ctx the parse tree
-	 */
-	enterExpressionConditional?: (ctx: ExpressionConditionalContext) => void;
-	/**
-	 * Exit a parse tree produced by the `expressionConditional`
-	 * labeled alternative in `smlParser.expression`.
-	 * @param ctx the parse tree
-	 */
-	exitExpressionConditional?: (ctx: ExpressionConditionalContext) => void;
-
 	/**
 	 * Enter a parse tree produced by the `expressionLambda`
 	 * labeled alternative in `smlParser.expression`.
@@ -135,6 +122,19 @@ export interface smlListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitExpressionApplicationInfix?: (ctx: ExpressionApplicationInfixContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `expressionConditional`
+	 * labeled alternative in `smlParser.expression`.
+	 * @param ctx the parse tree
+	 */
+	enterExpressionConditional?: (ctx: ExpressionConditionalContext) => void;
+	/**
+	 * Exit a parse tree produced by the `expressionConditional`
+	 * labeled alternative in `smlParser.expression`.
+	 * @param ctx the parse tree
+	 */
+	exitExpressionConditional?: (ctx: ExpressionConditionalContext) => void;
 
 	/**
 	 * Enter a parse tree produced by the `expressionRecord`
