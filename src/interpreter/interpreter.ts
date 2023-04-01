@@ -515,12 +515,6 @@ interface ListInstruction {
   length: number
 }
 
-// interface Closure {
-//   tag: 'LambdaInstruction'
-//   match: sml.Match
-//   env: Array<Object>
-// }
-
 interface ConditionalExpressionInstruction {
   tag: 'ConditionalExpressionInstruction'
   cons: sml.Expression
@@ -584,12 +578,12 @@ export function evaluate(program: sml.Program, context: Context): string {
 
 function prettier(evaluation: sml.Identifier): string {
   const id = evaluation.name
-  const val = lookup(id, E) as sml.Constant | sml.Record | sml.Tuple | sml.List
+  const val = lookup(id, E) as sml.Constant | sml.Record | sml.List | sml.Closure
 
   return `val ${id} = ${prettierValue(val)} : ${prettierType(val.type)}`
 }
 
-function prettierValue(val: sml.Constant | sml.Record | sml.Tuple | sml.List) {
+function prettierValue(val: sml.Constant | sml.Record | sml.Tuple | sml.List | sml.Closure) {
   let pval = ''
 
   val = val.tag === 'Record' ? tupleValueIfPossible(val) : val
@@ -620,6 +614,10 @@ function prettierValue(val: sml.Constant | sml.Record | sml.Tuple | sml.List) {
       pval += i++ < val.length - 1 ? ',' : ''
     }
     pval += ']'
+  } else if (val.tag === 'Closure') {
+    pval = 'fn'
+  } else {
+    throw new Error('not supported yet')
   }
 
   return pval
