@@ -95,7 +95,7 @@ export interface Context<T = any> {
   errors: SourceError[]
 
   /** SML errors */
-  smlErrors?: SmlError[]
+  smlErrors: SmlError[]
 
   /** Runtime Sepecific state */
   runtime: {

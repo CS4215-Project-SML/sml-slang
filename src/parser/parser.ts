@@ -60,6 +60,7 @@ import {
 import { smlVisitor } from '../lang/smlVisitor'
 import * as sml from '../sml/nodes'
 import { Context } from '../types'
+import { FunctionNameError, SyntaxError } from '../sml/error'
 
 function contextToLocation(ctx: DeclarationContext): sml.SourceLocation {
   return {
@@ -103,7 +104,8 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
     return {
       tag: 'SequenceDeclaration',
       type: { name: 'undefined' },
-      declarations: declarations
+      declarations: declarations,
+      loc: contextToLocation(ctx)
     }
   }
 
@@ -142,7 +144,8 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
     return {
       tag: 'SequenceDeclaration',
       type: { name: 'undefined' },
-      declarations
+      declarations,
+      loc: contextToLocation(ctx)
     }
   }
 
@@ -201,7 +204,8 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
       tag: 'Valbind',
       type: { name: 'undefined' },
       name: (ctx._name.accept(this) as sml.Identifier).name,
-      value: ctx._value.accept(this) as sml.Expression
+      value: ctx._value.accept(this) as sml.Expression,
+      loc: contextToLocation(ctx)
     }
   }
 
@@ -227,9 +231,7 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
 
     if (rest) {
       if (rest.name !== name) {
-        throw new Error(
-          'Parse error: function declaration matching rules need to have the same identifier'
-        )
+        throw new FunctionNameError(name, rest.name, contextToLocation(ctx))
       }
 
       matching.rules.push(...rest.matching.rules)
@@ -239,7 +241,8 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
       tag: 'Funbind',
       type: { name: 'undefined' },
       name: (ctx._name.accept(this) as sml.Identifier).name,
-      matching: matching
+      matching: matching,
+      loc: contextToLocation(ctx)
     }
   }
 
@@ -247,7 +250,8 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
     return {
       tag: 'Matching',
       type: { name: 'undefined' },
-      rules: [ctx._matchrule.accept(this) as sml.Matchingrule]
+      rules: [ctx._matchrule.accept(this) as sml.Matchingrule],
+      loc: contextToLocation(ctx)
     }
   }
 
@@ -262,7 +266,8 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
     return {
       tag: 'Matching',
       type: { name: 'undefined' },
-      rules
+      rules,
+      loc: contextToLocation(ctx)
     }
   }
 
@@ -273,7 +278,8 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
       tag: 'Matchingrule',
       type: { name: 'undefined' },
       pat: ctx._pat.accept(this) as sml.Pattern,
-      exp: ctx._exp.accept(this) as sml.Expression
+      exp: ctx._exp.accept(this) as sml.Expression,
+      loc: contextToLocation(ctx)
     }
   }
 
@@ -297,7 +303,8 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
     return {
       tag: 'PatternConstant',
       type: { name: 'undefined' },
-      value
+      value,
+      loc: contextToLocation(ctx)
     }
   }
 
@@ -309,7 +316,8 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
     return {
       tag: 'PatternIdentifier',
       type: { name: 'undefined' },
-      name
+      name,
+      loc: contextToLocation(ctx)
     }
   }
 
@@ -324,7 +332,8 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
       type: { name: 'undefined' },
       operator: '::',
       left,
-      right
+      right,
+      loc: contextToLocation(ctx)
     }
   }
 
@@ -374,7 +383,8 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
       tag: 'KeyPattern',
       type: { name: 'undefined' },
       key: (ctx._key.accept(this) as sml.Identifier).name,
-      pat: ctx._pat.accept(this) as sml.Pattern
+      pat: ctx._pat.accept(this) as sml.Pattern,
+      loc: contextToLocation(ctx)
     }
   }
 
@@ -395,7 +405,8 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
       tag: 'LetExpression',
       type: { name: 'undefined' },
       dec: ctx._dec.accept(this) as sml.Declaration,
-      exp: ctx._exp.accept(this) as sml.Expression
+      exp: ctx._exp.accept(this) as sml.Expression,
+      loc: contextToLocation(ctx)
     }
   }
 
@@ -406,7 +417,8 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
       tag: 'LambdaExpression',
       type: { name: 'undefined' },
       matching: ctx.getChild(1).accept(this) as sml.Matching,
-      fv: []
+      fv: [],
+      loc: contextToLocation(ctx)
     }
   }
 
@@ -424,7 +436,8 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
       type: { name: 'undefined' },
       pred: ctx._pred.accept(this) as sml.Expression,
       cons: ctx._cons.accept(this) as sml.Expression,
-      alt: ctx._alt.accept(this) as sml.Expression
+      alt: ctx._alt.accept(this) as sml.Expression,
+      loc: contextToLocation(ctx)
     }
   }
 
@@ -463,7 +476,8 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
         tag: 'PrefixApplicationExpression',
         type: { name: 'undefined' },
         operator: operator as sml.Expression,
-        operand: operand as sml.Expression
+        operand: operand as sml.Expression,
+        loc: contextToLocation(ctx)
       }
     }
   }
@@ -518,7 +532,7 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
     } else if (label.tag === 'Identifier') {
       name = label.name.toString()
     } else {
-      throw new Error('bruh')
+      throw new SyntaxError()
     }
 
     return {
@@ -569,7 +583,7 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
     } else if (child.tag === 'Identifier') {
       keyvalue = child.name.toString()
     } else {
-      throw new Error(`not supported yet: ${ctx}`)
+      throw new SyntaxError()
     }
 
     return {
@@ -685,7 +699,8 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
   }
 
   visitChildren(node: RuleNode): sml.Node {
-    throw new Error(`not supported yet: ${node}`)
+    // Not sure how to retrieve the location of the error
+    throw new SyntaxError()
   }
 
   visitTerminal(node: TerminalNode): sml.Node {
@@ -693,7 +708,8 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
   }
 
   visitErrorNode(node: ErrorNode): sml.Node {
-    throw new Error('bruh') // TODO: implement proper error type
+    // Not sure how to retrieve the location of the error
+    throw new SyntaxError()
   }
 
   debugVisit(phase: string, tree: ParseTree) {
@@ -718,14 +734,22 @@ export function parse(source: string, context: Context) {
   const tokenStream = new CommonTokenStream(lexer)
   const parser = new smlParser(tokenStream)
   parser.buildParseTree = true
-  const tree = parser.program()
-  const program = convertSml(tree)
-  return {
-    sml: program,
-    es: {
-      type: 'Program',
-      sourceType: 'script',
-      body: []
+  try {
+    const tree = parser.program()
+    const program = convertSml(tree)
+    return {
+      sml: program,
+      es: {
+        type: 'Program',
+        sourceType: 'script',
+        body: []
+      }
     }
+  } catch (e) {
+    if (e instanceof SyntaxError) {
+      context.smlErrors.push(e)
+    }
+
+    throw new SyntaxError()
   }
 }

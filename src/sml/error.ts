@@ -14,7 +14,7 @@ export enum ErrorSeverity {
 export interface SmlError {
   type: ErrorType
   severity: ErrorSeverity
-  location: SourceLocation
+  location?: SourceLocation
   explain(): string
 }
 
@@ -22,10 +22,24 @@ export class SyntaxError implements SmlError {
   public type = ErrorType.SYNTAX
   public severity = ErrorSeverity.ERROR
 
-  constructor(public error: Error, public location: SourceLocation) {}
+  constructor(public location?: SourceLocation) {}
 
   explain(): string {
     return 'Syntax error'
+  }
+}
+
+export class FunctionNameError extends SyntaxError {
+  constructor(
+    public expectedName: string,
+    public foundName: string,
+    public location: SourceLocation
+  ) {
+    super(location)
+  }
+
+  explain(): string {
+    return `Conflicting function names: expected ${this.expectedName}, found ${this.foundName}`
   }
 }
 
@@ -33,7 +47,7 @@ export class RuntimeError implements SmlError {
   public type = ErrorType.SYNTAX
   public severity = ErrorSeverity.ERROR
 
-  constructor(public error: Error, public location: SourceLocation) {}
+  constructor(public location: SourceLocation) {}
 
   explain(): string {
     return 'Runtime error'
@@ -44,7 +58,7 @@ export class TypeError implements SmlError {
   public type = ErrorType.SYNTAX
   public severity = ErrorSeverity.ERROR
 
-  constructor(public error: Error, public location: SourceLocation) {}
+  constructor(public location: SourceLocation) {}
 
   explain(): string {
     return 'Type Error'
@@ -52,13 +66,19 @@ export class TypeError implements SmlError {
 }
 
 export function parseSmlErrors(errors: SmlError[]) {
+  console.log('Parsing errors')
   const errorMessages = errors.map(error => {
-    const start = error.location.start
-    const end = error.location.end
+    if (error.location) {
+      const start = error.location.start
+      const end = error.location.end
 
-    const explanation = error.explain()
-    return `Line ${start.line}:${start.column}-${end.line}:${end.column} : ${explanation}`
+      const explanation = error.explain()
+      return `Line ${start.line}:${start.column}-${end.line}:${end.column} : ${explanation}`
+    } else {
+      return error.explain()
+    }
   })
+  console.log(errorMessages)
 
   return errorMessages.join('\n')
 }

@@ -95,6 +95,7 @@ export const createEmptyContext = <T>(
   return {
     externalSymbols,
     errors: [],
+    smlErrors: [],
     externalContext,
     runtime: createEmptyRuntime(),
     numberOfOuterEnvironments: 1,

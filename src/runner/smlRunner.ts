@@ -21,30 +21,34 @@ function runEvaluator(program: sml.Program, context: Context): string {
 }
 
 async function runInterpreter(program: sml.Program, context: Context): Promise<Result> {
-  console.log('Type-checker is running...')
+  try {
+    console.log('Type-checker is running...')
 
-  runTypechecker(program, context)
+    runTypechecker(program, context)
 
-  console.log('Free variable analyzer is running...')
-  runFreeVariableAnalyzer(program, context)
+    console.log('Free variable analyzer is running...')
+    runFreeVariableAnalyzer(program, context)
 
-  console.log('Interpreter is running...')
+    console.log('Interpreter is running...')
 
-  const evaluation = runEvaluator(program, context)
-  console.log(evaluation)
+    const evaluation = runEvaluator(program, context)
+    console.log(evaluation)
 
-  return { status: 'finished', context: context, value: evaluation }
+    return { status: 'finished', context: context, value: evaluation }
+  } catch (e) {
+    return { status: 'error' }
+  }
 }
 
-export function smlRunner(code: string | undefined, context: Context): Promise<Result> {
+export async function smlRunner(code: string | undefined, context: Context): Promise<Result> {
   if (!code) {
     return resolvedErrorPromise
   }
 
-  const program = parse(code, context).sml as sml.Program
-  if (!program) {
-    return new Promise((resolve, _reject) => resolve({ status: 'error' }))
+  try {
+    const program = parse(code, context).sml as sml.Program
+    return runInterpreter(program, context)
+  } catch (e) {
+    return { status: 'error' }
   }
-
-  return runInterpreter(program, context)
 }
