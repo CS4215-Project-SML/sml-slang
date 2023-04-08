@@ -44,18 +44,28 @@ export class FunctionNameError extends SyntaxError {
 }
 
 export class RuntimeError implements SmlError {
-  public type = ErrorType.SYNTAX
+  public type = ErrorType.RUNTIME
   public severity = ErrorSeverity.ERROR
 
-  constructor(public location: SourceLocation) {}
+  constructor(public location?: SourceLocation) {}
 
   explain(): string {
     return 'Runtime error'
   }
 }
 
+export class PatternMatchingError extends RuntimeError {
+  constructor(public location?: SourceLocation) {
+    super(location)
+  }
+
+  explain(): string {
+    return `Non-exhaustive match failure`
+  }
+}
+
 export class TypeError implements SmlError {
-  public type = ErrorType.SYNTAX
+  public type = ErrorType.TYPE
   public severity = ErrorSeverity.ERROR
 
   constructor(public location: SourceLocation) {}
@@ -66,7 +76,6 @@ export class TypeError implements SmlError {
 }
 
 export function parseSmlErrors(errors: SmlError[]) {
-  console.log('Parsing errors')
   const errorMessages = errors.map(error => {
     if (error.location) {
       const start = error.location.start

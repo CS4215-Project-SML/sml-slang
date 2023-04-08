@@ -160,7 +160,8 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
       tag: 'LambdaExpression',
       type: { name: 'undefined' },
       matching: funbind.matching,
-      fv: []
+      fv: [],
+      loc: contextToLocation(ctx)
     }
 
     return {
@@ -218,13 +219,15 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
       tag: 'Matchingrule',
       pat: ctx._pat.accept(this) as sml.Pattern,
       exp: ctx._body.accept(this) as sml.Expression,
-      type: { name: 'undefined' }
+      type: { name: 'undefined' },
+      loc: contextToLocation(ctx)
     }
 
     const matching: sml.Matching = {
       tag: 'Matching',
       rules: [matchingRule],
-      type: { name: 'undefined' }
+      type: { name: 'undefined' },
+      loc: contextToLocation(ctx)
     }
 
     const name = (ctx._name.accept(this) as sml.Identifier).name
@@ -734,22 +737,14 @@ export function parse(source: string, context: Context) {
   const tokenStream = new CommonTokenStream(lexer)
   const parser = new smlParser(tokenStream)
   parser.buildParseTree = true
-  try {
-    const tree = parser.program()
-    const program = convertSml(tree)
-    return {
-      sml: program,
-      es: {
-        type: 'Program',
-        sourceType: 'script',
-        body: []
-      }
+  const tree = parser.program()
+  const program = convertSml(tree)
+  return {
+    sml: program,
+    es: {
+      type: 'Program',
+      sourceType: 'script',
+      body: []
     }
-  } catch (e) {
-    if (e instanceof SyntaxError) {
-      context.smlErrors.push(e)
-    }
-
-    throw new SyntaxError()
   }
 }

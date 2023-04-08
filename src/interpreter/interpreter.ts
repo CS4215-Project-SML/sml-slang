@@ -2,6 +2,7 @@ import * as lodash from 'lodash'
 
 import * as sml from '../sml/nodes'
 import { Context, Environment, Frame } from '../types'
+import { PatternMatchingError, RuntimeError } from '../sml/error'
 
 /* **********************
  * pattern matching
@@ -167,12 +168,21 @@ const infixOperatorMicrocode = {
 
 // hacky implementation
 // right is popped before left
-function applyInfixOperator(op: string, ret: sml.Type, left: sml.Constant | sml.Record | sml.List, right: sml.Constant | sml.Record | sml.List) {
+function applyInfixOperator(
+  op: string,
+  ret: sml.Type,
+  left: sml.Constant | sml.Record | sml.List,
+  right: sml.Constant | sml.Record | sml.List
+) {
   if (op === '::') {
     const items = infixOperatorMicrocode[op](getJSRepresentation(left), getJSRepresentation(right))
     return { tag: 'List', type: ret, length: items.length, items: items }
   } else {
-    return { tag: 'Constant', type: ret, value: infixOperatorMicrocode[op](getJSRepresentation(left), getJSRepresentation(right)) }
+    return {
+      tag: 'Constant',
+      type: ret,
+      value: infixOperatorMicrocode[op](getJSRepresentation(left), getJSRepresentation(right))
+    }
   }
 }
 
@@ -348,14 +358,13 @@ const microcode = {
     push(A, envInstr, cmd.exp, { tag: 'PopInstruction' }, cmd.dec)
   },
   LambdaExpression: (cmd: sml.LambdaExpression) => {
-    // TODO: identify free variables
     const capture: Record<string, sml.Node> = {}
 
     for (const name of cmd.fv) {
       capture[name] = lookup(name, E)
     }
 
-    push(S, { tag: 'Closure', capture: capture, matching: cmd.matching })
+    push(S, { tag: 'Closure', capture: capture, matching: cmd.matching, loc: cmd.loc })
   },
   ConditionalExpression: (cmd: sml.ConditionalExpression) => {
     push(A, { tag: 'ConditionalExpressionInstruction', cons: cmd.cons, alt: cmd.alt }, cmd.pred)
@@ -419,7 +428,7 @@ const microcode = {
     if (items.hasOwnProperty(cmd.label)) {
       push(S, items[cmd.label])
     } else {
-      throw new Error('bruh') // TODO: proper error handling
+      throw new Error('Interpreter error: record selector instruction') // TODO: proper error handling
     }
   },
   ListInstruction: (cmd: ListInstruction) => {
@@ -446,7 +455,7 @@ const microcode = {
     const res = evaluateMatch(operator.matching, operand as MatchableValue)
 
     if (!res) {
-      throw new Error(`Failed to evaluate matching ${operand} on match rules ${operator.matching}`)
+      throw new PatternMatchingError(operator.loc)
     }
 
     const [exp, frame] = res

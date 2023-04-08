@@ -75,7 +75,7 @@ export interface BaseNodeWithoutComments {
   // has: `type: "Identifier"`
   tag: string
   type: Type
-  loc?: SourceLocation | null | undefined
+  loc?: SourceLocation | undefined
   range?: [number, number] | undefined
 }
 
