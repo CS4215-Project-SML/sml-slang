@@ -9,6 +9,7 @@ import { SourceLocation } from 'acorn'
 import * as es from 'estree'
 
 import { EnvTree } from './createContext'
+import { SmlError } from './sml/error'
 
 /**
  * Defines functions that act as built-ins, but might rely on
@@ -92,6 +93,9 @@ export interface Context<T = any> {
 
   /** All the errors gathered */
   errors: SourceError[]
+
+  /** SML errors */
+  smlErrors?: SmlError[]
 
   /** Runtime Sepecific state */
   runtime: {

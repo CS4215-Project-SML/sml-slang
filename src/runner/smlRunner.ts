@@ -6,6 +6,7 @@ import * as sml from '../sml/nodes'
 import { typechecker } from '../sml/typechecker'
 import { Context } from '../types'
 import { resolvedErrorPromise } from './utils'
+import { SyntaxError } from '../sml/error'
 
 function runTypechecker(program: sml.Program, context: Context): sml.Program {
   return typechecker(program, context)
@@ -19,7 +20,7 @@ function runEvaluator(program: sml.Program, context: Context): string {
   return evaluate(program, context)
 }
 
-function runInterpreter(program: sml.Program, context: Context): Promise<Result> {
+async function runInterpreter(program: sml.Program, context: Context): Promise<Result> {
   console.log('Type-checker is running...')
 
   runTypechecker(program, context)
@@ -32,9 +33,7 @@ function runInterpreter(program: sml.Program, context: Context): Promise<Result>
   const evaluation = runEvaluator(program, context)
   console.log(evaluation)
 
-  return new Promise((resolve, _reject) =>
-    resolve({ status: 'finished', context: context, value: evaluation })
-  )
+  return { status: 'finished', context: context, value: evaluation }
 }
 
 export function smlRunner(code: string | undefined, context: Context): Promise<Result> {
