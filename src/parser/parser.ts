@@ -292,12 +292,14 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
   visitPatternConstant(ctx: PatternConstantContext): sml.Node {
     this.debugVisit('Pattern Constant', ctx)
 
-    const value = (ctx.getChild(0).accept(this) as sml.Constant).value
+    const constant = ctx.getChild(0).accept(this) as sml.Constant
+    const value = constant.value
+    const type = constant.type
 
     return {
       tag: 'PatternConstant',
-      type: { name: 'undefined' },
-      value
+      type: type,
+      value: value
     }
   }
 
