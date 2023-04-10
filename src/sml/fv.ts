@@ -116,6 +116,8 @@ function analyzeFreeVariables(node: sml.Node, E: Environment, fv: Set<string>) {
     // fall through
     case 'Constant':
     // fall through
+    case 'Empty':
+    // fall through
     case 'RecordSelector':
       break
     default:
