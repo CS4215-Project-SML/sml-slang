@@ -652,13 +652,13 @@ function prettifyValue(val: sml.Constant | sml.Record | sml.Tuple | sml.List | s
   val = val.tag === 'Record' ? tupleValueIfPossible(val) : val
 
   if (val.tag === 'Constant') {
-    pval = val.value.toString()
+    pval = val.type.name === 'string' ? '"' + val.value.toString() + '"' : val.value.toString()
   } else if (val.tag === 'Record') {
     let i = 0
     pval = '{'
     for (const [key, value] of Object.entries(val.items)) {
       pval += key.toString() + '=' + prettifyValue(value)
-      pval += i++ < val.length - 1 ? ', ' : ''
+      pval += i++ < val.length - 1 ? ',' : ''
     }
     pval += '}'
   } else if (val.tag === 'Tuple') {
