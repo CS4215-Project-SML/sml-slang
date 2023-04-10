@@ -50,7 +50,6 @@ import {
   ProgramContext,
   ProgramDeclarationContext,
   ProgramEmptyContext,
-  ProgramSequenceContext,
   smlParser,
   ValbindContext,
   DeclarationSequenceContext,
@@ -81,32 +80,6 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
     return ctx.getChild(0).accept(this)
   }
 
-  visitProgramSequence(ctx: ProgramSequenceContext): sml.Node {
-    this.debugVisit('Program Sequence', ctx)
-
-    const declarations: Array<sml.Declaration> = []
-
-    const left = ctx._left.accept(this)
-    if (left.tag === 'SequenceDeclaration') {
-      declarations.push(...left.declarations)
-    } else if (left.tag !== 'Empty') {
-      declarations.push(left as sml.Declaration)
-    }
-
-    const right = ctx._right.accept(this)
-    if (right.tag === 'SequenceDeclaration') {
-      declarations.push(...right.declarations)
-    } else if (right.tag !== 'Empty') {
-      declarations.push(right as sml.Declaration)
-    }
-
-    return {
-      tag: 'SequenceDeclaration',
-      type: { name: 'undefined' },
-      declarations: declarations
-    }
-  }
-
   visitProgramDeclaration(ctx: ProgramDeclarationContext): sml.Node {
     this.debugVisit('Program Declaration', ctx)
 
@@ -128,21 +101,27 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
   visitDeclarationSequence(ctx: DeclarationSequenceContext): sml.Node {
     this.debugVisit('Declaration Sequence', ctx)
 
-    const declaration = ctx._left.accept(this) as sml.Declaration
-    const rest = ctx._right.accept(this) as sml.Declaration
+    
+    const declarations: Array<sml.Declaration> = []
 
-    const declarations = [declaration]
+    const left = ctx._left.accept(this)
+    if (left.tag === 'SequenceDeclaration') {
+      declarations.push(...left.declarations)
+    } else if (left.tag !== 'Empty') {
+      declarations.push(left as sml.Declaration)
+    }
 
-    if (rest.tag === 'SequenceDeclaration') {
-      declarations.push(...rest.declarations)
-    } else {
-      declarations.push(rest)
+    const right = ctx._right.accept(this)
+    if (right.tag === 'SequenceDeclaration') {
+      declarations.push(...right.declarations)
+    } else if (right.tag !== 'Empty') {
+      declarations.push(right as sml.Declaration)
     }
 
     return {
       tag: 'SequenceDeclaration',
       type: { name: 'undefined' },
-      declarations
+      declarations: declarations
     }
   }
 

@@ -27,7 +27,6 @@ import { PatternRecordContext } from "./smlParser";
 import { PatternListContext } from "./smlParser";
 import { PatternConstantContext } from "./smlParser";
 import { PatternIdentifierContext } from "./smlParser";
-import { ProgramSequenceContext } from "./smlParser";
 import { ProgramDeclarationContext } from "./smlParser";
 import { ProgramEmptyContext } from "./smlParser";
 import { LabelIdentifierContext } from "./smlParser";
@@ -369,19 +368,6 @@ export interface smlListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitPatternIdentifier?: (ctx: PatternIdentifierContext) => void;
-
-	/**
-	 * Enter a parse tree produced by the `programSequence`
-	 * labeled alternative in `smlParser.program`.
-	 * @param ctx the parse tree
-	 */
-	enterProgramSequence?: (ctx: ProgramSequenceContext) => void;
-	/**
-	 * Exit a parse tree produced by the `programSequence`
-	 * labeled alternative in `smlParser.program`.
-	 * @param ctx the parse tree
-	 */
-	exitProgramSequence?: (ctx: ProgramSequenceContext) => void;
 
 	/**
 	 * Enter a parse tree produced by the `programDeclaration`

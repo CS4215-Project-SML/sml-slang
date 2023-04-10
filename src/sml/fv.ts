@@ -93,6 +93,12 @@ function analyzeFreeVariables(node: sml.Node, E: Environment, fv: Set<string>) {
       extend(E)
       analyzeFreeVariables(node.pat, E, fv)
       analyzeFreeVariables(node.exp, E, fv)
+
+      fv.forEach(v => {
+        if (!isFreeVariable(v, E)) {
+          fv.delete(v)
+        }
+      })
       restore(E)
       break
     case 'List':

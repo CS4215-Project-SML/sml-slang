@@ -118,45 +118,6 @@ const typeOfInfixOperator = {
   }
 }
 
-/* ******************
- * Static environment
- * ******************/
-
-// Frames are objects that map identifiers to types.
-
-type Frame = Object
-
-type StaticEnvironment = Array<Frame>
-
-const GLOBAL_FRAME: Frame = {}
-
-// Populate global frame with infix operators
-for (const key in typeOfInfixOperator) {
-  GLOBAL_FRAME[key] = typeOfInfixOperator[key]
-}
-
-const GLOBAL_ENVIRONMENT: StaticEnvironment = [GLOBAL_FRAME]
-
-function lookup(name: string, env: StaticEnvironment): sml.Type {
-  for (let i = env.length - 1; i >= 0; i--) {
-    const frame = env[i]
-    if (frame.hasOwnProperty(name)) {
-      return frame[name]
-    }
-  }
-  throw new Error('undefined')
-}
-
-function bind(name: string, value: sml.Type, env: StaticEnvironment) {
-  const frame = env[env.length - 1]
-  frame[name] = value
-}
-
-function extend(env: StaticEnvironment): number {
-  return env.push({})
-}
-
-const E: StaticEnvironment = GLOBAL_ENVIRONMENT
 
 /* ****************
  * Type constraints
@@ -167,6 +128,8 @@ type Constraint = [sml.Type, sml.Type]
 type ConstraintEnvironment = Array<Constraint>
 
 function addConstraint(t1: sml.Type, t2: sml.Type, cenv: ConstraintEnvironment) {
+  // TODO: Might want to implement "referenced-in" checking here
+
   if (isTypeEquivalent(t1, t2)) {
 
     // Ignore redundant constraints
@@ -212,36 +175,65 @@ function addConstraint(t1: sml.Type, t2: sml.Type, cenv: ConstraintEnvironment) 
   throw new Error('invalid constraint')
 }
 
-function solveTypeConstraint(t: sml.Type, cenv: ConstraintEnvironment): sml.Type {
+// Maps polymorphic types to their reduced (solved) forms
+const R: Object = {}
+
+function reduceType(t: sml.Type): sml.Type {
   if (isTypePoly(t)) {
+    // if (R.hasOwnProperty(t.name)) {
+    //   return R[t.name]
+    // }
 
-    return solveConstraintEquations(t, cenv)
-
-  } else if (isTypePrimitive(t)) {
-
-    return t
-
-  } else if (isTypeRec(t)) {
-
-    for (let [key, value] of Object.entries((t as sml.Rec).body)) {
-      ;(t as sml.Rec).body[key] = solveTypeConstraint(value, cenv)
+    // Avoid cylic reduction
+    const reds = new Set()
+    reds.add(t.name)
+    while (R.hasOwnProperty(t.name)) {
+      const red = R[t.name]
+      if (reds.has(red.name)) {
+        break
+      }
+      reds.add(red.name)
+      t = red
+      if (!isTypePoly(t)) {
+        break
+      }
     }
-    return t
-
+    if (!isTypePoly(t)) {
+      return reduceType(t)
+    }
+  } else if (isTypeRec(t)) {
+    for (const [key, value] of Object.entries((t as sml.Rec).body)) {
+      ;(t as sml.Rec).body[key] = reduceType(value)
+    }
   } else if (isTypeLis(t)) {
-
-    ;(t as sml.Lis).body = solveTypeConstraint((t as sml.Lis).body, cenv)
-    return t
-
+    ;(t as sml.Lis).body = reduceType((t as sml.Lis).body)
   } else if (isTypeFun(t)) {
-
-    ;(t as sml.Fun).par = solveTypeConstraint((t as sml.Fun).par, cenv)
-    ;(t as sml.Fun).ret = solveTypeConstraint((t as sml.Fun).ret, cenv)
-    return t
-
+    ;(t as sml.Fun).par = reduceType((t as sml.Fun).par)
+    ;(t as sml.Fun).ret = reduceType((t as sml.Fun).ret)
   }
 
-  throw new Error('not supported yet')
+  return t
+}
+
+function solveTypeConstraint(t: sml.Type, cenv: ConstraintEnvironment): sml.Type {
+  if (isTypePoly(t)) {
+    const res = reduceType(solveConstraintEquations(t, cenv))
+    if (!isTypeEquivalent(t, res)) {
+      // possibility of overwrite?
+      R[t.name] = res
+    }
+    return res
+  } else if (isTypeRec(t)) {
+    for (const [key, value] of Object.entries((t as sml.Rec).body)) {
+      ;(t as sml.Rec).body[key] = solveTypeConstraint(value, cenv)
+    }
+  } else if (isTypeLis(t)) {
+    ;(t as sml.Lis).body = solveTypeConstraint((t as sml.Lis).body, cenv)
+  } else if (isTypeFun(t)) {
+    ;(t as sml.Fun).par = solveTypeConstraint((t as sml.Fun).par, cenv)
+    ;(t as sml.Fun).ret = solveTypeConstraint((t as sml.Fun).ret, cenv)
+  }
+  return t
 }
 
 function solveConstraintEquations(t: sml.Poly, cenv: ConstraintEnvironment): sml.Type {
@@ -263,7 +255,10 @@ function solveConstraintEquations(t: sml.Poly, cenv: ConstraintEnvironment): sml
   const renv: ConstraintEnvironment = []
   for (const c of cenv) {
     // this is wrong, need to check whether the type is "inside" or not, not equivalence check
-    if (!isTypeEquivalent(t, c[0]) && !isTypeEquivalent(t, c[1])) {
+    // if (!isTypeEquivalent(t, c[0]) && !isTypeEquivalent(t, c[1])) {
+    //   renv.push([c[0], c[1]])
+    // }
+    if (!isTypeReferencedIn(t, c[0]) && !isTypeReferencedIn(t, c[1])) {
       renv.push([c[0], c[1]])
     }
   }
@@ -286,7 +281,7 @@ function solveConstraintEquations(t: sml.Poly, cenv: ConstraintEnvironment): sml
   const res = prim ? prim : cons[0]
 
   for (let i = 1; i < cons.length; i++) {
-    if (!isTypeSimilar(res, cons[i])) {
+    if (!isTypePoly(res) && !isTypePoly(cons[i]) && !isTypeEquivalent(res, cons[i])) {
       throw new Error(`constraints cannot be solved: ${cenv}`)
     }
   }
@@ -362,117 +357,25 @@ function isTypeEquivalent(t1: sml.Type, t2: sml.Type): boolean {
   return false
 }
 
-function isTypeSimilar(t1: sml.Type, t2: sml.Type): boolean {
-  if (isTypePoly(t1) || isTypePoly(t2)) {
-
-    return true
-
-  } else if (isTypePrimitive(t1) && isTypePrimitive(t2)) {
-
-    return t1.name === t2.name
-
-  } else if (isTypeRec(t1) && isTypeRec(t2)) {
-
-    if (Object.keys((t1 as sml.Rec).body).length !== Object.keys((t2 as sml.Rec).body).length) {
-      return false
-    }
-
-    ;(t1 as sml.Rec).body = Object.keys((t1 as sml.Rec).body)
-      .sort()
-      .reduce((obj, key) => {
-        obj[key] = (t1 as sml.Rec).body[key]
-        return obj
-      }, {})
-  
-    ;(t2 as sml.Rec).body = Object.keys((t2 as sml.Rec).body)
-      .sort()
-      .reduce((obj, key) => {
-        obj[key] = (t2 as sml.Rec).body[key]
-        return obj
-      }, {})
-
-    const t1Body = Object.entries((t1 as sml.Rec).body)
-    const t2Body = Object.entries((t2 as sml.Rec).body)
-
-    for (let i = 0; i < t1Body.length; i++) {
-      if (t1Body[i][0] !== t2Body[i][0]) {
-        return false
+// Is type A referenced in type B?
+function isTypeReferencedIn(a: sml.Type, b: sml.Type): boolean {
+  if (isTypePoly(b)) {
+    return isTypeEquivalent(a, b)
+  } else if (isTypePrimitive(b)) {
+    return isTypeEquivalent(a, b)
+  } else if (isTypeRec(b)) {
+    for (const [key, _] of Object.entries((b as sml.Rec).body)) {
+      if (isTypeReferencedIn(a, (b as sml.Rec).body[key])) {
+        return true
       }
     }
-
-    for (let i = 0; i < t1Body.length; i++) {
-      if (!isTypeSimilar(t1Body[i][1], t2Body[i][1])) {
-        return false
-      }
-    }
-    
-    return true
-
-  } else if (isTypeLis(t1) && isTypeLis(t2)) {
-
-    const t1Body = (t1 as sml.Lis).body
-    const t2Body = (t2 as sml.Lis).body
-
-    return isTypeSimilar(t1Body, t2Body)
-
-  } else if (isTypeFun(t1) && isTypeFun(t2)) {
-
-    const t1Par = (t1 as sml.Fun).par
-    const t2Par = (t2 as sml.Fun).par
-
-    const t1Ret = (t1 as sml.Fun).ret
-    const t2Ret = (t2 as sml.Fun).ret
-
-    return isTypeSimilar(t1Par, t2Par) && isTypeSimilar(t1Ret, t2Ret)
-
+  } else if (isTypeLis(b)) {
+    return isTypeReferencedIn(a, (b as sml.Lis).body)
+  } else if (isTypeFun(b)) {
+    return isTypeReferencedIn(a, (b as sml.Fun).par) || isTypeReferencedIn(a, (b as sml.Fun).ret)
   }
-
   return false
 }
-
-function isTypeInt(t: sml.Type) {
-  return t.name === 'int'
-}
-
-function isTypeReal(t: sml.Type) {
-  return t.name === 'real'
-}
-
-function isTypeBool(t: sml.Type) {
-  return t.name === 'bool'
-}
-
-function isTypeChar(t: sml.Type) {
-  return t.name === 'char'
-}
-
-function isTypeStr(t: sml.Type) {
-  return t.name === 'string'
-}
-
-function isTypeRec(t: sml.Type) {
-  return t.name === 'record'
-}
-
-function isTypeLis(t: sml.Type) {
-  return t.name === 'list'
-}
-
-function isTypeFun(t: sml.Type) {
-  return t.name === 'function'
-}
-
-function isTypePoly(t: sml.Type) {
-  return t.name.slice(0, 1) === "'"
-}
-
-function isTypePrimitive(t: sml.Type) {
-  return isTypeInt(t) || isTypeReal(t) || isTypeBool(t) || isTypeChar(t) || isTypeStr(t)
-}
-
-/* *******************************
- * Utilities for polymorphic types
- * *******************************/
 
 let freshType = 0
 
@@ -480,9 +383,12 @@ function getFreshType(): string {
   return "'" + (freshType++).toString()
 }
 
-function reassignFreshTypes(t: sml.Type): sml.Type {
-  const poly: Array<string> = scanPolyTypes(t)
+function isNotFreshType(n: string) {
+  return isNaN(parseInt(n.slice(1)))
+}
 
+function reassignFreshTypes(t: sml.Type): sml.Type {
+  const poly: Array<string> = scanPolyTypes(t).filter(p => isNotFreshType(p))
   const mapping = {}
 
   for (const p of poly) {
@@ -526,12 +432,14 @@ function scanPolyTypes(t: sml.Type): Array<string> {
     poly.push(...scanPolyTypes((t as sml.Fun).ret))
   }
 
-  return poly.sort()
+  return poly
 }
 
 function assignTypes(t: sml.Type, mapping: Object): sml.Type {
   if (isTypePoly(t)) {
-    t.name = mapping[t.name]
+    if (mapping.hasOwnProperty(t.name)) {
+      t.name = mapping[t.name]
+    }
   } else if (isTypeRec(t)) {
     for (const [key, value] of Object.entries((t as sml.Rec).body)) {
       ;(t as sml.Rec).body[key] = assignTypes(value, mapping)
@@ -544,6 +452,92 @@ function assignTypes(t: sml.Type, mapping: Object): sml.Type {
   }
   return t
 }
+
+function isTypeInt(t: sml.Type) {
+  return t.name === 'int'
+}
+
+function isTypeReal(t: sml.Type) {
+  return t.name === 'real'
+}
+
+function isTypeBool(t: sml.Type) {
+  return t.name === 'bool'
+}
+
+function isTypeChar(t: sml.Type) {
+  return t.name === 'char'
+}
+
+function isTypeStr(t: sml.Type) {
+  return t.name === 'string'
+}
+
+function isTypeRec(t: sml.Type) {
+  return t.name === 'record'
+}
+
+function isTypeLis(t: sml.Type) {
+  return t.name === 'list'
+}
+
+function isTypeFun(t: sml.Type) {
+  return t.name === 'function'
+}
+
+function isTypePoly(t: sml.Type) {
+  return t.name.slice(0, 1) === "'"
+}
+
+function isTypePrimitive(t: sml.Type) {
+  return isTypeInt(t) || isTypeReal(t) || isTypeBool(t) || isTypeChar(t) || isTypeStr(t)
+}
+
+function isTypeUnd(t: sml.Type) {
+  return t.name === 'undfined'
+}
+
+
+/* ******************
+ * Static environment
+ * ******************/
+
+// Frames are objects that map identifiers to types.
+
+type Frame = Object
+
+type StaticEnvironment = Array<Frame>
+
+const GLOBAL_FRAME: Frame = {}
+
+// Populate global frame with infix operators
+for (const key in typeOfInfixOperator) {
+  GLOBAL_FRAME[key] = typeOfInfixOperator[key]
+}
+
+const GLOBAL_ENVIRONMENT: StaticEnvironment = [GLOBAL_FRAME]
+
+function lookup(name: string, env: StaticEnvironment): sml.Type {
+  for (let i = env.length - 1; i >= 0; i--) {
+    const frame = env[i]
+    if (frame.hasOwnProperty(name)) {
+      return reduceType(frame[name])
+    }
+  }
+  throw new Error('identifier is undefined')
+}
+
+function bind(name: string, value: sml.Type, env: StaticEnvironment) {
+  const frame = env[env.length - 1]
+  frame[name] = reduceType(value)
+}
+
+function extend(env: StaticEnvironment): number {
+  return env.push({})
+}
+
+const E: StaticEnvironment = GLOBAL_ENVIRONMENT
+
 
 function infer(node: sml.Node, cenv?: ConstraintEnvironment): sml.Type {
 
@@ -571,20 +565,27 @@ function infer(node: sml.Node, cenv?: ConstraintEnvironment): sml.Type {
 
   } else if (node.tag === 'FunctionDeclaration') {
 
-    // sketchy
-    bind(node.name, { name: 'function' , par: { name: 'undefined'}, ret: { name: 'undefined' }}, E)
+    bind(node.name, { name: 'function' , par: { name: getFreshType() }, ret: { name: getFreshType() }}, E)
     extend(E)
-    node.type = infer(node.lambda)  // or use constraint solving instead?
+    node.type = infer(node.lambda)
+    node.type = prettifyType(node.type)
     E.pop()
     bind(node.name, node.type, E)
     return node.type
 
+  } else if (node.tag === 'LetExpression') {
+
+    extend(E)
+    infer(node.dec)
+    node.type = infer(node.exp)
+    E.pop()
+    return node.type
+
   } else if (node.tag === 'LambdaExpression') {
 
-    for (const v of node.fv) {
-      // sketchy
-      bind(v, infer({ tag: 'Identifier', type: { name: 'undefined' }, name: v }), E)
-    }
+    // for (const v of node.fv) {
+    //   bind(v, { name: getFreshType() }, E)
+    // }
     node.type = infer(node.matching)
     return node.type
 
@@ -599,13 +600,13 @@ function infer(node: sml.Node, cenv?: ConstraintEnvironment): sml.Type {
 
       const C: ConstraintEnvironment = []
 
-      const mType = infer(node.rules[0])
-      for (let i = 0; i < node.rules.length; i++) {
+      let mType = infer(node.rules[0])
+      for (let i = 1; i < node.rules.length; i++) {
         const rType = infer(node.rules[i])
         addConstraint(mType, rType, C)
       }
 
-      solveTypeConstraint(mType, C)
+      mType = solveTypeConstraint(mType, C)
 
       node.type = mType
       return node.type
@@ -616,6 +617,7 @@ function infer(node: sml.Node, cenv?: ConstraintEnvironment): sml.Type {
 
     node.pat.type = infer(node.pat)
     node.exp.type = infer(node.exp)
+    node.pat.type = reduceType(node.pat.type)
     node.type = { name: 'function', par: node.pat.type, ret: node.exp.type }
     return node.type
 
@@ -625,8 +627,7 @@ function infer(node: sml.Node, cenv?: ConstraintEnvironment): sml.Type {
 
   } else if (node.tag === 'PatternIdentifier') {
 
-    // sketchy
-    bind(node.name, { name: 'undefined' }, E)
+    bind(node.name, { name: getFreshType() }, E)
     node.type = lookup(node.name, E)
     return node.type
 
@@ -641,7 +642,16 @@ function infer(node: sml.Node, cenv?: ConstraintEnvironment): sml.Type {
 
   } else if (node.tag === 'PatternInfix') {
 
-    throw new Error('not supported yet')
+    let leftType: sml.Type = infer(node.left)
+    let rightType: sml.Type = infer(node.right)
+
+    const C: ConstraintEnvironment = []
+    addConstraint(rightType, { name: 'list', body: leftType }, C)
+    leftType = solveTypeConstraint(leftType, C)
+    rightType = solveTypeConstraint(rightType, C)
+
+    node.type = rightType
+    return node.type
 
   } else if (node.tag === 'ConditionalExpression') {
 
@@ -663,11 +673,36 @@ function infer(node: sml.Node, cenv?: ConstraintEnvironment): sml.Type {
   } else if (node.tag === 'InfixApplicationExpression') {
 
     let funType: sml.Type = reassignFreshTypes(lookup(node.operator, E))
-
     let parType: sml.Type = (funType as sml.Fun).par
     let argType: sml.Type = { name: 'record', body: { 1: infer(node.left), 2: infer(node.right) } }
 
     const C: ConstraintEnvironment = []
+    addConstraint(parType, argType, C)
+
+    parType = solveTypeConstraint(parType, C)
+    argType = solveTypeConstraint(argType, C)
+
+    let retType: sml.Type = (funType as sml.Fun).ret
+
+    retType = solveTypeConstraint(retType, C)
+
+    node.type = retType
+    return node.type
+
+  } else if (node.tag === 'PrefixApplicationExpression') {
+
+    const C: ConstraintEnvironment = []
+
+    let funType: sml.Type = reassignFreshTypes(infer(node.operator))
+
+    if (!isTypeFun(funType)) {
+      addConstraint(funType, { name: 'function', par: { name: getFreshType() }, ret: { name: getFreshType() } }, C)
+      funType = solveTypeConstraint(funType, C)
+    }
+
+    let parType: sml.Type = (funType as sml.Fun).par
+    let argType: sml.Type = reassignFreshTypes(infer(node.operand))
+
     addConstraint(parType, argType, C)
 
     parType = solveTypeConstraint(parType, C)
@@ -679,8 +714,6 @@ function infer(node: sml.Node, cenv?: ConstraintEnvironment): sml.Type {
     node.type = retType
     return node.type
 
-  } else if (node.tag === 'PrefixApplicationExpression') {
-    
   } else if (node.tag === 'Record') {
 
     const bodyType = {}
@@ -739,6 +772,10 @@ function infer(node: sml.Node, cenv?: ConstraintEnvironment): sml.Type {
 
 export function typechecker(program: sml.Program, context: Context): sml.Program {
   program.type = infer(program.body)
+
   console.log(JSON.stringify(program.body, null, 2))
+  console.log(JSON.stringify(E, null, 2))
+  console.log(JSON.stringify(R, null, 2))
+
   return program
 }

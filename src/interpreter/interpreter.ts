@@ -556,8 +556,8 @@ export function evaluate(program: sml.Program, context: Context): string {
     const cmd = A.pop() as sml.Node
 
     console.log('Executed command:')
-    // console.log(cmd)
-    console.log(JSON.stringify(cmd, null, 2))
+    console.log(cmd)
+    // console.log(JSON.stringify(cmd, null, 2))
 
     if (microcode.hasOwnProperty(cmd.tag)) {
       microcode[cmd.tag](cmd)
@@ -567,11 +567,11 @@ export function evaluate(program: sml.Program, context: Context): string {
 
     console.log('Resulting registers:')
     console.log('A')
-    // console.log(A)
-    console.log(JSON.stringify(A, null, 2))
+    console.log(A)
+    // console.log(JSON.stringify(A, null, 2))
     console.log('S')
-    // console.log(S)
-    console.log(JSON.stringify(S, null, 2))
+    console.log(S)
+    // console.log(JSON.stringify(S, null, 2))
     console.log('E')
     console.log(E)
     // console.log(JSON.stringify(E, null, 2))
@@ -602,7 +602,7 @@ function prettifyValue(val: sml.Constant | sml.Record | sml.Tuple | sml.List | s
     pval = '{'
     for (const [key, value] of Object.entries(val.items)) {
       pval += key.toString() + '=' + prettifyValue(value)
-      pval += i++ < val.length - 1 ? ',' : ''
+      pval += i++ < val.length - 1 ? ', ' : ''
     }
     pval += '}'
   } else if (val.tag === 'Tuple') {
@@ -649,7 +649,7 @@ function prettifyType(val: sml.Type) {
     ptyp = '{'
     for (const [key, value] of Object.entries((val as sml.Rec).body)) {
       ptyp += key.toString() + ':' + prettifyType(value)
-      ptyp += i++ < bodyLength - 1 ? ',' : ''
+      ptyp += i++ < bodyLength - 1 ? ', ' : ''
     }
     ptyp += '}'
   } else if (val.name === 'tuple') {
@@ -658,7 +658,7 @@ function prettifyType(val: sml.Type) {
     for (let [key, value] of Object.entries((val as sml.Tup).body)) {
       value = value.name === 'record' ? tupleTypeIfPossible(value) : value
       const valtyp = prettifyType(value)
-      ptyp += value.name === 'tuple' ? '(' + valtyp + ')' : valtyp
+      ptyp += (value.name === 'tuple' || value.name === 'function') ? '(' + valtyp + ')' : valtyp
       ptyp += i++ < bodyLength - 1 ? ' * ' : ''
     }
   } else if (val.name === 'list') {

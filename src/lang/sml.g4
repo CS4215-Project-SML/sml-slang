@@ -4,9 +4,8 @@ grammar sml;
  * Programs
  */
 program
-    : left=program ';' right=program    # programSequence
-    | declaration                       # programDeclaration
-    |                                   # programEmpty
+    : declaration (';')?    # programDeclaration
+    |                       # programEmpty
     ;
 
 
@@ -154,5 +153,5 @@ ID
 
 DIGIT:          [0-9];
 LETTER:         [A-Za-z];
-NEWLINE:        ('\r'? '\n' | '\r');
+NEWLINE:        ('\r'? '\n' | '\r') -> skip;
 WHITESPACE:     [ \t]+ -> skip;
