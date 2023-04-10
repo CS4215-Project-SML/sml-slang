@@ -226,7 +226,7 @@ function lookup(name: string, env: Array<Object>): sml.Constant | sml.Record | s
 
 function bind(
   name: string,
-  value: sml.Constant | sml.Record | sml.LambdaExpression | sml.Closure,
+  value:sml.Constant | sml.Identifier | sml.Record | sml.List | sml.LambdaExpression | sml.Closure,
   env: Array<Object>
 ) {
   const frame = env[env.length - 1]
@@ -392,7 +392,7 @@ const microcode = {
     S.pop()
   },
   BindInstruction: (cmd: BindInstruction) => {
-    const value = S.pop() as sml.Constant
+    const value = S.pop() as sml.Constant | sml.Identifier | sml.Record | sml.List | sml.Closure
     bind(cmd.name, value, E)
     push(S, { tag: 'Identifier', type: cmd.type, name: cmd.name })
   },
@@ -460,6 +460,7 @@ const microcode = {
     }
 
     const [exp, frame] = res
+    exp.type = cmd.type
 
     const envInstr: EnvironmentInstruction = {
       tag: 'EnvironmentInstruction'
@@ -596,7 +597,7 @@ function prettify(evaluation: sml.Identifier): string {
   const id = evaluation.name
   const val = lookup(id, E) as sml.Constant | sml.Record | sml.List | sml.Closure
 
-  return `val ${id} = ${prettifyValue(val)} : ${prettifyType(val.type)}`
+  return `val ${id} = ${prettifyValue(val)} : ${prettifyType(prettifyPoly(val.type))}`
 }
 
 function prettifyValue(val: sml.Constant | sml.Record | sml.Tuple | sml.List | sml.Closure) {
@@ -676,17 +677,70 @@ function prettifyType(val: sml.Type) {
     ptyp = body.name === 'record' ? '(' + bodytyp + ')' : bodytyp
     ptyp += ' ' + val.name
   } else if (val.name === 'function') {
-    ptyp = prettifyType((val as sml.Fun).par)
+    ptyp = prettifyType((val as sml.Fun).par[0])
     ptyp += ' -> '
-    ptyp += prettifyType((val as sml.Fun).ret)
+    ptyp += prettifyType((val as sml.Fun).ret[0])
   } else if (val.name === 'undefined') {
     throw new Error(`not supported yet`)
   } else {
-    // This is polymorphic type
+    // This is for polymorphic type
     ptyp = val.name
   }
 
   return ptyp
+}
+
+function prettifyPoly(t: sml.Type) {
+  const poly: Array<string> = scanPolyTypes(t)
+  const alpha: Array<string> = 'abcdefghijklmnopqrstuvwxyz'.split('')
+
+  const mapping = {}
+
+  let idx = 0
+  for (const p of poly) {
+    if (!mapping.hasOwnProperty(p)) {
+      mapping[p] = "'" + alpha[idx++]
+    }
+  }
+
+  return assignAlphas(t, mapping)
+}
+
+function scanPolyTypes(t: sml.Type): Array<string> {
+  const poly = []
+
+  if (t.name.slice(0, 1) === "'") {
+    poly.push(t.name)
+  } else if (t.name === 'record') {
+    for (const [_, value] of Object.entries((t as sml.Rec).body)) {
+      poly.push(...scanPolyTypes(value))
+    }
+  } else if (t.name === 'list') {
+    poly.push(...scanPolyTypes((t as sml.Lis).body))
+  } else if (t.name === 'function') {
+    poly.push(...scanPolyTypes((t as sml.Fun).par[0]))
+    poly.push(...scanPolyTypes((t as sml.Fun).ret[0]))
+  }
+
+  return poly
+}
+
+function assignAlphas(t: sml.Type, mapping: Object): sml.Type {
+  if (t.name.slice(0, 1) === "'") {
+    if (mapping.hasOwnProperty(t.name)) {
+      t.name = mapping[t.name]
+    }
+  } else if (t.name === 'record') {
+    for (const [key, value] of Object.entries((t as sml.Rec).body)) {
+      ;(t as sml.Rec).body[key] = assignAlphas(value, mapping)
+    }
+  } else if (t.name === 'list') {
+    ;(t as sml.Lis).body = assignAlphas((t as sml.Lis).body, mapping)
+  } else if (t.name === 'function') {
+    ;(t as sml.Fun).par[0] = assignAlphas((t as sml.Fun).par[0], mapping)
+    ;(t as sml.Fun).ret[0] = assignAlphas((t as sml.Fun).ret[0], mapping)
+  }
+  return t
 }
 
 function tupleValueIfPossible(val: sml.Record): sml.Record | sml.Tuple {

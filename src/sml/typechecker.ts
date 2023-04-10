@@ -1,4 +1,4 @@
-import _, * as lodash from 'lodash'
+import * as lodash from 'lodash'
 import { Context } from '../types'
 import * as sml from './nodes'
 
@@ -6,115 +6,111 @@ import * as sml from './nodes'
 const typeOfInfixOperator = {
   '+': {
     name: 'function',
-    par: {
-      name: 'record',
-      body: { 1: { name: 'int' }, 2: { name: 'int' } }
-    },
-    ret: { name: 'int' }
+    par: [
+      { name: 'record', body: { 1: { name: 'int' }, 2: { name: 'int' } } },
+      { name: 'record', body: { 1: { name: 'real' }, 2: { name: 'real' } } }
+    ],
+    ret: [{ name: 'int' }, { name: 'real' }]
   },
   '-': {
     name: 'function',
-    par: {
-      name: 'record',
-      body: { 1: { name: 'int' }, 2: { name: 'int' } }
-    },
-    ret: { name: 'int' }
+    par: [
+      { name: 'record', body: { 1: { name: 'int' }, 2: { name: 'int' } } },
+      { name: 'record', body: { 1: { name: 'real' }, 2: { name: 'real' } } }
+    ],
+    ret: [{ name: 'int' }, { name: 'real' }]
   },
   '*': {
     name: 'function',
-    par: {
-      name: 'record',
-      body: { 1: { name: 'int' }, 2: { name: 'int' } }
-    },
-    ret: { name: 'int' }
+    par: [
+      { name: 'record', body: { 1: { name: 'int' }, 2: { name: 'int' } } },
+      { name: 'record', body: { 1: { name: 'real' }, 2: { name: 'real' } } }
+    ],
+    ret: [{ name: 'int' }, { name: 'real' }]
   },
   '/': {
     name: 'function',
-    par: {
-      name: 'record',
-      body: { 1: { name: 'real' }, 2: { name: 'real' } }
-    },
-    ret: { name: 'real' }
+    par: [
+      { name: 'record', body: { 1: { name: 'int' }, 2: { name: 'int' } } },
+      { name: 'record', body: { 1: { name: 'real' }, 2: { name: 'real' } } }
+    ],
+    ret: [{ name: 'int' }, { name: 'real' }]
   },
   '<': {
     name: 'function',
-    par: {
-      name: 'record',
-      body: { 1: { name: 'int' }, 2: { name: 'int' } }
-    },
-    ret: { name: 'bool' }
-  },
-  '>': {
-    name: 'function',
-    par: {
-      name: 'record',
-      body: { 1: { name: 'int' }, 2: { name: 'int' } }
-    },
-    ret: { name: 'bool' }
-  },
-  '=': {
-    name: 'function',
-    par: {
-      name: 'record',
-      body: { 1: { name: 'int' }, 2: { name: 'int' } }
-    },
-    ret: { name: 'bool' }
+    par: [
+      { name: 'record', body: { 1: { name: 'int' }, 2: { name: 'int' } } },
+      { name: 'record', body: { 1: { name: 'real' }, 2: { name: 'real' } } },
+      { name: 'record', body: { 1: { name: 'char' }, 2: { name: 'char' } } },
+      { name: 'record', body: { 1: { name: 'string' }, 2: { name: 'string' } } }
+    ],
+    ret: [{ name: 'bool' }, { name: 'bool' }, { name: 'bool' }, { name: 'bool' }]
   },
   '<=': {
     name: 'function',
-    par: {
-      name: 'record',
-      body: { 1: { name: 'int' }, 2: { name: 'int' } }
-    },
-    ret: { name: 'bool' }
+    par: [
+      { name: 'record', body: { 1: { name: 'int' }, 2: { name: 'int' } } },
+      { name: 'record', body: { 1: { name: 'real' }, 2: { name: 'real' } } },
+      { name: 'record', body: { 1: { name: 'char' }, 2: { name: 'char' } } },
+      { name: 'record', body: { 1: { name: 'string' }, 2: { name: 'string' } } }
+    ],
+    ret: [{ name: 'bool' }, { name: 'bool' }, { name: 'bool' }, { name: 'bool' }]
+  },
+  '>': {
+    name: 'function',
+    par: [
+      { name: 'record', body: { 1: { name: 'int' }, 2: { name: 'int' } } },
+      { name: 'record', body: { 1: { name: 'real' }, 2: { name: 'real' } } },
+      { name: 'record', body: { 1: { name: 'char' }, 2: { name: 'char' } } },
+      { name: 'record', body: { 1: { name: 'string' }, 2: { name: 'string' } } }
+    ],
+    ret: [{ name: 'bool' }, { name: 'bool' }, { name: 'bool' }, { name: 'bool' }]
   },
   '>=': {
     name: 'function',
-    par: {
-      name: 'record',
-      body: { 1: { name: 'int' }, 2: { name: 'int' } }
-    },
-    ret: { name: 'bool' }
+    par: [
+      { name: 'record', body: { 1: { name: 'int' }, 2: { name: 'int' } } },
+      { name: 'record', body: { 1: { name: 'real' }, 2: { name: 'real' } } },
+      { name: 'record', body: { 1: { name: 'char' }, 2: { name: 'char' } } },
+      { name: 'record', body: { 1: { name: 'string' }, 2: { name: 'string' } } }
+    ],
+    ret: [{ name: 'bool' }, { name: 'bool' }, { name: 'bool' }, { name: 'bool' }]
+  },
+  '=': {
+    name: 'function',
+    par: [
+      { name: 'record', body: { 1: { name: "'a" }, 2: { name: "'a" } } }
+    ],
+    ret: [{ name: 'bool' }]
   },
   '<>': {
     name: 'function',
-    par: {
-      name: 'record',
-      body: { 1: { name: 'int' }, 2: { name: 'int' } }
-    },
-    ret: { name: 'bool' }
+    par: [
+      { name: 'record', body: { 1: { name: "'a" }, 2: { name: "'a" } } }
+    ],
+    ret: [{ name: 'bool' }]
   },
   '^': {
     name: 'function',
-    par: {
-      name: 'record',
-      body: { 1: { name: 'string' }, 2: { name: 'string' } },
-      ret: { name: 'string' }
-    }
+    par: [{ name: 'record', body: { 1: { name: 'string' }, 2: { name: 'string' } } }],
+    ret: [{ name: 'string' }]
   },
   '::': {
     name: 'function',
-    par: {
-      name: 'record',
-      body: { 1: { name: "'a" }, 2: { name: 'list', body: { name: "'a" } } }
-    },
-    ret: { name: 'list', body: { name: "'a" } }
+    par: [
+      { name: 'record', body: { 1: { name: "'a" }, 2: { name: 'list', body: { name: "'a" } } } }
+    ],
+    ret: [{ name: 'list', body: { name: "'a" } }]
   },
   andalso: {
     name: 'function',
-    par: {
-      name: 'record',
-      body: { 1: { name: 'bool' }, 2: { name: 'bool' } }
-    },
-    ret: { name: 'bool' }
+    par: [{ name: 'record', body: { 1: { name: 'bool' }, 2: { name: 'bool' } } }],
+    ret: [{ name: 'bool' }]
   },
   orelse: {
     name: 'function',
-    par: {
-      name: 'record',
-      body: { 1: { name: 'bool' }, 2: { name: 'bool' } }
-    },
-    ret: { name: 'bool' }
+    par: [{ name: 'record', body: { 1: { name: 'bool' }, 2: { name: 'bool' } } }],
+    ret: [{ name: 'bool' }]
   }
 }
 
@@ -128,7 +124,6 @@ type Constraint = [sml.Type, sml.Type]
 type ConstraintEnvironment = Array<Constraint>
 
 function addConstraint(t1: sml.Type, t2: sml.Type, cenv: ConstraintEnvironment) {
-  // TODO: Might want to implement "referenced-in" checking here
 
   if (isTypeEquivalent(t1, t2)) {
 
@@ -161,8 +156,8 @@ function addConstraint(t1: sml.Type, t2: sml.Type, cenv: ConstraintEnvironment) 
 
   } else if (isTypeFun(t1) && isTypeFun(t2)) {
 
-    addConstraint((t1 as sml.Fun).par, (t2 as sml.Fun).par, cenv)
-    addConstraint((t1 as sml.Fun).ret, (t2 as sml.Fun).ret, cenv)
+    addConstraint((t1 as sml.Fun).par[0], (t2 as sml.Fun).par[0], cenv)
+    addConstraint((t1 as sml.Fun).ret[0], (t2 as sml.Fun).ret[0], cenv)
     return
 
   } else if (isTypePoly(t1) || isTypePoly(t2)) {
@@ -180,10 +175,6 @@ const R: Object = {}
 
 function reduceType(t: sml.Type): sml.Type {
   if (isTypePoly(t)) {
-    // if (R.hasOwnProperty(t.name)) {
-    //   return R[t.name]
-    // }
-
     // Avoid cylic reduction
     const reds = new Set()
     reds.add(t.name)
@@ -208,8 +199,8 @@ function reduceType(t: sml.Type): sml.Type {
   } else if (isTypeLis(t)) {
     ;(t as sml.Lis).body = reduceType((t as sml.Lis).body)
   } else if (isTypeFun(t)) {
-    ;(t as sml.Fun).par = reduceType((t as sml.Fun).par)
-    ;(t as sml.Fun).ret = reduceType((t as sml.Fun).ret)
+    ;(t as sml.Fun).par[0] = reduceType((t as sml.Fun).par[0])
+    ;(t as sml.Fun).ret[0] = reduceType((t as sml.Fun).ret[0])
   }
 
   return t
@@ -230,8 +221,8 @@ function solveTypeConstraint(t: sml.Type, cenv: ConstraintEnvironment): sml.Type
   } else if (isTypeLis(t)) {
     ;(t as sml.Lis).body = solveTypeConstraint((t as sml.Lis).body, cenv)
   } else if (isTypeFun(t)) {
-    ;(t as sml.Fun).par = solveTypeConstraint((t as sml.Fun).par, cenv)
-    ;(t as sml.Fun).ret = solveTypeConstraint((t as sml.Fun).ret, cenv)
+    ;(t as sml.Fun).par[0] = solveTypeConstraint((t as sml.Fun).par[0], cenv)
+    ;(t as sml.Fun).ret[0] = solveTypeConstraint((t as sml.Fun).ret[0], cenv)
   }
   return t
 }
@@ -254,10 +245,6 @@ function solveConstraintEquations(t: sml.Poly, cenv: ConstraintEnvironment): sml
   // Avoid infinite recursion
   const renv: ConstraintEnvironment = []
   for (const c of cenv) {
-    // this is wrong, need to check whether the type is "inside" or not, not equivalence check
-    // if (!isTypeEquivalent(t, c[0]) && !isTypeEquivalent(t, c[1])) {
-    //   renv.push([c[0], c[1]])
-    // }
     if (!isTypeReferencedIn(t, c[0]) && !isTypeReferencedIn(t, c[1])) {
       renv.push([c[0], c[1]])
     }
@@ -344,11 +331,11 @@ function isTypeEquivalent(t1: sml.Type, t2: sml.Type): boolean {
 
   } else if (isTypeFun(t1) && isTypeFun(t2)) {
 
-    const t1Par = (t1 as sml.Fun).par
-    const t2Par = (t2 as sml.Fun).par
+    const t1Par = (t1 as sml.Fun).par[0]
+    const t2Par = (t2 as sml.Fun).par[0]
 
-    const t1Ret = (t1 as sml.Fun).ret
-    const t2Ret = (t2 as sml.Fun).ret
+    const t1Ret = (t1 as sml.Fun).ret[0]
+    const t2Ret = (t2 as sml.Fun).ret[0]
 
     return isTypeEquivalent(t1Par, t2Par) && isTypeEquivalent(t1Ret, t2Ret)
 
@@ -372,7 +359,7 @@ function isTypeReferencedIn(a: sml.Type, b: sml.Type): boolean {
   } else if (isTypeLis(b)) {
     return isTypeReferencedIn(a, (b as sml.Lis).body)
   } else if (isTypeFun(b)) {
-    return isTypeReferencedIn(a, (b as sml.Fun).par) || isTypeReferencedIn(a, (b as sml.Fun).ret)
+    return isTypeReferencedIn(a, (b as sml.Fun).par[0]) || isTypeReferencedIn(a, (b as sml.Fun).ret[0])
   }
   return false
 }
@@ -383,33 +370,13 @@ function getFreshType(): string {
   return "'" + (freshType++).toString()
 }
 
-function isNotFreshType(n: string) {
-  return isNaN(parseInt(n.slice(1)))
-}
-
-function reassignFreshTypes(t: sml.Type): sml.Type {
-  const poly: Array<string> = scanPolyTypes(t).filter(p => isNotFreshType(p))
+function reassignFreshType(t: sml.Type): sml.Type {
+  const poly: Array<string> = scanPolyTypes(t)
   const mapping = {}
 
   for (const p of poly) {
     if (!mapping.hasOwnProperty(p)) {
       mapping[p] = getFreshType()
-    }
-  }
-
-  return assignTypes(t, mapping)
-}
-
-function prettifyType(t: sml.Type) {
-  const poly: Array<string> = scanPolyTypes(t)
-  const alpha: Array<string> = 'abcdefghijklmnopqrstuvwxyz'.split('')
-
-  const mapping = {}
-
-  let idx = 0
-  for (const p of poly) {
-    if (!mapping.hasOwnProperty(p)) {
-      mapping[p] = "'" + alpha[idx++]
     }
   }
 
@@ -428,8 +395,8 @@ function scanPolyTypes(t: sml.Type): Array<string> {
   } else if (isTypeLis(t)) {
     poly.push(...scanPolyTypes((t as sml.Lis).body))
   } else if (isTypeFun(t)) {
-    poly.push(...scanPolyTypes((t as sml.Fun).par))
-    poly.push(...scanPolyTypes((t as sml.Fun).ret))
+    poly.push(...scanPolyTypes((t as sml.Fun).par[0]))
+    poly.push(...scanPolyTypes((t as sml.Fun).ret[0]))
   }
 
   return poly
@@ -447,8 +414,8 @@ function assignTypes(t: sml.Type, mapping: Object): sml.Type {
   } else if (isTypeLis(t)) {
     ;(t as sml.Lis).body = assignTypes((t as sml.Lis).body, mapping)
   } else if (isTypeFun(t)) {
-    ;(t as sml.Fun).par = assignTypes((t as sml.Fun).par, mapping)
-    ;(t as sml.Fun).ret = assignTypes((t as sml.Fun).ret, mapping)
+    ;(t as sml.Fun).par[0] = assignTypes((t as sml.Fun).par[0], mapping)
+    ;(t as sml.Fun).ret[0] = assignTypes((t as sml.Fun).ret[0], mapping)
   }
   return t
 }
@@ -539,7 +506,7 @@ function extend(env: StaticEnvironment): number {
 const E: StaticEnvironment = GLOBAL_ENVIRONMENT
 
 
-function infer(node: sml.Node, cenv?: ConstraintEnvironment): sml.Type {
+function infer(node: sml.Node): sml.Type {
 
   if (node.tag === 'SequenceDeclaration') {
 
@@ -552,23 +519,20 @@ function infer(node: sml.Node, cenv?: ConstraintEnvironment): sml.Type {
   } else if (node.tag === 'ValueDeclaration') {
 
     node.type = infer(node.value)
-    node.type = prettifyType(node.type)
     bind(node.name, node.type, E)
     return node.type
 
   } else if (node.tag === 'ExpressionDeclaration') {
 
     node.type = infer(node.value)
-    node.type = prettifyType(node.type)
     bind('it', node.type, E)
     return node.type
 
   } else if (node.tag === 'FunctionDeclaration') {
 
-    bind(node.name, { name: 'function' , par: { name: getFreshType() }, ret: { name: getFreshType() }}, E)
+    bind(node.name, { name: 'function' , par: [{ name: getFreshType() }], ret: [{ name: getFreshType() }] }, E)
     extend(E)
     node.type = infer(node.lambda)
-    node.type = prettifyType(node.type)
     E.pop()
     bind(node.name, node.type, E)
     return node.type
@@ -583,9 +547,6 @@ function infer(node: sml.Node, cenv?: ConstraintEnvironment): sml.Type {
 
   } else if (node.tag === 'LambdaExpression') {
 
-    // for (const v of node.fv) {
-    //   bind(v, { name: getFreshType() }, E)
-    // }
     node.type = infer(node.matching)
     return node.type
 
@@ -600,15 +561,17 @@ function infer(node: sml.Node, cenv?: ConstraintEnvironment): sml.Type {
 
       const C: ConstraintEnvironment = []
 
-      let mType = infer(node.rules[0])
+      const mType = infer(node.rules[0])
       for (let i = 1; i < node.rules.length; i++) {
         const rType = infer(node.rules[i])
         addConstraint(mType, rType, C)
       }
 
-      mType = solveTypeConstraint(mType, C)
+      for (let i = 0; i < node.rules.length; i++) {
+        node.rules[i].type = solveTypeConstraint(node.rules[i].type, C)
+      }
 
-      node.type = mType
+      node.type = node.rules[0].type
       return node.type
 
     }
@@ -618,7 +581,7 @@ function infer(node: sml.Node, cenv?: ConstraintEnvironment): sml.Type {
     node.pat.type = infer(node.pat)
     node.exp.type = infer(node.exp)
     node.pat.type = reduceType(node.pat.type)
-    node.type = { name: 'function', par: node.pat.type, ret: node.exp.type }
+    node.type = { name: 'function', par: [node.pat.type], ret: [node.exp.type] }
     return node.type
 
   } else if (node.tag === 'PatternConstant') {
@@ -672,44 +635,52 @@ function infer(node: sml.Node, cenv?: ConstraintEnvironment): sml.Type {
 
   } else if (node.tag === 'InfixApplicationExpression') {
 
-    let funType: sml.Type = reassignFreshTypes(lookup(node.operator, E))
-    let parType: sml.Type = (funType as sml.Fun).par
-    let argType: sml.Type = { name: 'record', body: { 1: infer(node.left), 2: infer(node.right) } }
+    let funType = reassignFreshType(lodash.cloneDeep(lookup(node.operator, E))) as sml.Fun
 
-    const C: ConstraintEnvironment = []
-    addConstraint(parType, argType, C)
+    for (let i = 0; i < funType.par.length; i++) {
+      try {
+        let parType: sml.Type = funType.par[i]
+        let argType: sml.Type = { name: 'record', body: { 1: infer(node.left), 2: infer(node.right) } }
 
-    parType = solveTypeConstraint(parType, C)
-    argType = solveTypeConstraint(argType, C)
+        const C: ConstraintEnvironment = []
+        addConstraint(parType, argType, C)
 
-    let retType: sml.Type = (funType as sml.Fun).ret
+        parType = solveTypeConstraint(parType, C)
+        solveTypeConstraint(argType, C) // solve the constraints but don't mutate outer value
 
-    retType = solveTypeConstraint(retType, C)
+        let retType: sml.Type = solveTypeConstraint(funType.ret[i], C)
 
-    node.type = retType
-    return node.type
+        node.type = retType
+        return node.type
+      } catch (e) {
+        continue
+      }
+    }
+
+    throw new Error('operator operand mismatch')
 
   } else if (node.tag === 'PrefixApplicationExpression') {
 
     const C: ConstraintEnvironment = []
 
-    let funType: sml.Type = reassignFreshTypes(infer(node.operator))
+    let funType: sml.Type = infer(node.operator)
 
     if (!isTypeFun(funType)) {
-      addConstraint(funType, { name: 'function', par: { name: getFreshType() }, ret: { name: getFreshType() } }, C)
+      addConstraint(funType, { name: 'function', par: [{ name: getFreshType() }], ret: [{ name: getFreshType() }] }, C)
       funType = solveTypeConstraint(funType, C)
+    } else {
+      funType = reassignFreshType(lodash.cloneDeep(funType))
     }
 
-    let parType: sml.Type = (funType as sml.Fun).par
-    let argType: sml.Type = reassignFreshTypes(infer(node.operand))
+    let parType: sml.Type = (funType as sml.Fun).par[0]
+    let argType: sml.Type = infer(node.operand)
 
     addConstraint(parType, argType, C)
 
     parType = solveTypeConstraint(parType, C)
-    argType = solveTypeConstraint(argType, C)
+    solveTypeConstraint(argType, C) // solve the constraints but don't mutate outer value
 
-    let retType: sml.Type = (funType as sml.Fun).ret
-    retType = solveTypeConstraint(retType, C)
+    let retType: sml.Type = solveTypeConstraint((funType as sml.Fun).ret[0], C)
 
     node.type = retType
     return node.type
@@ -773,8 +744,12 @@ function infer(node: sml.Node, cenv?: ConstraintEnvironment): sml.Type {
 export function typechecker(program: sml.Program, context: Context): sml.Program {
   program.type = infer(program.body)
 
+  console.log('Type checking done')
+  console.log('BBB')
   console.log(JSON.stringify(program.body, null, 2))
+  console.log('EEE')
   console.log(JSON.stringify(E, null, 2))
+  console.log('RRR')
   console.log(JSON.stringify(R, null, 2))
 
   return program
