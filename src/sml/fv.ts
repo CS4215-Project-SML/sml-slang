@@ -66,12 +66,17 @@ function analyzeFreeVariables(node: sml.Node, E: Environment, fv: Set<string>) {
     case 'LambdaExpression':
       analyzeFreeVariables(node.matching, E, fv)
       node.fv = Array.from(fv)
-      console.log(JSON.stringify(node), null, 2)
       break
     case 'LetExpression':
       extend(E)
       analyzeFreeVariables(node.dec, E, fv)
       analyzeFreeVariables(node.exp, E, fv)
+
+      fv.forEach(v => {
+        if (!isFreeVariable(v, E)) {
+          fv.delete(v)
+        }
+      })
       restore(E)
       break
     case 'PatternIdentifier':

@@ -60,7 +60,6 @@ export interface Lis extends BaseType {
 //   ret: Array<Int | Real | Bool | Char | Str | Rec | Tup | Lis | Fun | Poly>
 // }
 
-
 export interface Fun extends BaseType {
   name: 'function'
   par: Int | Real | Bool | Char | Str | Rec | Tup | Lis | Fun | Poly
@@ -258,6 +257,7 @@ export interface PrefixApplicationExpression extends BaseExpression {
   tag: 'PrefixApplicationExpression'
   operator: Expression
   operand: Expression
+  isTailCall: boolean
 }
 
 export interface InfixApplicationExpression extends BaseExpression {
