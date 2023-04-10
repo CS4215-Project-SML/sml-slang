@@ -27,7 +27,6 @@ import { PatternRecordContext } from "./smlParser";
 import { PatternListContext } from "./smlParser";
 import { PatternConstantContext } from "./smlParser";
 import { PatternIdentifierContext } from "./smlParser";
-import { ProgramSequenceContext } from "./smlParser";
 import { ProgramDeclarationContext } from "./smlParser";
 import { ProgramEmptyContext } from "./smlParser";
 import { LabelIdentifierContext } from "./smlParser";
@@ -252,14 +251,6 @@ export interface smlVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitPatternIdentifier?: (ctx: PatternIdentifierContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by the `programSequence`
-	 * labeled alternative in `smlParser.program`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitProgramSequence?: (ctx: ProgramSequenceContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by the `programDeclaration`

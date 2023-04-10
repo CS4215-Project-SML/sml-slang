@@ -175,7 +175,7 @@ function applyInfixOperator(
   right: sml.Constant | sml.Record | sml.List
 ) {
   if (op === '::') {
-    const items = infixOperatorMicrocode[op](getJSRepresentation(left), getJSRepresentation(right))
+    const items = infixOperatorMicrocode[op](left, (right as sml.List).items)
     return { tag: 'List', type: ret, length: items.length, items: items }
   } else {
     return {
@@ -342,6 +342,7 @@ const microcode = {
     const lambda = cmd.lambda
     const instr: BindFunctionInstruction = {
       tag: 'BindFunctionInstruction',
+      type: cmd.type,
       name: cmd.name
     }
 
@@ -364,13 +365,13 @@ const microcode = {
       capture[name] = lookup(name, E)
     }
 
-    push(S, { tag: 'Closure', capture: capture, matching: cmd.matching, loc: cmd.loc })
+    push(S, { tag: 'Closure', type: cmd.type, capture: capture, matching: cmd.matching, loc: cmd.loc })
   },
   ConditionalExpression: (cmd: sml.ConditionalExpression) => {
-    push(A, { tag: 'ConditionalExpressionInstruction', cons: cmd.cons, alt: cmd.alt }, cmd.pred)
+    push(A, { tag: 'ConditionalExpressionInstruction', type: cmd.type, cons: cmd.cons, alt: cmd.alt }, cmd.pred)
   },
   PrefixApplicationExpression: (cmd: sml.PrefixApplicationExpression) => {
-    push(A, { tag: 'PrefixApplicationInstruction' }, cmd.operator, cmd.operand)
+    push(A, { tag: 'PrefixApplicationInstruction', type: cmd.type }, cmd.operator, cmd.operand)
   },
   InfixApplicationExpression: (cmd: sml.InfixApplicationExpression) => {
     push(
@@ -403,7 +404,7 @@ const microcode = {
     // Update capture value, as we bind with garbage lambda expression previously
     value.capture[cmd.name] = value
 
-    push(S, { tag: 'Identifier', name: cmd.name })
+    push(S, { tag: 'Identifier', type: cmd.type, name: cmd.name })
   },
   RecordInstruction: (cmd: RecordInstruction) => {
     // Make sure that items are added to the object in the order they were specified
@@ -498,6 +499,7 @@ interface BindInstruction {
 
 interface BindFunctionInstruction {
   tag: 'BindFunctionInstruction'
+  type: sml.Type
   name: string
 }
 
@@ -532,6 +534,7 @@ interface ConditionalExpressionInstruction {
 
 interface PrefixApplicationInstruction {
   tag: 'PrefixApplicationInstruction'
+  type: sml.Type
 }
 
 interface InfixApplicationInstruction {
@@ -563,6 +566,7 @@ export function evaluate(program: sml.Program, context: Context): string {
 
     console.log('Executed command:')
     console.log(cmd)
+    // console.log(JSON.stringify(cmd, null, 2))
 
     if (microcode.hasOwnProperty(cmd.tag)) {
       microcode[cmd.tag](cmd)
@@ -573,26 +577,29 @@ export function evaluate(program: sml.Program, context: Context): string {
     console.log('Resulting registers:')
     console.log('A')
     console.log(A)
+    // console.log(JSON.stringify(A, null, 2))
     console.log('S')
     console.log(S)
+    // console.log(JSON.stringify(S, null, 2))
     console.log('E')
     console.log(E)
+    // console.log(JSON.stringify(E, null, 2))
     console.log('================================\n')
 
     i++
   }
 
-  return prettier(S[0] as sml.Identifier)
+  return prettify(S[0] as sml.Identifier)
 }
 
-function prettier(evaluation: sml.Identifier): string {
+function prettify(evaluation: sml.Identifier): string {
   const id = evaluation.name
   const val = lookup(id, E) as sml.Constant | sml.Record | sml.List | sml.Closure
 
-  return `val ${id} = ${prettierValue(val)} : ${prettierType(val.type)}`
+  return `val ${id} = ${prettifyValue(val)} : ${prettifyType(val.type)}`
 }
 
-function prettierValue(val: sml.Constant | sml.Record | sml.Tuple | sml.List | sml.Closure) {
+function prettifyValue(val: sml.Constant | sml.Record | sml.Tuple | sml.List | sml.Closure) {
   let pval = ''
 
   val = val.tag === 'Record' ? tupleValueIfPossible(val) : val
@@ -603,15 +610,15 @@ function prettierValue(val: sml.Constant | sml.Record | sml.Tuple | sml.List | s
     let i = 0
     pval = '{'
     for (const [key, value] of Object.entries(val.items)) {
-      pval += key.toString() + '=' + prettierValue(value)
-      pval += i++ < val.length - 1 ? ',' : ''
+      pval += key.toString() + '=' + prettifyValue(value)
+      pval += i++ < val.length - 1 ? ', ' : ''
     }
     pval += '}'
   } else if (val.tag === 'Tuple') {
     let i = 0
     pval = '('
     for (const [key, value] of Object.entries(val.items)) {
-      pval += prettierValue(value)
+      pval += prettifyValue(value)
       pval += i++ < val.length - 1 ? ',' : ''
     }
     pval += ')'
@@ -619,7 +626,7 @@ function prettierValue(val: sml.Constant | sml.Record | sml.Tuple | sml.List | s
     let i = 0
     pval = '['
     for (let j = 0; j < val.items.length; j++) {
-      pval += val.items[j]
+      pval += prettifyValue(val.items[j])
       pval += i++ < val.length - 1 ? ',' : ''
     }
     pval += ']'
@@ -632,7 +639,7 @@ function prettierValue(val: sml.Constant | sml.Record | sml.Tuple | sml.List | s
   return pval
 }
 
-function prettierType(val: sml.Type) {
+function prettifyType(val: sml.Type) {
   let ptyp = ''
 
   val = val.name === 'record' ? tupleTypeIfPossible(val as sml.Rec) : val
@@ -650,8 +657,8 @@ function prettierType(val: sml.Type) {
     let i = 0
     ptyp = '{'
     for (const [key, value] of Object.entries((val as sml.Rec).body)) {
-      ptyp += key.toString() + ':' + prettierType(value)
-      ptyp += i++ < bodyLength - 1 ? ',' : ''
+      ptyp += key.toString() + ':' + prettifyType(value)
+      ptyp += i++ < bodyLength - 1 ? ', ' : ''
     }
     ptyp += '}'
   } else if (val.name === 'tuple') {
@@ -659,16 +666,21 @@ function prettierType(val: sml.Type) {
     let i = 0
     for (let [key, value] of Object.entries((val as sml.Tup).body)) {
       value = value.name === 'record' ? tupleTypeIfPossible(value) : value
-      const valtyp = prettierType(value)
-      ptyp += value.name === 'tuple' ? '(' + valtyp + ')' : valtyp
+      const valtyp = prettifyType(value)
+      ptyp += (value.name === 'tuple' || value.name === 'function') ? '(' + valtyp + ')' : valtyp
       ptyp += i++ < bodyLength - 1 ? ' * ' : ''
     }
   } else if (val.name === 'list') {
-    ptyp = prettierType((val as sml.Lis).body) + ' ' + val.name
+    const body = (val as sml.Lis).body
+    const bodytyp = prettifyType(body)
+    ptyp = body.name === 'record' ? '(' + bodytyp + ')' : bodytyp
+    ptyp += ' ' + val.name
   } else if (val.name === 'function') {
-    // throw new Error(`not supported yet ${val}`)
+    ptyp = prettifyType((val as sml.Fun).par)
+    ptyp += ' -> '
+    ptyp += prettifyType((val as sml.Fun).ret)
   } else if (val.name === 'undefined') {
-    // throw new Error(`not supported yet ${val}`)
+    throw new Error(`not supported yet`)
   } else {
     // This is polymorphic type
     ptyp = val.name

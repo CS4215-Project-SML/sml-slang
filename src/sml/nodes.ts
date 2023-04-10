@@ -54,10 +54,17 @@ export interface Lis extends BaseType {
   body: Int | Real | Bool | Char | Str | Str | Rec | Tup | Lis | Fun | Poly
 }
 
+// export interface Fun extends BaseType {
+//   name: 'function'
+//   par: Array<Int | Real | Bool | Char | Str | Rec | Tup | Lis | Fun | Poly>
+//   ret: Array<Int | Real | Bool | Char | Str | Rec | Tup | Lis | Fun | Poly>
+// }
+
+
 export interface Fun extends BaseType {
   name: 'function'
-  par: Array<Int | Real | Bool | Char | Str | Rec | Tup | Lis | Fun | Poly>
-  ret: Array<Int | Real | Bool | Char | Str | Rec | Tup | Lis | Fun | Poly>
+  par: Int | Real | Bool | Char | Str | Rec | Tup | Lis | Fun | Poly
+  ret: Int | Real | Bool | Char | Str | Rec | Tup | Lis | Fun | Poly
 }
 
 export interface Poly extends BaseType {
@@ -307,10 +314,10 @@ export interface RecordSelector extends BaseRecord {
  * Pattern
  */
 export interface PatternMap {
-  Constant: PatternConstant
-  Identifier: PatternIdentifier
-  Record: PatternRecord
-  Infix: PatternInfix
+  PatternConstant: PatternConstant
+  PatternIdentifier: PatternIdentifier
+  PatternRecord: PatternRecord
+  PatternInfix: PatternInfix
 }
 
 export type Pattern = PatternMap[keyof PatternMap]

@@ -22,15 +22,13 @@ function runEvaluator(program: sml.Program, context: Context): string {
 
 async function runInterpreter(program: sml.Program, context: Context): Promise<Result> {
   try {
-    console.log('Type-checker is running...')
-
-    runTypechecker(program, context)
-
     console.log('Free variable analyzer is running...')
     runFreeVariableAnalyzer(program, context)
 
-    console.log('Interpreter is running...')
+    console.log('Type-checker is running...')
+    runTypechecker(program, context)
 
+    console.log('Interpreter is running...')
     const evaluation = runEvaluator(program, context)
     console.log(evaluation)
 
