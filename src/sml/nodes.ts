@@ -251,6 +251,7 @@ export interface PrefixApplicationExpression extends BaseExpression {
   tag: 'PrefixApplicationExpression'
   operator: Expression
   operand: Expression
+  isTailCall: boolean
 }
 
 export interface InfixApplicationExpression extends BaseExpression {

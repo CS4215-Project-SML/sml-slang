@@ -36,6 +36,7 @@ function analyzeFreeVariables(node: sml.Node, E: Environment, fv: Set<string>) {
       break
     case 'ValueDeclaration':
       addName(node.name, E)
+      analyzeFreeVariables(node.value, E, fv)
       break
     case 'FunctionDeclaration':
       addName(node.name, E)
@@ -70,6 +71,12 @@ function analyzeFreeVariables(node: sml.Node, E: Environment, fv: Set<string>) {
       extend(E)
       analyzeFreeVariables(node.dec, E, fv)
       analyzeFreeVariables(node.exp, E, fv)
+
+      fv.forEach(v => {
+        if (!isFreeVariable(v, E)) {
+          fv.delete(v)
+        }
+      })
       restore(E)
       break
     case 'PatternIdentifier':

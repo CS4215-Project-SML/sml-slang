@@ -6,7 +6,7 @@ import * as sml from '../sml/nodes'
 import { typechecker } from '../sml/typechecker'
 import { Context } from '../types'
 import { resolvedErrorPromise } from './utils'
-import { RuntimeError, TypeError } from '../sml/error'
+import { RuntimeError, TypeError, parseSmlErrors } from '../sml/error'
 
 function runTypechecker(program: sml.Program, context: Context): sml.Program {
   return typechecker(program, context)
@@ -36,9 +36,10 @@ async function runInterpreter(program: sml.Program, context: Context): Promise<R
   } catch (e) {
     if (e instanceof RuntimeError || e instanceof TypeError) {
       context.smlErrors.push(e)
+      console.log(parseSmlErrors([e]))
+    } else {
+      console.log(e)
     }
-
-    console.log(e)
 
     return { status: 'error' }
   }

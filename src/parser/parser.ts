@@ -102,7 +102,6 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
   visitDeclarationSequence(ctx: DeclarationSequenceContext): sml.Node {
     this.debugVisit('Declaration Sequence', ctx)
 
-    
     const declarations: Array<sml.Declaration> = []
 
     const left = ctx._left.accept(this)
@@ -460,6 +459,7 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
         type: { name: 'undefined' },
         operator: operator as sml.Expression,
         operand: operand as sml.Expression,
+        isTailCall: false,
         loc: contextToLocation(ctx)
       }
     }

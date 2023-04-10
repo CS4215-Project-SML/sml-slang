@@ -8,4 +8,4 @@ fun double x = x * 2
 
 val add_one_then_double = compose (add_one, double);
 
-add_one_then_double 10 = 22
+add_one_then_double 10;
