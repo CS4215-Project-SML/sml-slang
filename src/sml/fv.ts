@@ -36,6 +36,7 @@ function analyzeFreeVariables(node: sml.Node, E: Environment, fv: Set<string>) {
       break
     case 'ValueDeclaration':
       addName(node.name, E)
+      analyzeFreeVariables(node.value, E, fv)
       break
     case 'FunctionDeclaration':
       addName(node.name, E)
@@ -65,6 +66,7 @@ function analyzeFreeVariables(node: sml.Node, E: Environment, fv: Set<string>) {
     case 'LambdaExpression':
       analyzeFreeVariables(node.matching, E, fv)
       node.fv = Array.from(fv)
+      console.log(JSON.stringify(node), null, 2)
       break
     case 'LetExpression':
       extend(E)

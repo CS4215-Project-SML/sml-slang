@@ -8,7 +8,7 @@ import { PatternMatchingError, RuntimeError } from '../sml/error'
  * pattern matching
  * **********************/
 
-type MatchableValue = sml.Constant | sml.Record | sml.List
+type MatchableValue = sml.Constant | sml.Record | sml.List | sml.Closure
 
 function evaluateMatch(match: sml.Matching, value: MatchableValue): [sml.Expression, Frame] | null {
   for (const mrule of match.rules) {
@@ -365,10 +365,20 @@ const microcode = {
       capture[name] = lookup(name, E)
     }
 
-    push(S, { tag: 'Closure', type: cmd.type, capture: capture, matching: cmd.matching, loc: cmd.loc })
+    push(S, {
+      tag: 'Closure',
+      type: cmd.type,
+      capture: capture,
+      matching: cmd.matching,
+      loc: cmd.loc
+    })
   },
   ConditionalExpression: (cmd: sml.ConditionalExpression) => {
-    push(A, { tag: 'ConditionalExpressionInstruction', type: cmd.type, cons: cmd.cons, alt: cmd.alt }, cmd.pred)
+    push(
+      A,
+      { tag: 'ConditionalExpressionInstruction', type: cmd.type, cons: cmd.cons, alt: cmd.alt },
+      cmd.pred
+    )
   },
   PrefixApplicationExpression: (cmd: sml.PrefixApplicationExpression) => {
     push(A, { tag: 'PrefixApplicationInstruction', type: cmd.type }, cmd.operator, cmd.operand)
@@ -465,7 +475,7 @@ const microcode = {
       tag: 'EnvironmentInstruction'
     }
 
-    E.push({ ...frame, ...operator.capture })
+    E.push({ ...operator.capture, ...frame })
 
     push(A, envInstr, exp)
   },
@@ -667,7 +677,7 @@ function prettifyType(val: sml.Type) {
     for (let [key, value] of Object.entries((val as sml.Tup).body)) {
       value = value.name === 'record' ? tupleTypeIfPossible(value) : value
       const valtyp = prettifyType(value)
-      ptyp += (value.name === 'tuple' || value.name === 'function') ? '(' + valtyp + ')' : valtyp
+      ptyp += value.name === 'tuple' || value.name === 'function' ? '(' + valtyp + ')' : valtyp
       ptyp += i++ < bodyLength - 1 ? ' * ' : ''
     }
   } else if (val.name === 'list') {
