@@ -17,6 +17,7 @@ export type Type = TypeMap[keyof TypeMap]
 
 export interface BaseType {
   name: string
+  inferred?: boolean
 }
 
 export interface Int extends BaseType {

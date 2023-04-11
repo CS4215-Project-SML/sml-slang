@@ -519,21 +519,22 @@ function infer(node: sml.Node): sml.Type {
   } else if (node.tag === 'ValueDeclaration') {
 
     node.type = infer(node.value)
+    node.type.inferred = true
     bind(node.name, node.type, E)
     return node.type
 
   } else if (node.tag === 'ExpressionDeclaration') {
 
     node.type = infer(node.value)
+    node.type.inferred = true
     bind('it', node.type, E)
     return node.type
 
   } else if (node.tag === 'FunctionDeclaration') {
 
     bind(node.name, { name: 'function' , par: [{ name: getFreshType() }], ret: [{ name: getFreshType() }] }, E)
-    extend(E)
     node.type = infer(node.lambda)
-    E.pop()
+    node.type.inferred = true
     bind(node.name, node.type, E)
     return node.type
 
@@ -578,10 +579,12 @@ function infer(node: sml.Node): sml.Type {
 
   } else if (node.tag === 'Matchingrule') {
 
+    extend(E)
     node.pat.type = infer(node.pat)
     node.exp.type = infer(node.exp)
     node.pat.type = reduceType(node.pat.type)
     node.type = { name: 'function', par: [node.pat.type], ret: [node.exp.type] }
+    E.pop()
     return node.type
 
   } else if (node.tag === 'PatternConstant') {
@@ -592,6 +595,7 @@ function infer(node: sml.Node): sml.Type {
 
     bind(node.name, { name: getFreshType() }, E)
     node.type = lookup(node.name, E)
+    node.type.inferred = false
     return node.type
 
   } else if (node.tag === 'PatternRecord') {
@@ -661,26 +665,32 @@ function infer(node: sml.Node): sml.Type {
 
   } else if (node.tag === 'PrefixApplicationExpression') {
 
-    const C: ConstraintEnvironment = []
+    let argType: sml.Type = infer(node.operand)
 
     let funType: sml.Type = infer(node.operator)
 
     if (!isTypeFun(funType)) {
-      addConstraint(funType, { name: 'function', par: [{ name: getFreshType() }], ret: [{ name: getFreshType() }] }, C)
-      funType = solveTypeConstraint(funType, C)
-    } else {
+      ;(funType as sml.Fun).name = 'function'
+      ;(funType as sml.Fun).par = [argType]
+      ;(funType as sml.Fun).ret = [{ name: getFreshType() }]
+      node.type = (funType as sml.Fun).ret[0]
+      return node.type
+    }
+
+    if (funType.inferred) {
       funType = reassignFreshType(lodash.cloneDeep(funType))
     }
 
     let parType: sml.Type = (funType as sml.Fun).par[0]
-    let argType: sml.Type = infer(node.operand)
+
+    const C: ConstraintEnvironment = []
 
     addConstraint(parType, argType, C)
 
     parType = solveTypeConstraint(parType, C)
-    solveTypeConstraint(argType, C) // solve the constraints but don't mutate outer value
+    solveTypeConstraint(argType, C)
 
-    let retType: sml.Type = solveTypeConstraint((funType as sml.Fun).ret[0], C)
+    let retType = solveTypeConstraint((funType as sml.Fun).ret[0], C)
 
     node.type = retType
     return node.type

@@ -723,7 +723,8 @@ function prettifyType(val: sml.Type) {
     ptyp = body.name === 'record' ? '(' + bodytyp + ')' : bodytyp
     ptyp += ' ' + val.name
   } else if (val.name === 'function') {
-    ptyp = prettifyType((val as sml.Fun).par[0])
+    const partyp = prettifyType((val as sml.Fun).par[0])
+    ptyp = (val as sml.Fun).par[0].name === 'function' ? '(' + partyp + ')' : partyp
     ptyp += ' -> '
     ptyp += prettifyType((val as sml.Fun).ret[0])
   } else if (val.name === 'undefined') {
