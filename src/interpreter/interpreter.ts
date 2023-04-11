@@ -4,6 +4,24 @@ import * as sml from '../sml/nodes'
 import { Context, Environment, Frame } from '../types'
 import { PatternMatchingError, RuntimeError } from '../sml/error'
 
+/**
+ * Global constants
+ */
+
+const nilValue: sml.List = {
+  tag: 'List',
+  length: 0,
+  items: [],
+  type: {
+    name: 'list',
+    body: { name: "'a" }
+  }
+}
+
+function isNil(value: sml.Node) {
+  return value.tag === 'List' && value.length === 0
+}
+
 /* ***********************
  * check tail call
  * ***********************/
@@ -80,6 +98,19 @@ function evaluatePatternIdentifier(
   pattern: sml.PatternIdentifier,
   value: MatchableValue
 ): [boolean, Frame] {
+  if (pattern.name === 'nil') {
+    if (isNil(value)) {
+      return [
+        true,
+        {
+          [pattern.name]: value
+        }
+      ]
+    } else {
+      return [false, {}]
+    }
+  }
+
   return [
     true,
     {
@@ -247,7 +278,7 @@ function lookup(name: string, env: Array<Object>): sml.Constant | sml.Record | s
 
 function bind(
   name: string,
-  value:sml.Constant | sml.Identifier | sml.Record | sml.List | sml.LambdaExpression | sml.Closure,
+  value: sml.Constant | sml.Identifier | sml.Record | sml.List | sml.LambdaExpression | sml.Closure,
   env: Array<Object>
 ) {
   const frame = env[env.length - 1]
@@ -333,7 +364,7 @@ const microcode = {
     push(S, { tag: 'Constant', type: cmd.type, value: cmd.value })
   },
   Identifier: (cmd: sml.Identifier) => {
-    const value = lookup(cmd.name, E)
+    const value = cmd.name === 'nil' ? nilValue : lookup(cmd.name, E)
     push(S, value)
   },
   Record: (cmd: sml.Record) => {
