@@ -136,13 +136,13 @@ function evaluatePatternRecord(
   }
 
   // Need to check that the type is exactly the same
-  for (const [key, alias] of Object.entries(pattern.aliases) as Array<[string, sml.Pattern]>) {
+  for (const [key, pat] of Object.entries(pattern.aliases) as Array<[string, sml.Pattern]>) {
     if (!(key in items)) {
       return [false, {}]
     }
 
     // Gets the value
-    const [isMatch, patFrame] = evaluatePattern(alias, items[key])
+    const [isMatch, patFrame] = evaluatePattern(pat, items[key])
 
     if (!isMatch) {
       return [false, {}]
