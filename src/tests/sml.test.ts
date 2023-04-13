@@ -84,6 +84,6 @@ describe('tail call test', () => {
 })
 
 describe('list tests', () => {
-  runTest('list-1-1.sml', "val mp = fn 'a list * ('a -> 'b) -> 'b list")
+  runTest('list-1-1.sml', "val mp = fn : 'a list * ('a -> 'b) -> 'b list")
   runTest('list-1-2.sml', 'val it = [2,3,4] : int list')
 })

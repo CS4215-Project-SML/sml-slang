@@ -3,7 +3,13 @@ import { Context } from '../types'
 import * as sml from './nodes'
 
 
-const typeOfInfixOperator = {
+const builtinIdentifiers = ['nil']
+
+const typeOfBuiltins = {
+  'nil': {
+    name: 'list',
+    body: { name: "'a" }
+  },
   '+': {
     name: 'function',
     par: [
@@ -478,8 +484,8 @@ type StaticEnvironment = Array<Frame>
 const GLOBAL_FRAME: Frame = {}
 
 // Populate global frame with infix operators
-for (const key in typeOfInfixOperator) {
-  GLOBAL_FRAME[key] = typeOfInfixOperator[key]
+for (const key in typeOfBuiltins) {
+  GLOBAL_FRAME[key] = typeOfBuiltins[key]
 }
 
 const GLOBAL_ENVIRONMENT: StaticEnvironment = [GLOBAL_FRAME]
@@ -592,6 +598,11 @@ function infer(node: sml.Node): sml.Type {
     return node.type
 
   } else if (node.tag === 'PatternIdentifier') {
+
+    if (builtinIdentifiers.includes(node.name)) {
+      node.type = reassignFreshType(lodash.cloneDeep(lookup(node.name, E)))
+      return node.type
+    }
 
     bind(node.name, { name: getFreshType() }, E)
     node.type = lookup(node.name, E)
@@ -742,6 +753,11 @@ function infer(node: sml.Node): sml.Type {
     return node.type
 
   } else if (node.tag === 'Identifier') {
+
+    if (builtinIdentifiers.includes(node.name)) {
+      node.type = reassignFreshType(lodash.cloneDeep(lookup(node.name, E)))
+      return node.type
+    }
 
     node.type = lookup(node.name, E)
     return node.type
