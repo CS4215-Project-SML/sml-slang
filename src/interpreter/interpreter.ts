@@ -99,12 +99,7 @@ function evaluatePatternIdentifier(
 ): [boolean, Frame] {
   if (pattern.name === 'nil') {
     if (isNil(value)) {
-      return [
-        true,
-        {
-          [pattern.name]: value
-        }
-      ]
+      return [true, {}]
     } else {
       return [false, {}]
     }
@@ -673,5 +668,7 @@ function prettify(evaluation: sml.Identifier): string {
   const id = evaluation.name
   const val = lookup(id, E) as sml.Constant | sml.Record | sml.List | sml.Closure
 
-  return `val ${id} = ${utils.prettifyValue(val)} : ${utils.prettifyType(utils.prettifyPoly(val.type))}`
+  return `val ${id} = ${utils.prettifyValue(val)} : ${utils.prettifyType(
+    utils.prettifyPoly(val.type)
+  )}`
 }
