@@ -1,7 +1,8 @@
 import * as lodash from 'lodash'
 import { Context } from '../types'
 import * as sml from './nodes'
-
+import * as utils from './utils'
+import { TypeError } from './error'
 
 const builtinIdentifiers = ['nil']
 
@@ -138,12 +139,12 @@ function addConstraint(t1: sml.Type, t2: sml.Type, cenv: ConstraintEnvironment) 
 
   } else if (isTypePrimitive(t1) && isTypePrimitive(t2) && !isTypeEquivalent(t1, t2)) {
 
-    throw new Error('invalid constraint')
+    throw new Error('constraint given is invalid')
 
   } else if (isTypeRec(t1) && isTypeRec(t2)) {
 
     if (Object.keys((t1 as sml.Rec).body).length !== Object.keys((t2 as sml.Rec).body).length) {
-      throw new Error('invalid constraint')
+      throw new Error('constraint given is invalid')
     }
 
     const t1Body = Object.entries((t1 as sml.Rec).body)
@@ -173,7 +174,7 @@ function addConstraint(t1: sml.Type, t2: sml.Type, cenv: ConstraintEnvironment) 
 
   }
 
-  throw new Error('invalid constraint')
+  throw new Error('constraint given is invalid')
 }
 
 // Maps polymorphic types to their reduced (solved) forms
@@ -266,7 +267,7 @@ function solveConstraintEquations(t: sml.Poly, cenv: ConstraintEnvironment): sml
       if (!prim) {
         prim = cons[i]
       } else if (prim && !isTypeEquivalent(prim, cons[i])) {
-        throw new Error('constraints cannot be solved')
+        throw new Error('constraint equations cannot be solved')
       }
     }
   }
@@ -275,7 +276,7 @@ function solveConstraintEquations(t: sml.Poly, cenv: ConstraintEnvironment): sml
 
   for (let i = 1; i < cons.length; i++) {
     if (!isTypePoly(res) && !isTypePoly(cons[i]) && !isTypeEquivalent(res, cons[i])) {
-      throw new Error(`constraints cannot be solved: ${cenv}`)
+      throw new Error('constraint equations cannot be solved')
     }
   }
 
@@ -497,7 +498,7 @@ function lookup(name: string, env: StaticEnvironment): sml.Type {
       return reduceType(frame[name])
     }
   }
-  throw new Error('identifier is undefined')
+  throw new TypeError(`unbound variable or constructor: ${name}`)
 }
 
 function bind(name: string, value: sml.Type, env: StaticEnvironment) {
@@ -650,12 +651,14 @@ function infer(node: sml.Node): sml.Type {
 
   } else if (node.tag === 'InfixApplicationExpression') {
 
+    let argType: sml.Type = { name: 'record', body: { 1: infer(node.left), 2: infer(node.right) } }
+
     let funType = reassignFreshType(lodash.cloneDeep(lookup(node.operator, E))) as sml.Fun
 
     for (let i = 0; i < funType.par.length; i++) {
       try {
         let parType: sml.Type = funType.par[i]
-        let argType: sml.Type = { name: 'record', body: { 1: infer(node.left), 2: infer(node.right) } }
+        // let argType: sml.Type = { name: 'record', body: { 1: infer(node.left), 2: infer(node.right) } }
 
         const C: ConstraintEnvironment = []
         addConstraint(parType, argType, C)
@@ -672,7 +675,11 @@ function infer(node: sml.Node): sml.Type {
       }
     }
 
-    throw new Error('operator operand mismatch')
+    throw new TypeError(
+      `operator and operand do not agree\n  operator domain: ${utils.prettifyType(
+        utils.prettifyPoly(funType.par[0])
+      )}\n  operand        : ${utils.prettifyType(utils.prettifyPoly(argType))}`
+    , node.loc)
 
   } else if (node.tag === 'PrefixApplicationExpression') {
 
@@ -694,17 +701,29 @@ function infer(node: sml.Node): sml.Type {
 
     let parType: sml.Type = (funType as sml.Fun).par[0]
 
-    const C: ConstraintEnvironment = []
+    try {
 
-    addConstraint(parType, argType, C)
+      const C: ConstraintEnvironment = []
 
-    parType = solveTypeConstraint(parType, C)
-    solveTypeConstraint(argType, C)
+      addConstraint(parType, argType, C)
 
-    let retType = solveTypeConstraint((funType as sml.Fun).ret[0], C)
+      parType = solveTypeConstraint(parType, C)
+      solveTypeConstraint(argType, C)
 
-    node.type = retType
-    return node.type
+      let retType = solveTypeConstraint((funType as sml.Fun).ret[0], C)
+
+      node.type = retType
+      return node.type
+
+    } catch (e) {
+
+      throw new TypeError(
+        `operator and operand do not agree\n  operator domain: ${utils.prettifyType(
+          utils.prettifyPoly(parType)
+        )}\n  operand        : ${utils.prettifyType(utils.prettifyPoly(argType))}`
+      , node.loc)
+
+    }
 
   } else if (node.tag === 'Record') {
 
@@ -718,7 +737,7 @@ function infer(node: sml.Node): sml.Type {
   } else if (node.tag === 'RecordSelector') {
     
     if (!node.record) {
-      throw new Error('no record to be selected')
+      throw new TypeError('no record to be selected', node.loc)
     }
 
     node.type = (infer(node.record) as sml.Rec).body[node.label]
@@ -764,7 +783,7 @@ function infer(node: sml.Node): sml.Type {
 
   }
 
-  throw new Error('not supported yet')
+  throw new TypeError(`not supported yet: ${node.tag}`, node.loc)
 }
 
 export function typechecker(program: sml.Program, context: Context): sml.Program {

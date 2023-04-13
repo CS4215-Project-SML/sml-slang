@@ -68,10 +68,10 @@ export class TypeError implements SmlError {
   public type = ErrorType.TYPE
   public severity = ErrorSeverity.ERROR
 
-  constructor(public location: SourceLocation) {}
+  constructor(public message: string, public location?: SourceLocation) {}
 
   explain(): string {
-    return 'Type Error'
+    return `Type Error: ${this.message}`;
   }
 }
 
