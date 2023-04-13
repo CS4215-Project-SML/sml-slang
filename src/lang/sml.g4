@@ -62,10 +62,11 @@ expression
     | operator=expression operand=expression                                                # expressionApplicationPrefix
     | left=expression operator=('*' | '/') right=expression                                 # expressionApplicationInfix
     | left=expression operator=('+' | '-' | '^') right=expression                           # expressionApplicationInfix
-    | left=expression operator='::' right=expression                                        # expressionApplicationInfix
+    | <assoc=right> left=expression operator='::' right=expression                          # expressionApplicationInfix
     | left=expression operator=('=' | '<>' | '<' | '<=' | '>' | '>=') right=expression      # expressionApplicationInfix
     | left=expression operator=(ANDALSO | ORELSE) right=expression                          # expressionApplicationInfix
     | IF pred=expression THEN cons=expression ELSE alt=expression                           # expressionConditional
+    | CASE exp=expression OF match=matching                                                           # expressionCase
 
     | '{' (keyvalue? | (keyvalue (',' keyvalue)+)) '}'                                      # expressionRecord
     | '(' expression ',' expression (',' expression)* ')'                                   # expressionTuple
@@ -155,3 +156,4 @@ DIGIT:          [0-9];
 LETTER:         [A-Za-z];
 NEWLINE:        ('\r'? '\n' | '\r') -> skip;
 WHITESPACE:     [ \t]+ -> skip;
+COMMENT:        '(*' .*? '*)' -> skip;

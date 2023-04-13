@@ -54,7 +54,8 @@ import {
   ValbindContext,
   DeclarationSequenceContext,
   ExpressionLetContext,
-  PatternParanthesesContext
+  PatternParanthesesContext,
+  ExpressionCaseContext
 } from '../lang/smlParser'
 import { smlVisitor } from '../lang/smlVisitor'
 import * as sml from '../sml/nodes'
@@ -423,6 +424,23 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
     }
   }
 
+  visitExpressionCase(ctx: ExpressionCaseContext): sml.Node {
+    this.debugVisit('Expression Case', ctx)
+
+    return {
+      tag: 'PrefixApplicationExpression',
+      operator: {
+        tag: 'LambdaExpression',
+        matching: ctx._match.accept(this) as sml.Matching,
+        fv: [],
+        type: { name: 'undefined' }
+      },
+      operand: ctx._exp.accept(this) as sml.Expression,
+      type: { name: 'undefined' },
+      isTailCall: false
+    }
+  }
+
   visitExpressionApplicationInfix(ctx: ExpressionApplicationInfixContext): sml.Node {
     this.debugVisit('Expression Application Infix', ctx)
 
@@ -515,7 +533,7 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
     } else if (label.tag === 'Identifier') {
       name = label.name.toString()
     } else {
-      throw new SyntaxError()
+      throw new SyntaxError('Record selector error')
     }
 
     return {
@@ -566,7 +584,7 @@ class ProgramGenerator implements smlVisitor<sml.Node> {
     } else if (child.tag === 'Identifier') {
       keyvalue = child.name.toString()
     } else {
-      throw new SyntaxError()
+      throw new SyntaxError('Key value error')
     }
 
     return {

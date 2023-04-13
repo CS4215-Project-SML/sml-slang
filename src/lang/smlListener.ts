@@ -9,6 +9,7 @@ import { ExpressionParenthesesContext } from "./smlParser";
 import { ExpressionApplicationPrefixContext } from "./smlParser";
 import { ExpressionApplicationInfixContext } from "./smlParser";
 import { ExpressionConditionalContext } from "./smlParser";
+import { ExpressionCaseContext } from "./smlParser";
 import { ExpressionRecordContext } from "./smlParser";
 import { ExpressionTupleContext } from "./smlParser";
 import { ExpressionListContext } from "./smlParser";
@@ -134,6 +135,19 @@ export interface smlListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitExpressionConditional?: (ctx: ExpressionConditionalContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `expressionCase`
+	 * labeled alternative in `smlParser.expression`.
+	 * @param ctx the parse tree
+	 */
+	enterExpressionCase?: (ctx: ExpressionCaseContext) => void;
+	/**
+	 * Exit a parse tree produced by the `expressionCase`
+	 * labeled alternative in `smlParser.expression`.
+	 * @param ctx the parse tree
+	 */
+	exitExpressionCase?: (ctx: ExpressionCaseContext) => void;
 
 	/**
 	 * Enter a parse tree produced by the `expressionRecord`

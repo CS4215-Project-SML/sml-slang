@@ -9,6 +9,7 @@ import { ExpressionParenthesesContext } from "./smlParser";
 import { ExpressionApplicationPrefixContext } from "./smlParser";
 import { ExpressionApplicationInfixContext } from "./smlParser";
 import { ExpressionConditionalContext } from "./smlParser";
+import { ExpressionCaseContext } from "./smlParser";
 import { ExpressionRecordContext } from "./smlParser";
 import { ExpressionTupleContext } from "./smlParser";
 import { ExpressionListContext } from "./smlParser";
@@ -107,6 +108,14 @@ export interface smlVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitExpressionConditional?: (ctx: ExpressionConditionalContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `expressionCase`
+	 * labeled alternative in `smlParser.expression`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitExpressionCase?: (ctx: ExpressionCaseContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by the `expressionRecord`

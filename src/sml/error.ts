@@ -22,10 +22,10 @@ export class SyntaxError implements SmlError {
   public type = ErrorType.SYNTAX
   public severity = ErrorSeverity.ERROR
 
-  constructor(public location?: SourceLocation) {}
+  constructor(public message?: string, public location?: SourceLocation) {}
 
   explain(): string {
-    return 'Syntax error'
+    return this.message ? `Syntax error: ${this.message}` : 'Syntax error'
   }
 }
 
@@ -35,7 +35,7 @@ export class FunctionNameError extends SyntaxError {
     public foundName: string,
     public location: SourceLocation
   ) {
-    super(location)
+    super(undefined, location)
   }
 
   explain(): string {
@@ -71,7 +71,7 @@ export class TypeError implements SmlError {
   constructor(public message: string, public location?: SourceLocation) {}
 
   explain(): string {
-    return `Type Error: ${this.message}`;
+    return `Type Error: ${this.message}`
   }
 }
 
