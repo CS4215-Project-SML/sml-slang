@@ -87,3 +87,8 @@ describe('list tests', () => {
   runTest('list-1-1.sml', "val mp = fn : 'a list * ('a -> 'b) -> 'b list")
   runTest('list-1-2.sml', 'val it = [2,3,4] : int list')
 })
+
+describe('case tests', () => {
+  runTest('case-1-1.sml', 'val fac = fn : int -> int')
+  runTest('case-1-2.sml', 'val it = 120 : int')
+})
