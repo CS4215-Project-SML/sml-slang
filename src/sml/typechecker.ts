@@ -658,7 +658,6 @@ function infer(node: sml.Node): sml.Type {
     for (let i = 0; i < funType.par.length; i++) {
       try {
         let parType: sml.Type = funType.par[i]
-        // let argType: sml.Type = { name: 'record', body: { 1: infer(node.left), 2: infer(node.right) } }
 
         const C: ConstraintEnvironment = []
         addConstraint(parType, argType, C)
@@ -687,41 +686,85 @@ function infer(node: sml.Node): sml.Type {
 
     let funType: sml.Type = infer(node.operator)
 
-    if (!isTypeFun(funType)) {
-      ;(funType as sml.Fun).name = 'function'
-      ;(funType as sml.Fun).par = [argType]
-      ;(funType as sml.Fun).ret = [{ name: getFreshType() }]
-      node.type = (funType as sml.Fun).ret[0]
-      return node.type
-    }
+    if (funType.inferred && isTypeFun(funType)) {
 
-    if (funType.inferred) {
       funType = reassignFreshType(lodash.cloneDeep(funType))
-    }
 
-    let parType: sml.Type = (funType as sml.Fun).par[0]
+      let parType: sml.Type = (funType as sml.Fun).par[0]
 
-    try {
+      try {
+  
+        const C: ConstraintEnvironment = []
+  
+        addConstraint(parType, argType, C)
+  
+        parType = solveTypeConstraint(parType, C)
+        solveTypeConstraint(argType, C)
+  
+        let retType = solveTypeConstraint((funType as sml.Fun).ret[0], C)
+  
+        node.type = retType
+        return node.type
+  
+      } catch (e) {
+  
+        throw new TypeError(
+          `operator and operand do not agree\n  operator domain: ${utils.prettifyType(
+            utils.prettifyPoly(parType)
+          )}\n  operand        : ${utils.prettifyType(utils.prettifyPoly(argType))}`
+        , node.loc)
+  
+      }
 
-      const C: ConstraintEnvironment = []
+    } else if (funType.inferred && !isTypeFun(funType)) {
 
-      addConstraint(parType, argType, C)
+      throw new TypeError(`operator is not a function\n  operator: ${utils.prettifyType(utils.prettifyPoly(funType))}`, node.loc)
 
-      parType = solveTypeConstraint(parType, C)
-      solveTypeConstraint(argType, C)
+    } else if (!funType.inferred && isTypeFun(funType)) {
 
-      let retType = solveTypeConstraint((funType as sml.Fun).ret[0], C)
+      let parType: sml.Type = (funType as sml.Fun).par[0]
 
-      node.type = retType
-      return node.type
+      try {
+  
+        const C: ConstraintEnvironment = []
+  
+        addConstraint(parType, argType, C)
+  
+        parType = solveTypeConstraint(parType, C)
+        solveTypeConstraint(argType, C)
+  
+        let retType = solveTypeConstraint((funType as sml.Fun).ret[0], C)
+  
+        node.type = retType
+        return node.type
+  
+      } catch (e) {
+  
+        throw new TypeError(
+          `operator and operand do not agree\n  operator domain: ${utils.prettifyType(
+            utils.prettifyPoly(parType)
+          )}\n  operand        : ${utils.prettifyType(utils.prettifyPoly(argType))}`
+        , node.loc)
+  
+      }
 
-    } catch (e) {
+    } else if (!funType.inferred && !isTypeFun(funType)) {
 
-      throw new TypeError(
-        `operator and operand do not agree\n  operator domain: ${utils.prettifyType(
-          utils.prettifyPoly(parType)
-        )}\n  operand        : ${utils.prettifyType(utils.prettifyPoly(argType))}`
-      , node.loc)
+      try {
+
+        const C: ConstraintEnvironment = []
+
+        addConstraint(funType, { name: 'function', par: [reassignFreshType(argType)], ret: [{ name: getFreshType() }] }, C)
+        funType = solveTypeConstraint(funType, C)
+
+        node.type = (funType as sml.Fun).ret[0]
+        return node.type
+
+      } catch (e) {
+
+        throw new TypeError(`operator is not a function\n  operator: ${utils.prettifyType(utils.prettifyPoly(funType))}`, node.loc)
+
+      }
 
     }
 
